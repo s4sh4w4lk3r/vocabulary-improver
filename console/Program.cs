@@ -4,7 +4,10 @@
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello, World!");
+            string connString = "server=localhost;port=3306;username=admin;password=admin;database=vocabulary-improver";
+            string tableName = "en-ru";
+            var dict = ReadDictionary.GetDictFromDB(connString, tableName);
+            LearnWords.Learn(dict);
         }
     }
 }
