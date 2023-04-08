@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace console
 {
-    internal class ReadDictionary
+    class DBProcessing
     {
         public static Dictionary<string, string> GetDict(string connString, string tableName)
         {
@@ -76,6 +76,28 @@ namespace console
             MySqlCommand command = new MySqlCommand(delete, connection);
             command.ExecuteNonQuery();
             connection.Close(); 
+        }
+        public static void DeleteDict(string connString, string tableName)
+        {
+            MySqlConnection connection = new MySqlConnection(connString);
+            connection.Open();
+
+            string drop = $"DROP TABLE `{tableName}`;";
+
+            MySqlCommand command = new MySqlCommand(drop, connection);
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+        public static void ClearDict(string connString, string tableName)
+        {
+            MySqlConnection connection = new MySqlConnection(connString);
+            connection.Open();
+
+            string delete = $"DELETE FROM {tableName};";
+
+            MySqlCommand command = new MySqlCommand(delete, connection);
+            command.ExecuteNonQuery();
+            connection.Close();
         }
     }
 }

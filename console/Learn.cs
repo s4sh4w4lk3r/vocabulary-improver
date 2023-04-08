@@ -7,14 +7,11 @@ using System.Threading.Tasks;
 
 namespace console
 {
-    class LearnWords
+    class Learn
     {
-        public static void Learn(Dictionary<string, string> dict)
+        public static void Start(Dictionary<string, string> dict)
         {
-            for (int i = 0; i < dict.Count; i++)
-            {
-
-            }
+            Console.WriteLine($"Welcome! dictionary size is {dict.Count} words.");
             foreach (var item in dict)
             {
                 Console.Write($"{item.Key} ---> ");
