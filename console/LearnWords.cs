@@ -20,9 +20,9 @@ namespace console
                 Console.Write($"{item.Key} ---> ");
                 Console.ReadLine();
                 Console.WriteLine($"Correct answer ---> {item.Value}");
-                Console.ReadKey(true);
             }
             Console.WriteLine("End of the dictionary.");
+            Console.ReadKey();
         }
     }
 }
