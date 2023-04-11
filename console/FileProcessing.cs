@@ -1,9 +1,9 @@
 ﻿namespace console;
-partial class Input
+partial class Improver
 {
-    static Dictionary<string, string> ReadFile(string path)
+    static List<Word> ReadFile(string path)
     {
-        Dictionary<string, string> dict = new Dictionary<string, string>();
+        List<Word> dict = new List<Word>();
         List<string> lines = new List<string>();
         try
         {
@@ -18,15 +18,14 @@ partial class Input
         foreach (var item in lines)
         {
             string[] word = item.Split(" - ");
-            try { dict.Add(word[0], word[1]); }
-            catch (Exception) { }
+            dict.Add(new Word(word[0], word[1]));
         }
 
         return dict;
     }
-    static Dictionary<string, string> Shuffle(Dictionary<string, string> dict)
+    static List<Word> Shuffle(List<Word> dict)
     {
-        return dict.OrderBy(x => new Random().Next()).ToDictionary(item => item.Key, item => item.Value);
+        return dict.OrderBy(x => new Random().Next()).ToList();;
     }
-    public static Dictionary<string, string> GetDict(string path) => Shuffle(ReadFile(path));
+    public static List<Word> GetDict(string path) => Shuffle(ReadFile(path));
 }

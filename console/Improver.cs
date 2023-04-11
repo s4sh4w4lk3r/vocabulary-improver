@@ -7,9 +7,15 @@ using System.Threading.Tasks;
 
 namespace console;
 
-class Learn
+
+partial class Improver
 {
-    public static void Start(Dictionary<string, string> dict)
+    List<Word> dict;
+    public Improver(List<Word> dictionary)
+    {
+        this.dict = dictionary;
+    }
+    public void Start()
     {
         if (dict.Count == 0)
         {
@@ -20,9 +26,9 @@ class Learn
         Console.WriteLine($"Welcome! dictionary size is {dict.Count} words.");
         foreach (var item in dict)
         {
-            Console.Write($"{item.Key} ---> ");
+            Console.Write($"{item.key} ---> ");
             Console.ReadLine();
-            Console.WriteLine($"Correct answer ---> {item.Value}\n");
+            Console.WriteLine($"Correct answer ---> {item.value}\n");
         }
         Console.WriteLine("End of the dictionary.");
         Console.ReadKey();

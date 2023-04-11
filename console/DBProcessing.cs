@@ -2,7 +2,7 @@
 
 namespace console;
 
-partial class Input
+partial class Improver
 {
     static private string connString = null!;
     static public string ConnString
