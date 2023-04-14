@@ -7,28 +7,27 @@ using System.Threading.Tasks;
 
 namespace console;
 
-
 partial class Improver
 {
-    List<Word> dict;
-    public Improver(List<Word> dictionary)
+    VIDictionary vIDictionary;
+    public Improver(VIDictionary vIDictionary)
     {
-        this.dict = dictionary;
+        this.vIDictionary = vIDictionary;
     }
     public void Start()
     {
-        if (dict.Count == 0)
+        if (vIDictionary.DictList.Count == 0)
         {
             System.Console.WriteLine("Bad path or empty file.");
             Console.ReadKey();
             return;
         }
-        Console.WriteLine($"Welcome! dictionary size is {dict.Count} words.");
-        foreach (var item in dict)
+        Console.WriteLine($"Welcome! dictionary size is {vIDictionary.DictList.Count} words.");
+        foreach (var item in vIDictionary.DictList)
         {
-            Console.Write($"{item.key} ---> ");
+            Console.Write($"{item.Key} ---> ");
             Console.ReadLine();
-            Console.WriteLine($"Correct answer ---> {item.value}\n");
+            Console.WriteLine($"Correct answer ---> {item.Value}\n");
         }
         Console.WriteLine("End of the dictionary.");
         Console.ReadKey();

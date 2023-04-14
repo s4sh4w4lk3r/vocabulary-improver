@@ -22,7 +22,7 @@ class DBProcessing
         this.tableName = tableName;
         this.connection = GetDBConnection();
     }
-    MySqlConnection GetDBConnection() // Возвращает MySqlConnection объект, если подключение усешно, или исключение, если неуспешно
+    MySqlConnection GetDBConnection() // Возвращает MySqlConnection объект, если подключение усешно, или исключение, если неуспешно для ctor
     {
         string connectionString = $"server={hostname};port={port};username={username};password={password};database={db_name}";
         MySqlConnection connection = new MySqlConnection(connectionString);
@@ -39,7 +39,7 @@ class DBProcessing
     }
     #endregion
     #region Working with database
-    public List<Word> GetDict()
+    public List<Word> GetDict() // Получить список объектов Word в БД
     {
         List<Word> dict = new List<Word>();
 
@@ -61,7 +61,7 @@ class DBProcessing
         connection.Close();
         return dict;
     }
-    public void CreateDict()
+    public void CreateDict() // Создать таблицу в БД
     {
         string create = $"CREATE TABLE if not exists `{tableName}` (`word1` VARCHAR(255) NOT NULL , `word2` VARCHAR(255) NOT NULL , " +
         "`rating` TINYINT UNSIGNED NOT NULL , PRIMARY KEY (`word1`)) ENGINE = InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;";
@@ -70,7 +70,7 @@ class DBProcessing
         command.ExecuteNonQuery();
         connection.Close();
     }
-    public void Add(string key, string value)
+    public void Add(string key, string value) // Добавить слово с ретинглом 0 в БД
     {
         string insert = $"INSERT INTO `{tableName}` (`word1`, `word2`, `rating`) VALUES ('{key}', '{value}', 0)";
         connection.Open();
@@ -82,13 +82,13 @@ class DBProcessing
 
         connection.Close();
     }
-    public void Add(List<Word> dict)
+    public void Add(List<Word> dict) // Добавить список объектов Word с ретинглом 0 в БД
     {
         string megaInsert = $"INSERT INTO `{tableName}` (`word1`, `word2`, `rating`) VALUES ";
 
         foreach (var item in dict)
         {
-            megaInsert += $"('{item.key}', '{item.value}', 0), ";
+            megaInsert += $"('{item.Key}', '{item.Value}', 0), ";
         }
 
         megaInsert = megaInsert.Remove(megaInsert.Length - 2) + ";";
@@ -101,7 +101,7 @@ class DBProcessing
         {throw new Exception($"Insertion error, probably duplication in database table.\n{ex.Message.ToString()}");}
         connection.Close();
     }
-    public void Remove(string key)
+    public void Remove(string key) // Удалить слово по ключу в БД
     {
         string delete = $"DELETE FROM `{tableName}` WHERE `word1`='{key}';";
 
@@ -110,7 +110,7 @@ class DBProcessing
         command.ExecuteNonQuery();
         connection.Close();
     }
-    public void DeleteDict()
+    public void DeleteDict() // Удалить таблицу в БД
     {
         string drop = $"DROP TABLE `{tableName}`;";
 
@@ -119,12 +119,28 @@ class DBProcessing
         command.ExecuteNonQuery();
         connection.Close();
     }
-    public void ClearDict()
+    public void ClearDict() // Очистить таблицу в БД
     {
         string delete = $"DELETE FROM `{tableName}`;";
 
         connection.Open();
         MySqlCommand command = new MySqlCommand(delete, connection);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
+    public void ReduceRatingDB(string key) // Увелечение рейтинга в БД
+    {
+        connection.Open();
+        string update = $"UPDATE `{tableName}` SET `rating`=rating - 1 WHERE word1 = '{key}';";
+        MySqlCommand command = new MySqlCommand(update, connection);
+        command.ExecuteNonQuery();
+        connection.Close();
+    }
+    public void IncreaseRatingDB(string key) // Уменьшение рейтинга в БД
+    {
+        connection.Open();
+        string update = $"UPDATE `{tableName}` SET `rating`=rating + 1 WHERE word1 = '{key}';";
+        MySqlCommand command = new MySqlCommand(update, connection);
         command.ExecuteNonQuery();
         connection.Close();
     }
