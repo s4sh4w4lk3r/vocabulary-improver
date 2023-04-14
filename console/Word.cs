@@ -1,4 +1,14 @@
 namespace console;
+class VIDictionary
+{
+    public readonly string source;
+    public readonly List<Word> dictionary;
+    public VIDictionary(string source)
+    {
+        this.source = source;
+        
+    }
+}
 class Word
 {
     public readonly string key = null!;

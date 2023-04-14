@@ -1,5 +1,5 @@
 ﻿namespace console;
-partial class Improver
+class FileProcessing
 {
     static List<Word> ReadFile(string path)
     {

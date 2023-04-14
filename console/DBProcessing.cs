@@ -2,113 +2,131 @@
 
 namespace console;
 
-partial class Improver
+class DBProcessing
 {
-    static private string connString = null!;
-    static public string ConnString
+    #region Database initializing
+    string hostname;
+    string port;
+    string username;
+    string password;
+    string db_name;
+    string tableName;
+    MySqlConnection connection;
+    public DBProcessing(string hostname, string port, string username, string password, string db_name, string tableName)
     {
-        get { return connString; }
-        set
-        {
-            MySqlConnection connection = new MySqlConnection(value);
-            try
-            {
-                connection.Open();
-                connection.Close();
-                connString = value;
-            }
-            catch (Exception) { }
-        }
+        this.hostname = hostname;
+        this.port = port;
+        this.username = username;
+        this.password = password;
+        this.db_name = db_name;
+        this.tableName = tableName;
+        this.connection = GetDBConnection();
     }
-
-    public static Dictionary<string, string> GetDict(string connString, string tableName)
+    MySqlConnection GetDBConnection() // Возвращает MySqlConnection объект, если подключение усешно, или исключение, если неуспешно
     {
-        Dictionary<string, string> dict = new Dictionary<string, string>();
-        MySqlConnection connection = new MySqlConnection(connString);
-        connection.Open();
+        string connectionString = $"server={hostname};port={port};username={username};password={password};database={db_name}";
+        MySqlConnection connection = new MySqlConnection(connectionString);
+        try
+        {
+            connection.Open();
+            connection.Close();
+        }
+        catch (MySql.Data.MySqlClient.MySqlException)
+        {
+            throw new Exception("An error occurred while connecting to the database.");
+        }
+        return connection;
+    }
+    #endregion
+    #region Working with database
+    public List<Word> GetDict()
+    {
+        List<Word> dict = new List<Word>();
 
         string select = $"SELECT * FROM `{tableName}` ORDER BY RAND();";
 
+        connection.Open();
         MySqlCommand command = new MySqlCommand(select, connection);
         MySqlDataReader reader = command.ExecuteReader();
 
         while (reader.Read())
         {
-            dict.Add(reader[0].ToString()!, reader[1].ToString()!);
+            string key = reader[0].ToString()!;
+            string value = reader[1].ToString()!;
+            byte.TryParse(reader[1].ToString(), out byte rating);
+            dict.Add(new Word(key, value, rating));
         }
         reader.Close();
 
         connection.Close();
         return dict;
     }
-    public static void CreateDict(string connString, string tableName)
+    public void CreateDict()
     {
-        MySqlConnection connection = new MySqlConnection(connString);
+        string create = $"CREATE TABLE if not exists `{tableName}` (`word1` VARCHAR(255) NOT NULL , `word2` VARCHAR(255) NOT NULL , " +
+        "`rating` TINYINT UNSIGNED NOT NULL , PRIMARY KEY (`word1`)) ENGINE = InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;";
         connection.Open();
-
-        string create = $"CREATE TABLE `{tableName}` (`key` VARCHAR(255) NOT NULL , `value` VARCHAR(255) NULL , " +
-        "PRIMARY KEY (`key`)) ENGINE = InnoDB CHARSET=utf8mb4 COLLATE utf8mb4_unicode_ci;";
-
         MySqlCommand command = new MySqlCommand(create, connection);
         command.ExecuteNonQuery();
         connection.Close();
     }
-    public static void Add(string connString, string tableName, string key, string value)
+    public void Add(string key, string value)
     {
-        MySqlConnection connection = new MySqlConnection(connString);
+        string insert = $"INSERT INTO `{tableName}` (`word1`, `word2`, `rating`) VALUES ('{key}', '{value}', 0)";
         connection.Open();
-
-        string insert = $"INSERT INTO `{tableName}` (`key`, `value`) VALUES ('{key}', '{value}')";
-
         MySqlCommand command = new MySqlCommand(insert, connection);
-        command.ExecuteNonQuery();
+        
+        try {command.ExecuteNonQuery();} 
+        catch (MySql.Data.MySqlClient.MySqlException ex) 
+        {throw new Exception($"Insertion error, probably duplication in database table.\n{ex.Message.ToString()}");}
+
         connection.Close();
     }
-    public static void Add(string connString, string tableName, Dictionary<string, string> dict)
+    public void Add(List<Word> dict)
     {
-        MySqlConnection connection = new MySqlConnection(connString);
-        string megaInsert = $"INSERT INTO `{tableName}` (`key`, `value`) VALUES ";
+        string megaInsert = $"INSERT INTO `{tableName}` (`word1`, `word2`, `rating`) VALUES ";
+
         foreach (var item in dict)
         {
-            megaInsert += $"('{item.Key}', '{item.Value}'), ";
+            megaInsert += $"('{item.key}', '{item.value}', 0), ";
         }
+
         megaInsert = megaInsert.Remove(megaInsert.Length - 2) + ";";
+
         connection.Open();
         MySqlCommand command = new MySqlCommand(megaInsert, connection);
-        command.ExecuteNonQuery();
+
+        try {command.ExecuteNonQuery();} 
+        catch (MySql.Data.MySqlClient.MySqlException ex) 
+        {throw new Exception($"Insertion error, probably duplication in database table.\n{ex.Message.ToString()}");}
         connection.Close();
     }
-    public static void Remove(string connString, string tableName, string key)
+    public void Remove(string key)
     {
-        MySqlConnection connection = new MySqlConnection(connString);
+        string delete = $"DELETE FROM `{tableName}` WHERE `word1`='{key}';";
+
         connection.Open();
-
-        string delete = $"DELETE FROM `{tableName}` WHERE `key`='{key}';";
-
         MySqlCommand command = new MySqlCommand(delete, connection);
         command.ExecuteNonQuery();
         connection.Close();
     }
-    public static void DeleteDict(string connString, string tableName)
+    public void DeleteDict()
     {
-        MySqlConnection connection = new MySqlConnection(connString);
-        connection.Open();
-
         string drop = $"DROP TABLE `{tableName}`;";
 
+        connection.Open();
         MySqlCommand command = new MySqlCommand(drop, connection);
         command.ExecuteNonQuery();
         connection.Close();
     }
-    public static void ClearDict(string connString, string tableName)
+    public void ClearDict()
     {
-        MySqlConnection connection = new MySqlConnection(connString);
+        string delete = $"DELETE FROM `{tableName}`;";
+
         connection.Open();
-
-        string delete = $"DELETE FROM {tableName};";
-
         MySqlCommand command = new MySqlCommand(delete, connection);
         command.ExecuteNonQuery();
         connection.Close();
     }
+    #endregion
 }
