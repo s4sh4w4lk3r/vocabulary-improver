@@ -2,12 +2,13 @@ namespace console;
 class VIDictionary
 {
     public readonly string source;
-    public readonly List<Word> dictionary;
-    public VIDictionary(string source)
+    public readonly List<Word> dict;
+    public VIDictionary(string source, List<Word> dict)
     {
         this.source = source;
-        
+        this.dict = dict;
     }
+
 }
 class Word
 {
