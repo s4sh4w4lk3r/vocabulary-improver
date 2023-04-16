@@ -2,17 +2,28 @@
 {
     class Program
     {
-        private const string path = "dict.vi";
+        private const string path = "test.json";
 
         static void Main(string[] args)
         {
-            FileProcessing.CreateFile("text.txt");
-            var file = new FileProcessing("text.txt");
-        //    var dict = file.ShuffledList;
-        //    file.ReduceRatingFile("figure out");
-        //    file.ReduceRatingFile("figure out");
-        //    file.ImproveRatingFile("figure out");
-           Console.ReadKey();
+            FileProcessing.CreateFile(path);
+
+            var file = new FileProcessing(path);
+
+            var dict = file.Dict;
+            file.AddFromTxt("dict.vi");
+
+            var suffledDict = file.ShuffledList;
+
+            file.Add("test", "test");
+
+            file.Remove("test");
+
+            file.ImproveRatingFile("figure out");
+
+            file.ReduceRatingFile("figure out");
+
+            Console.ReadKey();
         }
     }
 }
