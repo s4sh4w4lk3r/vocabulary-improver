@@ -53,7 +53,7 @@ class FileProcessing
         word?.ReduceRatingWord();
         SaveToJSON();
     }
-    public void ImproveRatingFile(string key) // Увеличение рейтинга слова.
+    public void IncreaseRatingFile(string key) // Увеличение рейтинга слова.
     {
         Word? word = Dict?.Find(x => x.Key.Contains(key));
         word?.ImproveRatingWord();

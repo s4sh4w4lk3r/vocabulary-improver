@@ -2,28 +2,16 @@
 {
     class Program
     {
-        private const string path = "test.json";
+        private const string path = "dict.json";
 
         static void Main(string[] args)
         {
-            FileProcessing.CreateFile(path);
+            DBProcessing database = new DBProcessing("localhost", "3306", "admin", "admin", "vocabulary-improver", "en-ru");
+            
 
-            var file = new FileProcessing(path);
-
-            var dict = file.Dict;
-            file.AddFromTxt("dict.vi");
-
-            var suffledDict = file.ShuffledList;
-
-            file.Add("test", "test");
-
-            file.Remove("test");
-
-            file.ImproveRatingFile("figure out");
-
-            file.ReduceRatingFile("figure out");
-
-            Console.ReadKey();
+            FileProcessing file = new FileProcessing(path);
+            
+            
         }
     }
 }

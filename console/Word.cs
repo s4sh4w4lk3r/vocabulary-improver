@@ -14,15 +14,15 @@ class VIDictionary
         this.DictList = dictList;
         FileSource = source;
     }
-    public void ReduceRating(string key)
+    public void ReduceRating(string key) 
     {
         DBSource?.ReduceRatingDB(key);
-        //добавить сюда такое же но с файлом
+        FileSource?.ReduceRatingFile(key);
     }
     public void IncreaseRating(string key)
     {
         DBSource?.IncreaseRatingDB(key);
-        //добавить сюда такое же но с файлом
+        FileSource?.IncreaseRatingFile(key);
     }
 }
 class Word
