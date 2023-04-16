@@ -1,13 +1,18 @@
 ﻿namespace console
 {
-    internal class Program
+    class Program
     {
+        private const string path = "dict.vi";
+
         static void Main(string[] args)
         {
-            var database = new DBProcessing("localhost", "3306", "admin", "admin", "vocabulary-improver", "en-ru");
-            var dict = database.GetDict();
-            var viDict = new VIDictionary(database, dict);
-            viDict.ReduceRating("aids");
+            FileProcessing.CreateFile("text.txt");
+            var file = new FileProcessing("text.txt");
+        //    var dict = file.ShuffledList;
+        //    file.ReduceRatingFile("figure out");
+        //    file.ReduceRatingFile("figure out");
+        //    file.ImproveRatingFile("figure out");
+           Console.ReadKey();
         }
     }
 }

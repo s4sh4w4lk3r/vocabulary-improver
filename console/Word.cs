@@ -17,12 +17,12 @@ class VIDictionary
     public void ReduceRating(string key)
     {
         DBSource?.ReduceRatingDB(key);
-        a//добавить сюда такое же но с файлом
+        //добавить сюда такое же но с файлом
     }
     public void IncreaseRating(string key)
     {
         DBSource?.IncreaseRatingDB(key);
-        a//добавить сюда такое же но с файлом
+        //добавить сюда такое же но с файлом
     }
 }
 class Word
@@ -30,15 +30,31 @@ class Word
     public string Key {get; private set;}
     public string Value {get; private set;}
     public byte Rating {get; private set;} = 0;
-    public Word(string key, string value, byte rating)
+    public Word(string key, string value, byte rating = 0)
     {
         this.Key = key;
         this.Value = value;
         this.Rating = rating;
     }
-    public Word(string key, string value)
+    public void ReduceRatingWord()
     {
-        this.Key = key;
-        this.Value = value;
+        const byte minRating = 0;
+        try
+        {
+            checked
+            {
+                Rating -= 1;
+            }
+        }
+        catch (System.OverflowException)
+        {
+            Rating = minRating;
+        }
+    }
+    public void ImproveRatingWord()
+    {
+        const byte maxRating = 10;
+        Rating += 1;
+        if (Rating > 10) Rating = maxRating;
     }
 }
