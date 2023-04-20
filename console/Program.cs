@@ -1,17 +1,23 @@
 ﻿namespace console
 {
+    enum StartMode {MySQLDatabase, LocalFile};
+
     class Program
     {
-        private const string path = "dict.json";
-
         static void Main(string[] args)
         {
-            DBProcessing database = new DBProcessing("localhost", "3306", "admin", "admin", "vocabulary-improver", "en-ru");
-            
+            System.Console.WriteLine("Hello, select the operating mode\n 1 - MySQL Database, 2 - Locally");
 
-            FileProcessing file = new FileProcessing(path);
-            
-            
+            switch (Console.ReadKey(true).Key)
+            {
+                case ConsoleKey.D1:
+
+                    break;
+
+                case ConsoleKey.D2:
+
+                    break;
+            }
         }
     }
 }

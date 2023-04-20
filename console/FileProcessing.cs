@@ -12,26 +12,34 @@ class FileProcessing
     public FileProcessing(string path) // ctor, который создает объект класса, читает файл если он есть.
     {
         Path = path;
-        try {File.OpenRead(path).Close(); ReadFromJSON();} 
-        catch (Exception) {throw new Exception($"Error reading the file {Path}");}
+        if (File.Exists(path)) ReadFromJSON();
+        else throw new Exception($"Error reading the file {Path}");
     }
     public static void CreateFile(string path) // Создает файл по полному пути.
     {
         File.Create(path).Close();
     }
-    public void AddFromTxt(string path) // Чтение из тектосого файла в текущий список объектов Word.
+    public void AddFromTxt(string path) // Чтение из тектосого файла в текущий список объектов Word, если файл не имеет ниодной строки, то ничего не произойдет.
     {
         Dict = new List<Word>();
         List<string> lines = new List<string>();
-        try {lines = System.IO.File.ReadLines(path).ToList();}
-        catch (System.IO.IOException) {return;}
+       
+        lines = System.IO.File.ReadLines(path).ToList();
+        if (lines.Count == 0) return;
 
-        foreach (var item in lines)
+        try 
         {
-            string[] word = item.Split(" - ");
-            Dict.Add(new Word(word[0], word[1]));
+            foreach (var item in lines)
+            {
+                string[] word = item.Split(" - ");
+                Dict.Add(new Word(word[0], word[1]));
+            }
+            SaveToJSON();
         }
-        SaveToJSON();
+        catch (System.IndexOutOfRangeException) 
+        {
+            throw new Exception($"Incorrect file formatting.\n{path}");
+        }
     }
     public void SaveToJSON() // Сохранение текущего списка объектов Word в JSON.
     {

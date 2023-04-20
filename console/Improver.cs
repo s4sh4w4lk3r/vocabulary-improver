@@ -25,9 +25,23 @@ partial class Improver
         Console.WriteLine($"Welcome! dictionary size is {vIDictionary.DictList.Count} words.");
         foreach (var item in vIDictionary.DictList)
         {
+            System.Console.WriteLine();
             Console.Write($"{item.Key} ---> ");
             Console.ReadLine();
-            Console.WriteLine($"Correct answer ---> {item.Value}\n");
+            Console.WriteLine($"Correct answer ---> {item.Value}\nDid you answer correctly? y/n");
+            switch (Console.ReadKey(true).Key)
+            {
+                case ConsoleKey.Y:
+                vIDictionary.IncreaseRating(item.Key);
+                break;
+
+                case ConsoleKey.N:
+                vIDictionary.ReduceRating(item.Key);
+                break;
+
+                default: Console.WriteLine("Skipped");
+                break;
+            }
         }
         Console.WriteLine("End of the dictionary.");
         Console.ReadKey();
