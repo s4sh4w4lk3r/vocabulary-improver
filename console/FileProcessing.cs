@@ -22,9 +22,9 @@ class FileProcessing
     public void AddFromTxt(string path) // Чтение из тектосого файла в текущий список объектов Word, если файл не имеет ниодной строки, то ничего не произойдет.
     {
         Dict = new List<Word>();
-        List<string> lines = new List<string>();
-       
-        lines = System.IO.File.ReadLines(path).ToList();
+        
+
+        List<string> lines = System.IO.File.ReadLines(path).ToList();
         if (lines.Count == 0) return;
 
         try 
