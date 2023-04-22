@@ -24,6 +24,13 @@ class VIDictionary
         DBSource?.IncreaseRatingDB(key);
         FileSource?.IncreaseRatingFile(key);
     }
+    public void ResetRatingAll()
+    {
+        foreach (Word item in DictList)
+        {
+            item.ResetRatingWord();
+        }
+    }
 }
 class Word
 {
@@ -57,4 +64,9 @@ class Word
         Rating += 1;
         if (Rating > 10) Rating = maxRating;
     }
+    public void ResetRatingWord()
+    {
+        this.Rating = 0;
+    }
 }
+    

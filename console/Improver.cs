@@ -26,12 +26,12 @@ partial class Improver
         System.Console.WriteLine();
         return password;
     }
-    static void ShutDown()
+    public static void ShutDown()
     {
         Thread.Sleep(4000);
         Environment.Exit(0);
     }
-    void Start()
+    public void Start()
     {
         if (vIDictionary.DictList.Count == 0)
         {
@@ -68,7 +68,7 @@ partial class Improver
     {
         Console.Write("Entering database parameters\nHostname: ");
         string hostname = Console.ReadLine()!;
-        Console.Write("Port: ");
+        Console.Write("Port (skip for default): ");
         string port = Console.ReadLine()!;
         Console.Write("Username: ");
         string username = Console.ReadLine()!;
@@ -79,7 +79,8 @@ partial class Improver
         Console.Write("Table name: ");
         string tableName = Console.ReadLine()!;
         System.Console.WriteLine();
-        if (hostname == string.Empty || port == string.Empty || username == string.Empty || password == string.Empty || db_name == string.Empty || tableName == string.Empty)
+        if (port == string.Empty) port = "3306";
+        if (hostname == string.Empty || username == string.Empty || password == string.Empty || db_name == string.Empty || tableName == string.Empty)
         {
             System.Console.Write("Some parameter was not entered. The application will be closed.");
             ShutDown();
@@ -90,7 +91,7 @@ partial class Improver
         {
             database = new DBProcessing(hostname, port, username, password, db_name, tableName);
         }
-        catch (Exception)
+        catch
         {
             Console.Write("Bad login. The application will be closed.");
             ShutDown();
@@ -100,5 +101,21 @@ partial class Improver
         improver.Start();
         ShutDown();
 
+    }
+    public static void StartLocally()
+    {
+        System.Console.WriteLine("1 - create empty dictionary, 2 - open an existing dictionary");
+        switch (Console.ReadKey(true).Key)
+            {
+                case ConsoleKey.D1:
+                    FileProcessing.ConsoleCreateFile();
+                    System.Console.WriteLine();
+                    StartLocally();
+                    break;
+                case ConsoleKey.D2:
+                    FileProcessing.ConsoleOpenFile();
+                    StartLocally();
+                    break;
+            }
     }
 }

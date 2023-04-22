@@ -3,6 +3,7 @@
 namespace console;
 class FileProcessing
 {
+    #region internal
     public string Path {get; private set;} // Путь до JSON файла.
     public List<Word>? Dict {get; private set;} // Список объектов Word.
     public List<Word>? ShuffledList // Свойство, перемешивающее список объектов Word для вывода.
@@ -15,7 +16,7 @@ class FileProcessing
         if (File.Exists(path)) ReadFromJSON();
         else throw new Exception($"Error reading the file {Path}");
     }
-    public static void CreateFile(string path) // Создает файл по полному пути.
+    static void CreateFile(string path) // Создает файл по полному пути.
     {
         File.Create(path).Close();
     }
@@ -78,4 +79,101 @@ class FileProcessing
         Dict?.Remove(word!); 
         SaveToJSON();
     }
+    #endregion
+    #region console
+    public static void ConsoleCreateFile()
+    {
+        System.Console.WriteLine();
+        System.Console.Write("File name:");
+        string path = Console.ReadLine()!;
+        try 
+        {
+            CreateFile(path);
+            System.Console.WriteLine("File Created");
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine($"An error occurred during file creation.\n{ex.Message}");
+            Thread.Sleep(10000);
+            throw;
+        }
+    }
+    public static void ConsoleOpenFile()
+    {
+        System.Console.WriteLine("1 - Select a file in the current directory, 2 - Specify the file path");
+        switch (Console.ReadKey(true).Key)
+            {
+                case ConsoleKey.D1:
+                    FileProcessing.ScanDir();
+                    ConsoleOpenFile();
+                    break;
+                case ConsoleKey.D2:
+                    FileProcessing.SpecifyDir();
+                    ConsoleOpenFile();
+                    break;
+            }
+    }
+    static void ScanDir()
+    {
+        System.Console.WriteLine($"\nCurrent directory: {Directory.GetCurrentDirectory()}");
+
+        string[] files = Directory.GetFiles(Directory.GetCurrentDirectory()).ToArray();
+
+        for (int i = 0; i < files.Length; i++)
+        {
+            System.Console.WriteLine($"{i}: {System.IO.Path.GetFileName(files[i])}");
+        }
+
+        System.Console.Write("\nEnter file number: ");
+
+        string fileNumberString = Console.ReadLine()!;
+
+        int.TryParse(fileNumberString, out int fileNumberInt);
+
+        if (fileNumberInt <0 || fileNumberInt > files.Length -1)
+        {
+            System.Console.WriteLine("\nBad file number.");
+            ScanDir();
+        }
+        string filePath = files[fileNumberInt];
+
+        try 
+        {
+            FileProcessing file = new FileProcessing(filePath);
+            FileSelected(file);
+        }
+        
+        catch (Exception)
+        {
+            System.Console.WriteLine("Incorrect file formatting.");
+            return;
+        }
+    }
+    static void SpecifyDir()
+    {
+        System.Console.Write("Enter the path: ");
+        string path = Console.ReadLine()!;
+        try 
+        {
+            FileProcessing file = new FileProcessing(path);
+            FileSelected(file);
+        }
+        catch (Exception ex)
+        {
+            System.Console.WriteLine(ex.Message);
+            return;
+        }
+    }
+    static void FileSelected(FileProcessing file)
+    {
+        if (file.ShuffledList is null) 
+        {
+            System.Console.WriteLine("Dictionary is null. Exiting...");
+            Improver.ShutDown();
+        }
+        VIDictionary vIDictionary = new VIDictionary(file, file.ShuffledList!);
+        Improver improver = new Improver(vIDictionary);
+        improver.Start();
+    }
+    #endregion
 }
