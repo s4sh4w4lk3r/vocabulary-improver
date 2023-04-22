@@ -35,6 +35,18 @@ class DBProcessing
         {
             throw new Exception("An error occurred while connecting to the database.");
         }
+        try 
+        {
+            string select = $"SELECT * FROM {tableName}";
+            connection.Open();
+            MySqlCommand command = new MySqlCommand(select, connection);
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+        catch
+        {
+            System.Console.WriteLine($"The table {tableName} does not exist, create it.");  
+        }
         return connection;
     }
     #endregion

@@ -96,11 +96,20 @@ partial class Improver
             Console.Write("Bad login. The application will be closed.");
             ShutDown();
         }
+        System.Console.WriteLine("1 - Start, 2 - Create table");
+        if (Console.ReadKey(true).Key == ConsoleKey.D1)
+        {
         VIDictionary viDict = new VIDictionary(database, database.GetDict());
         Improver improver = new Improver(viDict);
         improver.Start();
         ShutDown();
-
+        }
+        if (Console.ReadKey(true).Key == ConsoleKey.D2)
+        {
+            database.CreateDict();
+            System.Console.WriteLine("OK");
+            StartDatabase();
+        }
     }
     public static void StartLocally()
     {
