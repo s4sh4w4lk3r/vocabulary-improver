@@ -65,7 +65,7 @@ class FileProcessing
     public void IncreaseRatingFile(string key) // Увеличение рейтинга слова.
     {
         Word? word = Dict?.Find(x => x.Key.Contains(key));
-        word?.ImproveRatingWord();
+        word?.IncreaseRatingWord();
         SaveToJSON();
     }
     public void Add(string key, string value) //Добавить слово в JSON

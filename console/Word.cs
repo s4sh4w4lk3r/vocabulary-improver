@@ -58,7 +58,7 @@ class Word
             Rating = minRating;
         }
     }
-    public void ImproveRatingWord()
+    public void IncreaseRatingWord()
     {
         const byte maxRating = 10;
         Rating += 1;

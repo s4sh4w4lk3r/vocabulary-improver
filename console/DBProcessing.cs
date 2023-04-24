@@ -35,9 +35,9 @@ class DBProcessing
         {
             throw new Exception("An error occurred while connecting to the database.");
         }
-        try 
+        try
         {
-            string select = $"SELECT * FROM {tableName}";
+            string select = $"SELECT * FROM `{tableName}`";
             connection.Open();
             MySqlCommand command = new MySqlCommand(select, connection);
             command.ExecuteNonQuery();
@@ -45,7 +45,8 @@ class DBProcessing
         }
         catch
         {
-            System.Console.WriteLine($"The table {tableName} does not exist, create it.");  
+            System.Console.WriteLine($"The table {tableName} does not exist, create it.");
+            connection.Close();
         }
         return connection;
     }
@@ -55,7 +56,7 @@ class DBProcessing
     {
         List<Word> dict = new List<Word>();
 
-        string select = $"SELECT * FROM `{tableName}` ORDER BY RAND();";
+        string select = $"SELECT * FROM `{tableName}` ORDER BY `rating` ASC, RAND();";
 
         connection.Open();
         MySqlCommand command = new MySqlCommand(select, connection);
@@ -145,16 +146,30 @@ class DBProcessing
         connection.Open();
         string update = $"UPDATE `{tableName}` SET `rating`=rating - 1 WHERE word1 = '{key}';";
         MySqlCommand command = new MySqlCommand(update, connection);
-        command.ExecuteNonQuery();
-        connection.Close();
+        try
+        {
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+        catch (Exception)
+        {
+            connection.Close();
+        }
     }
     public void IncreaseRatingDB(string key) // Уменьшение рейтинга в БД
     {
         connection.Open();
         string update = $"UPDATE `{tableName}` SET `rating`=rating + 1 WHERE word1 = '{key}';";
         MySqlCommand command = new MySqlCommand(update, connection);
-        command.ExecuteNonQuery();
-        connection.Close();
+        try
+        {
+            command.ExecuteNonQuery();
+            connection.Close();
+        }
+        catch (Exception)
+        {
+            connection.Close();
+        }
     }
     #endregion
 }
