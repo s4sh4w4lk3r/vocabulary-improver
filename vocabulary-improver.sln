@@ -5,7 +5,9 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "console", "console\console.csproj", "{42E1CB7C-1548-4EEA-A5FC-793F70FDCE7E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "wpf", "wpf\wpf.csproj", "{60E78538-6521-456C-A221-CB21F9A254EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "wpf", "wpf\wpf.csproj", "{60E78538-6521-456C-A221-CB21F9A254EF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{37C7D39D-4B1E-4E4E-93E1-E5E3AAF3C684}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,13 +16,16 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{42E1CB7C-1548-4EEA-A5FC-793F70FDCE7E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{42E1CB7C-1548-4EEA-A5FC-793F70FDCE7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42E1CB7C-1548-4EEA-A5FC-793F70FDCE7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42E1CB7C-1548-4EEA-A5FC-793F70FDCE7E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{60E78538-6521-456C-A221-CB21F9A254EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{60E78538-6521-456C-A221-CB21F9A254EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{60E78538-6521-456C-A221-CB21F9A254EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{60E78538-6521-456C-A221-CB21F9A254EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{37C7D39D-4B1E-4E4E-93E1-E5E3AAF3C684}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{37C7D39D-4B1E-4E4E-93E1-E5E3AAF3C684}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{37C7D39D-4B1E-4E4E-93E1-E5E3AAF3C684}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{37C7D39D-4B1E-4E4E-93E1-E5E3AAF3C684}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

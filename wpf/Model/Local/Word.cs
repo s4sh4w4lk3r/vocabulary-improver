@@ -18,7 +18,7 @@ namespace wpf.Model.Local
         }
         public override string ToString()
         {
-            return $"Key: {Word1} Value:{Word2} Rating: {Value}";
+            return $"{Word1}:{Word2}:{Value}";
         }
     }
 }
