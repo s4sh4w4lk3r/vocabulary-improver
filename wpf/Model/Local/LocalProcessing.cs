@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wpf.backside.local
+namespace wpf.Model.Local
 {
     public class LocalProcessing
     {

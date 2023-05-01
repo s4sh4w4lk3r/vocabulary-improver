@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace wpf.backside.local
+namespace wpf.Model.Local
 {
     /// <summary>
     /// Represents the rating value and allows values only from 0 to 10 inclusive.

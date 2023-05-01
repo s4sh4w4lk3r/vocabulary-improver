@@ -13,8 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using wpf.backside;
-using wpf.backside.local;
+using wpf.Model;
+using wpf.Model.Local;
 
 namespace wpf
 {

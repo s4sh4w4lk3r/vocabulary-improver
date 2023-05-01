@@ -5,14 +5,25 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="Vocabulary Improver" Height="700" Width="1300" Background="#FF1e1e1e">
     <Grid>
-        <DockPanel LastChildFill="False">
-            <Button DockPanel.Dock="Top" Background="AliceBlue" Content="Верхняя кнопка" />
-            <Button DockPanel.Dock="Bottom" Background="BlanchedAlmond"/>
-            <Button DockPanel.Dock="Left" Background="Aquamarine" Content="Левая кнопка" />
-            <Button DockPanel.Dock="Right" Background="DarkGreen" Content="Правая кнопка" />
-            <Button Background="LightGreen" Content="Центр" />
-        </DockPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="17"></RowDefinition>
+            <RowDefinition></RowDefinition>
+            <RowDefinition Height="17"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"></ColumnDefinition>
+            <ColumnDefinition MinWidth="280" Width="280"></ColumnDefinition>
+            <ColumnDefinition Width="3"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+            <ColumnDefinition Width="10"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Background="#FF292929" Width="10" HorizontalAlignment="Left"></StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" Background="#FF292929" Height="17" VerticalAlignment="Top"></StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Background="#FF292929" Width="10" HorizontalAlignment="Right"></StackPanel>
+        <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5" Background="#FF292929" Height="17" VerticalAlignment="Bottom"></StackPanel>
+        <GridSplitter Grid.Row="1" Grid.Column="2" Background="#FF353434" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="3" ></GridSplitter>
     </Grid>
 </Window>
+    

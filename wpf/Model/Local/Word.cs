@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace wpf.backside.local
+namespace wpf.Model.Local
 {
     public class Word : Rating
     {
