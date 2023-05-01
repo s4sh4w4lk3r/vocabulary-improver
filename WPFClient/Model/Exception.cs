@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace wpf.Model
+namespace WPFClient.Model
 {
     internal class VIException : Exception
     {

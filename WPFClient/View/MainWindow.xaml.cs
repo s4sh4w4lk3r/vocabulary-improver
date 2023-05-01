@@ -13,10 +13,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using wpf.Model;
-using wpf.Model.Local;
+using WPFClient.Model;
+using WPFClient.Model.Local;
 
-namespace wpf
+namespace WPFClient
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

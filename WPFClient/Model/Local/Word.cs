@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace wpf.Model.Local
+namespace WPFClient.Model.Local
 {
     public class Word : Rating
     {

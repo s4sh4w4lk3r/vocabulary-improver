@@ -1,6 +1,6 @@
 ﻿using MySql.Data.MySqlClient;
 
-namespace console;
+namespace ConsoleClient;
 
 class DBProcessing
 {

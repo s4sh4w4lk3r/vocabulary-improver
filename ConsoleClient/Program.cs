@@ -1,4 +1,4 @@
-﻿namespace console
+﻿namespace ConsoleClient
 {
     class Program
     {
