@@ -15,7 +15,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="View\green.png" />
+    <None Remove="View\orange.png" />
+    <None Remove="View\purple.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="View\green.png" />
+    <Resource Include="View\orange.png" />
+    <Resource Include="View\purple.png" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerSide", "ServerSide\ServerSide.csproj", "{7230D0E5-1166-44C0-84D8-9339CF679F72}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WPFClient", "WPFClient\WPFClient.csproj", "{3736BE3D-6F15-403B-BC2F-9DFADA8255B9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WPFClient", "WPFClient\WPFClient.csproj", "{5F54A8BD-2750-48B4-9657-DBE2ED25E310}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{7230D0E5-1166-44C0-84D8-9339CF679F72}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7230D0E5-1166-44C0-84D8-9339CF679F72}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7230D0E5-1166-44C0-84D8-9339CF679F72}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3736BE3D-6F15-403B-BC2F-9DFADA8255B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3736BE3D-6F15-403B-BC2F-9DFADA8255B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3736BE3D-6F15-403B-BC2F-9DFADA8255B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3736BE3D-6F15-403B-BC2F-9DFADA8255B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F54A8BD-2750-48B4-9657-DBE2ED25E310}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F54A8BD-2750-48B4-9657-DBE2ED25E310}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F54A8BD-2750-48B4-9657-DBE2ED25E310}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F54A8BD-2750-48B4-9657-DBE2ED25E310}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
