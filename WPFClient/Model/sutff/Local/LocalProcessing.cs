@@ -5,8 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WPFClient.Model.sutff.Local.Enties;
 
-namespace WPFClient.Model.Local
+namespace WPFClient.Model.sutff.Local
 {
     public class LocalProcessing
     {
@@ -16,6 +17,32 @@ namespace WPFClient.Model.Local
         public List<Word>? ShuffledList // Свойство, перемешивающее список объектов Word для вывода.
         {
             get { return Dict?.OrderBy(x => new Random().Next()).ToList(); }
+        }
+
+
+        public LocalProcessing(string path) // ctor, который создает объект класса, читает файл если он есть.
+        {
+            Path = path;
+            if (File.Exists(path)) ReadFromJSON();
+            else throw new VIException($"Error reading the file {Path}");
+        }
+
+        public List<Word> ReadFromFile(string path)
+        {
+
+            List<Word> words = new List<Word>();
+
+            using (StreamReader reader = new StreamReader(path))
+            {
+                string? line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    var word = line.Split(" - ");
+                    words.Add(new Word(word[0], word[1]));
+                }
+            }
+
+            return words;
         }
         public static void CreateFile(string path) // Создает файл по полному пути.
         {
@@ -33,12 +60,6 @@ namespace WPFClient.Model.Local
             string dictJSON = JsonConvert.SerializeObject(Dict, Formatting.Indented);
             File.WriteAllText(Path, dictJSON);
         }
-        public LocalProcessing(string path) // ctor, который создает объект класса, читает файл если он есть.
-        {
-            Path = path;
-            if (File.Exists(path)) ReadFromJSON();
-            else throw new VIException($"Error reading the file {Path}");
-        }
         public void Add(string key, string value) //Добавить слово в JSON
         {
             Dict?.Add(new Word(key, value));
@@ -53,13 +74,13 @@ namespace WPFClient.Model.Local
         public void IncreaseRatingFile(string key) // Увеличение рейтинга слова.
         {
             Word? word = Dict?.Find(x => x.Word1.Contains(key));
-            if (word != null) { word.Increase();}
+            if (word != null) { word.Increase(); }
             WriteToJSON();
         }
         public void ReduceRatingFile(string key) // Увеличение рейтинга слова.
         {
             Word? word = Dict?.Find(x => x.Word1.Contains(key));
-            if (word != null) { word.Reduce(); }
+            if (word != null) { word.Decrease(); }
             WriteToJSON();
         }
     }

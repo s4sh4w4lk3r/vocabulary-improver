@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace DraftClient.Model
+namespace WPFClient.Model.sutff
 {
     public sealed class ViVariables
     {

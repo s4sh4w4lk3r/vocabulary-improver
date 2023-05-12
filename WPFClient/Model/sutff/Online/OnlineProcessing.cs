@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WPFClient.Model.Online
+namespace WPFClient.Model.sutff.Online
 {
     internal class OnlineProcessing
     {

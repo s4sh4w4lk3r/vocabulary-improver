@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WPFClient.Model
+namespace WPFClient.Model.sutff
 {
     internal class VIException : Exception
     {

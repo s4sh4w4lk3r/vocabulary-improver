@@ -24,8 +24,8 @@
         <StackPanel Grid.Row="0" Grid.Column="5" Grid.RowSpan="3" Background="#FF292929" Width="10" HorizontalAlignment="Right"></StackPanel>
         <StackPanel Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="5" Background="#FF292929" Height="17" VerticalAlignment="Bottom"></StackPanel>
         <GridSplitter Grid.Row="1" Grid.Column="2" Background="#FF353434" HorizontalAlignment="Center" VerticalAlignment="Stretch" Width="3" ></GridSplitter>
-        <StackPanel x:Name="ListDictsPanel" Grid.Row="1" Grid.Column="1">
-            <Button x:Name="btn" Height="50" Click="btn_click">
+        <StackPanel x:Name="listDictsPanel" Grid.Row="1" Grid.Column="1" MouseRightButtonDown="listDictsPanel_MouseRightButtonDown">
+            <Button x:Name="buttonTemplate" Height="50" Click="btn_click">
                 <Button.Template>
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Grid Height="50" Background="#FF292929">
@@ -46,58 +46,6 @@
                                 <Label Foreground="White" FontStyle="Italic">Описание словаря</Label>
                             </StackPanel>
                             <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Height="50" Width="100" Source="/View/purple.png"/>
-
-                        </Grid>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-            <Button x:Name="btn1" Height="50" Click="btn_click">
-                <Button.Template>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Grid Height="50" Background="#FF292929">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                            </Grid.RowDefinitions>
-
-                            <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
-                            <StackPanel Grid.Row="0" Grid.Column="1">
-                                <Label Foreground="White" FontSize="14" FontFamily="Segoe UI Semibold">Название словаря</Label>
-                            </StackPanel>
-                            <StackPanel Grid.Row="2" Grid.Column="1">
-                                <Label Foreground="White" FontStyle="Italic">Описание словаря</Label>
-                            </StackPanel>
-                            <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Height="50" Width="100" Source="/View/orange.png"/>
-
-                        </Grid>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-            <Button x:Name="btn2" Height="50" Click="btn_click">
-                <Button.Template>
-                    <ControlTemplate TargetType="{x:Type Button}">
-                        <Grid Height="50" Background="#FF292929">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="50"></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition></RowDefinition>
-                                <RowDefinition></RowDefinition>
-                            </Grid.RowDefinitions>
-
-                            <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="2"/>
-                            <StackPanel Grid.Row="0" Grid.Column="1">
-                                <Label Foreground="White" FontSize="14" FontFamily="Segoe UI Semibold">Название словаря</Label>
-                            </StackPanel>
-                            <StackPanel Grid.Row="2" Grid.Column="1">
-                                <Label Foreground="White" FontStyle="Italic">Описание словаря</Label>
-                            </StackPanel>
-                            <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Height="50" Width="100" Source="/View/green.png"/>
 
                         </Grid>
                     </ControlTemplate>
