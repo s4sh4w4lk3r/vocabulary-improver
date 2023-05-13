@@ -14,16 +14,11 @@ namespace WPFClient
         public static void Start()
         {
             string path = @"C:\Users\roman\Desktop\vocabulary-improver\WPFClient\test.json";
-            LocalWordProcessing lp = new LocalWordProcessing(path);
-            lp.LocalProcessingLogging += Lp_LocalProcessingLogging;
-            lp.Load();
-            foreach (var item in lp.Words)
-            {
-                Debug.WriteLine(item.Word1 + item.Word2);
-            }
+            IWordProcessing wp = new LocalWordProcessing(path);
+            wp.WordProcessingLogging += DebugLogger;
         }
 
-        private static void Lp_LocalProcessingLogging(string obj)
+        private static void DebugLogger(string obj)
         {
             Debug.WriteLine(obj);
         }

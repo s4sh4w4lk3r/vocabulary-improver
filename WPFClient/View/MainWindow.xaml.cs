@@ -29,6 +29,7 @@ namespace WPFClient
         {
             InitializeComponent();
             Startup.Start();
+            Close();
         }
         private void btn_click(object sender, RoutedEventArgs e)
         {

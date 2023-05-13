@@ -3,25 +3,22 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace WPFClient
 {
     public class LocalWordProcessing : IWordProcessing
     {
-        public event Action<string>? LocalProcessingLogging;
+        const int DEFAULT_RATING_VALUE = 0;
+
+        public event Action<string>? WordProcessingLogging;
+
         public string Path { get; set; }
 
         private List<Word> words;
-
         public List<Word> Words //OK
         {
             get { return words; }
-            set { words = value; }
+            private set { words = value; }
         }
 
         public List<Word> ShuffledWords
@@ -50,20 +47,21 @@ namespace WPFClient
             {
                 throw new VIException($"Еhe file with the path {Path} does not exist.");
             }
+            Load();
         }
 
         public void Add(string word1, string word2)
         {
-            Words.Add(new Word(word1, word2, Guid.NewGuid()));
+            Words.Add(new Word(word1, word2, Guid.NewGuid(), DEFAULT_RATING_VALUE));
             Save();
-            LocalProcessingLogging?.Invoke($"A couple of words have been added, Word1: {word1}, Word2: {word2}.");
+            WordProcessingLogging?.Invoke($"A couple of words have been added, Word1: {word1}, Word2: {word2}.");
         }//OK
 
         public void Add(List<Word> words)
         {
             Words.AddRange(words);
             Save();
-            LocalProcessingLogging?.Invoke($"A collection of words has been added.");
+            WordProcessingLogging?.Invoke($"A collection of words has been added.");
         }//OK
 
         public void DecreaseRating(Guid guid)
@@ -73,41 +71,39 @@ namespace WPFClient
             Save();
             if (word is null)
             {
-                LocalProcessingLogging?.Invoke($"The word by GUID {guid} was not found.");
+                WordProcessingLogging?.Invoke($"The word by GUID {guid} was not found.");
             }
             else
             {
-                LocalProcessingLogging?.Invoke($"The rating of the word {word.Word1} has been decreased. Now it is {word.Value}.");
+                WordProcessingLogging?.Invoke($"The rating of the word {word.Word1} has been decreased. Now it is {word.Rating}.");
             }
-        }
+
+        }//OK
 
         public void IncreaseRating(Guid guid)
         {
             Word? word = Words.Find(x => x.Guid == guid);
             word?.Increase();
             Save();
-            Load();
             if (word is null)
             {
-                LocalProcessingLogging?.Invoke($"The word by GUID {guid} was not found.");
+                WordProcessingLogging?.Invoke($"The word by GUID {guid} was not found.");
             }
             else
             {
-                LocalProcessingLogging?.Invoke($"The rating of the word {word.Word1} has been increased. Now it is {word.Value}.");
+                WordProcessingLogging?.Invoke($"The rating of the word {word.Word1} has been increased. Now it is {word.Rating}.");
             }
-        }
+        }//OK
 
         public void Load()
         {
-            using StreamReader sr = File.OpenText(Path);
-            JsonSerializer serializer = new JsonSerializer();
-
-            if (serializer.Deserialize(sr, typeof(List<Word>)) is List<Word> loadedWords)
+            string json = File.ReadAllText(Path);
+            var jsonWords = JsonConvert.DeserializeObject<List<Word>>(json);
+            if (jsonWords != null)
             {
-                this.Words = loadedWords;
-                LocalProcessingLogging?.Invoke($"The words were loaded, the number of words is {Words.Count}");
+                Words = jsonWords;
             }
-        }
+        }//OK
 
         public void LoadFromFile(string path)
         {
@@ -117,11 +113,11 @@ namespace WPFClient
                 while ((line = reader.ReadLine()) != null)
                 {
                     var word = line.Split(" - ");
-                    Words.Add(new Word(word[0], word[1], Guid.NewGuid()));
+                    Words.Add(new Word(word[0], word[1], Guid.NewGuid(), DEFAULT_RATING_VALUE));
                 }
             }
             Save();
-            LocalProcessingLogging?.Invoke($"The download from the external file has been completed, the total number of words is {Words.Count}");
+            WordProcessingLogging?.Invoke($"The download from the external file has been completed, the total number of words is {Words.Count}");
         }//OK
 
         public void Remove(string word1) // OK
@@ -131,11 +127,11 @@ namespace WPFClient
             {
                 Words.RemoveAt(wordIndex);
                 Save();
-                LocalProcessingLogging?.Invoke($"The word {word1} has been removed.");
+                WordProcessingLogging?.Invoke($"The word {word1} has been removed.");
             }
             else
             {
-                LocalProcessingLogging?.Invoke($"The word {word1} was not found to be deleted.");
+                WordProcessingLogging?.Invoke($"The word {word1} was not found to be deleted.");
             }
         }
 
@@ -147,11 +143,11 @@ namespace WPFClient
                 string wordToDelete = Words[wordIndex].Word1;
                 Words.RemoveAt(wordIndex);
                 Save();
-                LocalProcessingLogging?.Invoke($"The word {wordToDelete} with GUID {guid} has been removed.");
+                WordProcessingLogging?.Invoke($"The word {wordToDelete} with GUID {guid} has been removed.");
             }
             else
             {
-                LocalProcessingLogging?.Invoke($"The word with GUID {guid} was not found to be deleted.");
+                WordProcessingLogging?.Invoke($"The word with GUID {guid} was not found to be deleted.");
             }
         } // OK
 
@@ -170,15 +166,15 @@ namespace WPFClient
             Save();
             if (processedGuids == guids.Count)
             {
-                LocalProcessingLogging?.Invoke("All words by GUID were found and deleted.");
+                WordProcessingLogging?.Invoke("All words by GUID were found and deleted.");
             }
             else if (processedGuids != guids.Count && processedGuids != 0)
             {
-                LocalProcessingLogging?.Invoke("Some words on the entered GUIDs were not deleted.");
+                WordProcessingLogging?.Invoke("Some words on the entered GUIDs were not deleted.");
             }
             else if (processedGuids == 0)
             {
-                LocalProcessingLogging?.Invoke("The words were not found by the entered GUIDs and were not deleted.");
+                WordProcessingLogging?.Invoke("The words were not found by the entered GUIDs and were not deleted.");
             }
         }//OK
 
@@ -186,7 +182,7 @@ namespace WPFClient
         {
             string WordsJSON = JsonConvert.SerializeObject(Words, Formatting.Indented);
             File.WriteAllText(Path, WordsJSON);
-            LocalProcessingLogging?.Invoke($"The current object was saved by {Path}");
-        }
+            WordProcessingLogging?.Invoke($"Saved to JSON.");
+        }//OK
     }
 }

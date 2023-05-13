@@ -15,15 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Model\sutff\LocalProcessing.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="View\purple.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Model\sutff\LocalProcessing.cs" />
   </ItemGroup>
 
   <ItemGroup>

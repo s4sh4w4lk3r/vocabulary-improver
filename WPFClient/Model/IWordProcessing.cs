@@ -8,6 +8,7 @@ namespace WPFClient
 {
     internal interface IWordProcessing
     {
+        public event Action<string>? WordProcessingLogging;
         public List<Word> Words { get;}
         public List<Word> ShuffledWords { get;}
         public void Save();
