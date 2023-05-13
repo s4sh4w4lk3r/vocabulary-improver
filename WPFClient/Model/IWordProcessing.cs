@@ -3,15 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WPFClient.Model.sutff.Local.Enties;
 
-namespace WPFClient.Model
+namespace WPFClient
 {
     internal interface IWordProcessing
     {
-        public List<Word> Words { get; set; }
-        public List<Word> ShuffledWords { get; set; }
-
+        public List<Word> Words { get;}
+        public List<Word> ShuffledWords { get;}
         public void Save();
         public void Load();
         public void LoadFromFile(string path);
@@ -25,7 +23,5 @@ namespace WPFClient.Model
         public void Remove(string word1);
         public void Remove(Guid guid);
         public void Remove(List<Guid> guids);
-
-
     }
 }

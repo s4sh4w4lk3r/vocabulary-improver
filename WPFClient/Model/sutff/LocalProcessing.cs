@@ -3,11 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using WPFClient.Model.sutff.Local.Enties;
 
-namespace WPFClient.Model.sutff.Local
+namespace WPFClient
 {
     public class LocalProcessing
     {

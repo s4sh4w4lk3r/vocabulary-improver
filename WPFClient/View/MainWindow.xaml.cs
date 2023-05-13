@@ -16,8 +16,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
-using WPFClient.Model;
-using WPFClient.Model.Local;
 using WPFClient.View;
 
 namespace WPFClient
@@ -30,17 +28,19 @@ namespace WPFClient
         public MainWindow()
         {
             InitializeComponent();
+            Startup.Start();
         }
         private void btn_click(object sender, RoutedEventArgs e)
         {
-/*            var daw = new DictionaryAdditionWizard();
-            daw.ShowDialog();*/
+            /*            var daw = new DictionaryAdditionWizard();
+                        daw.ShowDialog();*/
+            
 
-            string btnXml = XamlWriter.Save(buttonTemplate);
+            /*string btnXml = XamlWriter.Save(buttonTemplate);
             StringReader stringReader = new StringReader(btnXml);
             XmlReader xmlReader = XmlReader.Create(stringReader);
             Button newButton = (Button)XamlReader.Load(xmlReader); 
-            listDictsPanel.Children.Add(newButton);
+            listDictsPanel.Children.Add(newButton);*/
         }
 
         private void listDictsPanel_MouseDown(object sender, MouseButtonEventArgs e)
@@ -49,7 +49,6 @@ namespace WPFClient
 
         private void listDictsPanel_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            Debug.WriteLine("HArosh");
         }
     }
 }

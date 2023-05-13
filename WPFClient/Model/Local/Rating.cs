@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
-namespace WPFClient.Model.sutff.Local.Enties
+namespace WPFClient
 {
     /// <summary>
     /// Represents the rating value and allows values only from 0 to 10 inclusive.
