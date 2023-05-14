@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WPFClient
 {
-    internal interface IWordProcessing
+    interface IWordProcessing
     {
         public event Action<string>? WordProcessingLogging;
         public List<Word> Words { get;}
@@ -21,8 +21,12 @@ namespace WPFClient
         public void Add(string word1, string word2);
         public void Add(List<Word> words);
 
+        public void Edit(Guid guid, string word2); //Find word by GUID and change its word2.
+        public void Edit(string word1, string word2);//Find word by word1 and change its word2.
+
         public void Remove(string word1);
         public void Remove(Guid guid);
         public void Remove(List<Guid> guids);
+        public void Clear();
     }
 }

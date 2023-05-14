@@ -7,7 +7,7 @@ namespace WPFClient
         const int MAX_RATING = 10;
         const int MIN_RATING = 0;
         public string Word1 { get; private set; }
-        public string Word2 { get; private set; }
+        public string Word2 { get; set; }
         public Guid Guid { get; private set; }
         public int Rating { get; private set; }
         public Word(string word1, string word2, Guid guid, int rating)

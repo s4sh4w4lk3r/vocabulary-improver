@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Shapes;
 using WPFClient;
 
 namespace WPFClient
@@ -13,9 +14,12 @@ namespace WPFClient
     {
         public static void Start()
         {
-            string path = @"C:\Users\roman\Desktop\vocabulary-improver\WPFClient\test.json";
-            IWordProcessing wp = new LocalWordProcessing(path);
-            wp.WordProcessingLogging += DebugLogger;
+            string path = System.IO.Path.Combine(ViTools.ViDictsDirectory, "test.json");
+            IWordProcessing lwp = new LocalWordProcessing(path);
+            lwp.WordProcessingLogging += DebugLogger;
+            var wp = new WordProcessor();
+            wp.WordProcessings.Add(lwp);
+            wp.Save();
         }
 
         private static void DebugLogger(string obj)

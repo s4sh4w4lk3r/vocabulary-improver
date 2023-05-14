@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Windows.Controls;
 
 namespace WPFClient
 {
@@ -54,7 +55,7 @@ namespace WPFClient
         {
             Words.Add(new Word(word1, word2, Guid.NewGuid(), DEFAULT_RATING_VALUE));
             Save();
-            WordProcessingLogging?.Invoke($"A couple of words have been added, Word1: {word1}, Word2: {word2}.");
+            WordProcessingLogging?.Invoke($"A pair of words have been added, Word1: {word1}, Word2: {word2}.");
         }//OK
 
         public void Add(List<Word> words)
@@ -97,12 +98,7 @@ namespace WPFClient
 
         public void Load()
         {
-            string json = File.ReadAllText(Path);
-            var jsonWords = JsonConvert.DeserializeObject<List<Word>>(json);
-            if (jsonWords != null)
-            {
-                Words = jsonWords;
-            }
+            Words = ViTools.ReadFromJSON<List<Word>>(Path) ?? Words;
         }//OK
 
         public void LoadFromFile(string path)
@@ -180,9 +176,47 @@ namespace WPFClient
 
         public void Save()
         {
-            string WordsJSON = JsonConvert.SerializeObject(Words, Formatting.Indented);
-            File.WriteAllText(Path, WordsJSON);
+            ViTools.SaveToJSON(Words, Path);
             WordProcessingLogging?.Invoke($"Saved to JSON.");
         }//OK
+
+        public void Edit(Guid guid, string word2)
+        {
+            Word? word = Words.Find(x => x.Guid == guid);
+            if (word != null)
+            {
+                string oldWord2 = word.Word2;
+                word.Word2 = word2;
+                Save();
+                WordProcessingLogging?.Invoke($"The word pair \"{word.Word1}:{oldWord2}\" with GUID {guid} has been edited to \"{word.Word1}:{word2}\".");
+            }
+            else
+            {
+                WordProcessingLogging?.Invoke($"A pair of words with GUID {guid} was not found.");
+            }
+        }//OK
+
+        public void Edit(string word1, string word2)
+        {
+            Word? word = Words.Find(x => x.Word1 == word1);
+            if (word != null)
+            {
+                string oldWord2 = word.Word2;
+                word.Word2 = word2;
+                Save();
+                WordProcessingLogging?.Invoke($"The word pair \"{word.Word1}{oldWord2}\" has been changed to \"{word.Word1}:{word.Word2}\"");
+            }
+            else
+            {
+                WordProcessingLogging?.Invoke($"Word2 was not found by {word1}.");
+            }
+        }//OK
+        public void Clear()
+        {
+            int wordsQuantity = Words.Count;
+            Words.Clear();
+            Save();
+            WordProcessingLogging?.Invoke($"List cleared. {wordsQuantity} elements have been removed.");
+        }
     }
 }
