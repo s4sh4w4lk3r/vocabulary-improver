@@ -28,8 +28,6 @@ namespace ConsoleClient
         public MainWindow()
         {
             InitializeComponent();
-            Startup.Start();
-            Close();
         }
         private void btn_click(object sender, RoutedEventArgs e)
         {

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WPFClient", "WPFClient\WPFC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServerSide", "ServerSide\ServerSide.csproj", "{7417361C-183A-4426-8271-1D81496FCADB}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleClient", "ConsoleClient\ConsoleClient.csproj", "{8A5BB675-1B95-4FE7-9CFE-D8B976A5C5FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7417361C-183A-4426-8271-1D81496FCADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7417361C-183A-4426-8271-1D81496FCADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7417361C-183A-4426-8271-1D81496FCADB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A5BB675-1B95-4FE7-9CFE-D8B976A5C5FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A5BB675-1B95-4FE7-9CFE-D8B976A5C5FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A5BB675-1B95-4FE7-9CFE-D8B976A5C5FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A5BB675-1B95-4FE7-9CFE-D8B976A5C5FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

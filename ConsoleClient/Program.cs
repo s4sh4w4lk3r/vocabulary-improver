@@ -1,20 +1,6 @@
-﻿namespace ConsoleClient
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            System.Console.WriteLine("Hello, select the operating mode\n1 - MySQL Database, 2 - Locally, Any Key - Exit\n");
+﻿using ConsoleClient;
+using ConsoleClient.sutff;
+using System.Collections.Generic;
 
-            switch (Console.ReadKey(true).Key)
-            {
-                case ConsoleKey.D1:
-                    Improver.StartDatabase();
-                    break;
-                case ConsoleKey.D2:
-                    Improver.StartLocally();
-                    break;
-            }
-        }
-    }
-}
+var cs = ConsoleStartup.GetInstance();
+cs.Start();
