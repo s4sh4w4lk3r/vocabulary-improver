@@ -16,9 +16,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
-using WPFClient.View;
+using ConsoleClient.View;
 
-namespace WPFClient
+namespace ConsoleClient
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -33,9 +33,9 @@ namespace WPFClient
         }
         private void btn_click(object sender, RoutedEventArgs e)
         {
-            /*            var daw = new DictionaryAdditionWizard();
-                        daw.ShowDialog();*/
-            
+/*            var daw = new DictionaryAdditionWizard();
+            daw.ShowDialog();*/
+
 
             /*string btnXml = XamlWriter.Save(buttonTemplate);
             StringReader stringReader = new StringReader(btnXml);

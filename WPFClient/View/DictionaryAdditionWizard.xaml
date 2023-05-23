@@ -1,9 +1,9 @@
-﻿<Window x:Class="WPFClient.View.DictionaryAdditionWizard"
+﻿<Window x:Class="ConsoleClient.View.DictionaryAdditionWizard"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:WPFClient.View"
+        xmlns:local="clr-namespace:ConsoleClient.View"
         mc:Ignorable="d"
         Title="Dictionary Addition Wizard" Height="570" Width="970">
     <Grid Background="#FF1E1E1E">
