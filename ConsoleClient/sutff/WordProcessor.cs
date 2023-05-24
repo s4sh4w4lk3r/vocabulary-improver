@@ -18,9 +18,9 @@ namespace ConsoleClient.sutff
         public WordProcessor(Guid guid, string name, string description, string source)
         {
             bool a = guid == Guid.Empty;
-            bool b = string.IsNullOrEmpty(name);
-            bool c = string.IsNullOrEmpty(description);
-            bool d = string.IsNullOrEmpty(source);
+            bool b = string.IsNullOrWhiteSpace(name);
+            bool c = string.IsNullOrWhiteSpace(description);
+            bool d = string.IsNullOrWhiteSpace(source);
             if (a || b || c || d)
             {
                 throw new Exception("Null or empty strings");
@@ -37,17 +37,18 @@ namespace ConsoleClient.sutff
 
             if (Source.Contains(ONLINE_SOURCE_TAG))
             {
-                string path = Source.Replace(ONLINE_SOURCE_TAG, string.Empty);
-                Console.WriteLine(ToString());
+                string sourceOnline = Source.Replace(ONLINE_SOURCE_TAG, string.Empty);
+                throw new NotImplementedException();
             }
 
             if (Source.Contains(OFFLINE_SOURCE_TAG))
             {
                 string path = Source.Replace(OFFLINE_SOURCE_TAG, string.Empty);
-                Console.WriteLine(ToString());
+                GuessingGameLocal game = new(path);
+                game.Start();
             }
         }
-        public static void AddNewProcessor(string name, string description, string source, bool isOnline)
+        public static void AddNewProcessor(string name, string description, string? onlineSource = null)
         {
             if (File.Exists(ViTools.ViDictsListFilePath) == false)
             {
@@ -56,16 +57,21 @@ namespace ConsoleClient.sutff
 
             List<WordProcessor> JSONlist = ViTools.ReadFromJSON<List<WordProcessor>>(ViTools.ViDictsListFilePath) ?? new List<WordProcessor>();
 
-            if (isOnline == true)
+
+
+
+            if (onlineSource != null)
             {
-                JSONlist.Add(new WordProcessor(Guid.NewGuid(), name, description, ONLINE_SOURCE_TAG + source));
+                JSONlist.Add(new WordProcessor(Guid.NewGuid(), name, description, ONLINE_SOURCE_TAG + onlineSource));
             }
-            if (isOnline == false)
+            if (onlineSource == null)
             {
-                JSONlist.Add(new WordProcessor(Guid.NewGuid(), name, description, OFFLINE_SOURCE_TAG + source));
+                string path = Path.Combine(ViTools.ViDictsDirectory, $"{name}.json");
+                JSONlist.Add(new WordProcessor(Guid.NewGuid(), name, description, OFFLINE_SOURCE_TAG + path));
             }
             ViTools.SaveToJSON(JSONlist, ViTools.ViDictsListFilePath);
         }
+
         public static void RemoveWordProcessor(Guid guidToRemove)
         {
             if (File.Exists(ViTools.ViDictsListFilePath) == false)

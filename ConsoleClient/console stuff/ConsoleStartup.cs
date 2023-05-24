@@ -30,7 +30,7 @@ namespace ConsoleClient
             while (true)
             {
                 Console.WriteLine(new string('*', 120));
-                Console.WriteLine("Select an action.\nPlay - Enter, Add - Insert, Remove - Del, Exit - Pause");
+                Console.WriteLine("Select an action.\nPlay - Enter, Add - Insert, Remove - Del, Exit - Escape");
                 ConsoleKey key = Console.ReadKey(true).Key;
                 switch (key)
                 {
@@ -38,7 +38,7 @@ namespace ConsoleClient
                         Console.WriteLine(new string('*', 120));
                         SelectProcessor();
                         break;
-                    case ConsoleKey.Pause:
+                    case ConsoleKey.Escape:
                         Environment.Exit(0);
                         break;
                     case ConsoleKey.Insert:
@@ -56,37 +56,66 @@ namespace ConsoleClient
         {
             string? name;
             string? desc;
-            string? sourceInput;
             bool isOnline;
 
             Console.Write("name: "); name = Console.ReadLine();
             Console.Write("desc: "); desc = Console.ReadLine();
-            Console.Write("source: "); sourceInput = Console.ReadLine();
             Console.Write("Is online (y/n): "); isOnline = IsOnlineSelector(Console.ReadKey().Key);
-            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(desc) || string.IsNullOrEmpty(sourceInput))
+            if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(desc))
             {
                 throw new Exception("name or desc is null or empty");
             }
-            else
+            
+            if (isOnline == false)
             {
-            WordProcessor.AddNewProcessor(name, desc, sourceInput, isOnline);
+
+                string path = Path.Combine(ViTools.ViDictsDirectory, $"{name}.json");
+
+                if (File.Exists(path)) 
+                { 
+                    throw new Exception("A dictionary with a similar name already exists."); 
+                }
+                File.Create(path).Close();
+                WordProcessor.AddNewProcessor(name, desc);
+                Console.WriteLine();
             }
-            Console.WriteLine();
+
+            if (isOnline == true)
+            {
+                Console.Write("\nOnline Source: ");
+                string? onlineSource = Console.ReadLine();
+                if (onlineSource != null)
+                {
+                    WordProcessor.AddNewProcessor(name, desc, onlineSource);
+                }
+                Console.WriteLine();
+            }
+            return;
+
         }//OK
         public void SelectProcessor()
         {
             Console.WriteLine("Scanning dicts...");
             processorList = WordProcessor.GetWordProcessors();
             Console.WriteLine($"Dictionaries found: {processorList.Count}");
-            int i = 0;
+            if (processorList.Count == 0) { return; }
+            int i;
             for (i = 0; i < processorList.Count; i++)
             {
                 Console.WriteLine($"{i} \t {processorList[i].Name}");
             }
             Console.Write("Enter dictionary number to play: ");
             int.TryParse(Console.ReadLine(), out int numToPlay);
-            processorList[numToPlay].StartIWordProcessing();
-            Console.WriteLine();
+            if (numToPlay < 0 ||  numToPlay > processorList.Count - 1)
+            {
+                Console.WriteLine("Bad number.");
+                return;
+            }
+            else
+            {
+                processorList[numToPlay].StartIWordProcessing();
+                Console.WriteLine();
+            }
         }
         public void RemoveProcessor()
         {
@@ -108,6 +137,12 @@ namespace ConsoleClient
             int.TryParse(Console.ReadLine(), out int numToDelete);
 
             Guid guidToRemove = processorList[numToDelete].Guid;
+            if (processorList[numToDelete].Source.Contains("[OFFLINE]"))
+            {
+                string path = processorList[numToDelete].Source;
+                path = path.Replace("[OFFLINE]", string.Empty);
+                File.Delete(path);
+            }
             WordProcessor.RemoveWordProcessor(guidToRemove);
             Console.WriteLine();
         }//OK
