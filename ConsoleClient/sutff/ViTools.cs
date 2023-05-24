@@ -45,6 +45,11 @@ namespace ConsoleClient
             {
                 File.Create(ConfigFilePath).Close();
             }
+            
+            if (File.Exists(ViDictsListFilePath) == false)
+            {
+                File.Create(ViDictsListFilePath);
+            }
         }
     }
 }
