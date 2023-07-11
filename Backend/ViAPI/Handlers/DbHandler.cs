@@ -1,24 +1,23 @@
-﻿namespace ServerSide.Database;
+﻿using ViAPI.Database;
 
-public class DbProcessing
-{
-    public static bool CheckConnection()
+namespace ServerSide.Database;
+
+public static class DbHandler
+{/*
+    public static bool CheckConnection(ViDbContext db)
     {
-        using var db = new VocabularyImproverContext();
-        return db.Database.CanConnect();
+        db.Database.CanConnect();
     }
 
-    public static List<DictionaryVi>? GetDictsByUserGuid(Guid userGuid)
+    public static IEnumerable<DictionaryVi>? GetDictsByUserGuid(Guid userGuid)
     {
         using var db = new VocabularyImproverContext();
-        var dicts = db.Dictionaries.Where(x => x.UserGuidFk == userGuid).Include(x => x.Words).ToList();
-        return dicts;
+        return db.Dictionaries.Where(x => x.UserGuidFk == userGuid).Include(x => x.Words);
     }
-    public static List<WordDB>? GetWordsByDictGuid(Guid dictGuid)
+    public static IEnumerable<WordDB>? GetWordsByDictGuid(Guid dictGuid)
     {
         using var db = new VocabularyImproverContext();
-        var words = db.Words.Where(x => x.DictionaryGuidFk == dictGuid).ToList();
-        return words;
+        return db.Words.Where(x => x.DictionaryGuidFk == dictGuid);
     }
     public static void IncreaseRating(Guid wordGuid)
     {
@@ -196,6 +195,6 @@ public class DbProcessing
                 break;
         }
         db.SaveChanges();
-    }
+    }*/
 }
 

@@ -7,7 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Database\DbProcessing.cs" />
+    <Compile Remove="Database\DbHandler.cs" />
+    <Compile Remove="ScaffoldModels\Dictionary.cs" />
+    <Compile Remove="ScaffoldModels\User.cs" />
+    <Compile Remove="ScaffoldModels\UserdataReg.cs" />
+    <Compile Remove="ScaffoldModels\UserdataTg.cs" />
+    <Compile Remove="ScaffoldModels\VocabularyImproverContext.cs" />
+    <Compile Remove="ScaffoldModels\Word.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="ScaffoldModels\Dictionary.cs" />
+    <Content Include="ScaffoldModels\User.cs" />
+    <Content Include="ScaffoldModels\UserdataReg.cs" />
+    <Content Include="ScaffoldModels\UserdataTg.cs" />
+    <Content Include="ScaffoldModels\VocabularyImproverContext.cs" />
+    <Content Include="ScaffoldModels\Word.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,7 +30,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Database\DbProcessing.cs" />
+    <None Include="Handlers\DbHandler.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
