@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="Handlers\DbHandler.cs" />
+    <None Include="Database\DbMethods.cs" />
   </ItemGroup>
 
   <ItemGroup>

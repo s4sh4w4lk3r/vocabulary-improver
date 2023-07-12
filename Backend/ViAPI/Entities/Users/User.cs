@@ -1,5 +1,4 @@
-﻿using ViAPI.Auth;
-using ViAPI.Handlers;
+﻿using ViAPI.StaticMethods;
 
 namespace ViAPI.Entities
 {
@@ -9,8 +8,8 @@ namespace ViAPI.Entities
         public string Firstname { get; set; }
         public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Firstname: {Firstname}";
         public User(Guid guid, string firstname)
-        {
-            InputExceptions.CheckStringException(firstname);
+        {   
+            InputChecker.CheckStringException(firstname);
             Guid = guid;
             Firstname = firstname;
         }

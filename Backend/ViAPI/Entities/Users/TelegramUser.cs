@@ -1,4 +1,4 @@
-﻿namespace ViAPI.Entities.Users
+﻿namespace ViAPI.Entities
 {
     public class TelegramUser : User
     {

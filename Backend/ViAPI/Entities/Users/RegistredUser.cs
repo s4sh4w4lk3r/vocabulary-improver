@@ -1,6 +1,6 @@
-﻿using ViAPI.Handlers;
+﻿using ViAPI.StaticMethods;
 
-namespace ViAPI.Entities.Users
+namespace ViAPI.Entities
 {
     public class RegistredUser : User
     {
@@ -9,8 +9,8 @@ namespace ViAPI.Entities.Users
         public string Hash { get; set; }
         public RegistredUser(Guid guid, string firstname, string username, string email, string hash) : base(guid, firstname)
         {
-            InputExceptions.CheckStringException(username, hash);
-            InputExceptions.CheckEmailException(email);
+            InputChecker.CheckStringException(username, hash);
+            InputChecker.CheckEmailException(email);
             Username = username;
             Email = email;
             Hash = hash;

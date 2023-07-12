@@ -1,7 +1,6 @@
-﻿using Microsoft.VisualBasic;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-namespace ViAPI.Handlers
+namespace ViAPI.StaticMethods
 {
     public static class InputChecker
     {
@@ -27,32 +26,29 @@ namespace ViAPI.Handlers
         }
         public static bool CheckRating(int rating)
         {
-            if (rating >= 0 && rating <= 10) 
+            if (rating >= 0 && rating <= 10)
             {
                 return true;
             }
             else return false;
         }
-    }
-    public static class InputExceptions
-    {
         public static void CheckStringException(params string[] strings)
         {
-            if (InputChecker.CheckString(strings) is false)
+            if (CheckString(strings) is false)
             {
                 throw new ArgumentException("The string consists of a space, empty or NULL.");
             }
         }
         public static void CheckEmailException(string email)
         {
-            if (InputChecker.CheckEmail(email) is false)
+            if (CheckEmail(email) is false)
             {
                 throw new ArgumentException("The Email string has an invalid format or NULL.");
             }
         }
         public static void CheckRatingException(int rating)
         {
-            if (InputChecker.CheckRating(rating) is false)
+            if (CheckRating(rating) is false)
             {
                 throw new ArgumentException("The rating value is not in the range from 0 to 10 inclusive.");
             }

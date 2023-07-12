@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics.Metrics;
+﻿using Microsoft.EntityFrameworkCore;
 using ViAPI.Entities;
-using ViAPI.Entities.Users;
-using ViAPI.Handlers;
+using ViAPI.StaticMethods;
 
 namespace ViAPI.Database
 {
@@ -15,20 +12,20 @@ namespace ViAPI.Database
             Database.EnsureCreated();
         }
 
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Word> Words => Set<Word>();
-        public DbSet<ViDictionary> Dictionaries => Set<ViDictionary>();
+        public DbSet<User> Users { get; set; }
+        public DbSet<Word> Words { get; set; }
+        public DbSet<ViDictionary> Dictionaries { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             //Здесь сначала читаются параметры из appsettings.json, а там уже путь на секреты, в которых и есть строка подключения.
             var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
             string secretsPath = builder.GetSection("ViApiSettings")["SecretsPath"]!;
-            InputExceptions.CheckStringException(secretsPath);
+            InputChecker.CheckStringException(secretsPath);
 
             builder = new ConfigurationBuilder().AddJsonFile(secretsPath).Build();
             string connstring = builder.GetConnectionString("MySql")!;
-            InputExceptions.CheckStringException(connstring);
+            InputChecker.CheckStringException(connstring);
 
             optionsBuilder.UseMySql(connstring, ServerVersion.AutoDetect(connstring));
         }
