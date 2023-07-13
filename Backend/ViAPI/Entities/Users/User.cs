@@ -5,7 +5,7 @@ namespace ViAPI.Entities;
 public abstract class User
 {
     public Guid Guid { get; set; }
-    public string Firstname { get; set; }
+    public string Firstname { get; set; } = string.Empty;
 
     public User(Guid guid, string firstname)
     {   

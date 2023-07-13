@@ -5,9 +5,9 @@ namespace ViAPI.Entities;
 public class Word
 {
     public Guid Guid { get; set; }
-    public string SourceWord { get; set; }
-    public string TargetWord { get; set; }
-    public int Rating { get; private set; }
+    public string SourceWord { get; set; } = string.Empty;
+    public string TargetWord { get; set; } = string.Empty;
+    public int Rating { get; private set; } = 0;
 
     public Word(Guid guid, string sourceWord, string targetWord, int rating = 0)
     {

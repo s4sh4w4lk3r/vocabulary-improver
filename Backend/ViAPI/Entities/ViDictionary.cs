@@ -1,27 +1,24 @@
 ﻿using System.Collections;
+using ViAPI.StaticMethods;
 
 namespace ViAPI.Entities;
 
 public class ViDictionary : IList<Word>
 {
     public Guid Guid { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = string.Empty;
     public User? User { get; set; }
-    public IList<Word> Words { get; set; }
-
-    private ViDictionary(Guid guid, string name)
+    public IList<Word> Words { get; set; } = new List<Word>();
+    private ViDictionary() { }
+    public ViDictionary(Guid guid, string name, User user)
     {
+        InputChecker.CheckString(name);
         Guid = guid;
         Name = name;
-        Words = new List<Word>();
-    }
-    public ViDictionary(Guid guid, string name, User user) : this(guid, name)
-    {
         User = user;
     }
-    public ViDictionary(Guid guid, string name, User user, IEnumerable<Word> words) : this(guid, name)
+    public ViDictionary(Guid guid, string name, User user, IEnumerable<Word> words) : this(guid, name, user)
     {
-        User = user;
         Words = words.ToList();
     }
 
