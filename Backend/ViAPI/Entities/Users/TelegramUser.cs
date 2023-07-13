@@ -2,12 +2,12 @@
 
 public class TelegramUser : User
 {
-    public ulong Id { get; set; }
+    public ulong TelegramId { get; set; }
 
-    public TelegramUser(Guid guid, string firstname, ulong id) : base(guid, firstname)
+    public TelegramUser(Guid guid, string firstname, ulong telegramId) : base(guid, firstname)
     {
-        Id = id;
+        TelegramId = telegramId;
     }
 
-    public override string ToString() => $"{base.ToString()}, TelegramID: {Id}";
+    public override string ToString() => $"{base.ToString()}, TelegramID: {TelegramId}";
 }

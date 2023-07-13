@@ -8,18 +8,22 @@ public class Word
     public string SourceWord { get; set; } = string.Empty;
     public string TargetWord { get; set; } = string.Empty;
     public int Rating { get; private set; } = 0;
+    
+    public Guid DictionaryGuid { get; set; }
+    public ViDictionary? Dictionary { get; set; }
 
     public Word(Guid guid, string sourceWord, string targetWord, int rating = 0)
     {
         InputChecker.CheckRatingException(rating);
         InputChecker.CheckStringException(sourceWord, targetWord);
+        InputChecker.CheckGuidException(guid);
         Guid = guid;
         SourceWord = sourceWord;
         TargetWord = targetWord;
         Rating = rating;
     }
 
-    public override string ToString() => $"[Word] Guid: {Guid}, SourceWord: {SourceWord}, TargetWord: {TargetWord}, {Rating}";
+    public override string ToString() => $"[Word] Guid: {Guid}, Source-Target: {SourceWord} - {TargetWord}, {Rating}, DictGuid: {Guid}";
     
     public void IncreaseRating()
     {

@@ -36,17 +36,16 @@ public class ViDbContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
+            entity.ToTable("users");
             entity.HasKey(e => e.Guid).HasName("PRIMARY");
             //Ниже используется подход Table Per Hierarchy, вызывается у базовой сущности User. В бд создается таблица Users с столбцом дискриминатора.
             entity.UseTphMappingStrategy();
-            entity.ToTable("users");
         });
 
         modelBuilder.Entity<TelegramUser>(entity =>
         {
 
-            entity.HasIndex(entity => entity.Id, "tgId-unique").IsUnique();
-            entity.Property(e => e.Id).HasColumnName("TelegramId");
+            entity.HasIndex(entity => entity.TelegramId, "tgId-unique").IsUnique();
         });
 
         modelBuilder.Entity<RegistredUser>(entity =>
@@ -61,16 +60,20 @@ public class ViDbContext : DbContext
             {
                 entity.ToTable("words");
                 entity.HasKey(e => e.Guid).HasName("PRIMARY");
+                entity.HasIndex(e => e.DictionaryGuid, "dictguid-unique");
                 entity.Property(e => e.SourceWord).HasMaxLength(512);
                 entity.Property(e => e.TargetWord).HasMaxLength(512);
                 entity.Property(e => e.Rating).HasDefaultValue(0);
+                entity.HasOne(e => e.Dictionary).WithMany(e => e.Words).HasForeignKey(e => e.DictionaryGuid).HasConstraintName("WordToDictionary");
             });
 
         modelBuilder.Entity<ViDictionary>(entity =>
             {
                 entity.ToTable("dictionaries");
                 entity.HasKey(e => e.Guid).HasName("PRIMARY");
+                entity.HasIndex(e => e.UserGuid, "userguid-unique").IsUnique();
                 entity.Property(e => e.Name).HasMaxLength(255);
+                entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasConstraintName("DictionaryToUser");
             });
     }
 }

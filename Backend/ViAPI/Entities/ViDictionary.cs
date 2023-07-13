@@ -7,12 +7,16 @@ public class ViDictionary : IList<Word>
 {
     public Guid Guid { get; set; }
     public string Name { get; set; } = string.Empty;
+
+    public Guid UserGuid { get; set; }
     public User? User { get; set; }
     public IList<Word> Words { get; set; } = new List<Word>();
+
     private ViDictionary() { }
     public ViDictionary(Guid guid, string name, User user)
     {
-        InputChecker.CheckString(name);
+        InputChecker.CheckStringException(name);
+        InputChecker.CheckGuidException(guid);
         Guid = guid;
         Name = name;
         User = user;
@@ -22,7 +26,7 @@ public class ViDictionary : IList<Word>
         Words = words.ToList();
     }
 
-    public override string ToString() => $"[{GetType()}] Guid {Guid}, Name: {Name}, UserGuid{User?.Guid}, WordsCount: {Count}";
+    public override string ToString() => $"[{GetType()}] Guid {Guid}, Name: {Name}, WordsCount: {Count}, UserGuid: {UserGuid}";
 
     #region Реализация методов интерфейса IList<T>.
     public int Count => Words.Count;

@@ -4,7 +4,7 @@ namespace ViAPI.StaticMethods;
 
 public static class InputChecker
 {
-    public static bool CheckString(params string[] strings)
+    static bool CheckString(params string[] strings)
     {
         foreach (var item in strings)
         {
@@ -15,7 +15,7 @@ public static class InputChecker
         }
         return true;
     }
-    public static bool CheckEmail(string email)
+    static bool CheckEmail(string email)
     {
         Regex validateEmailRegex = new("^\\S+@\\S+\\.\\S+$");
         if (!string.IsNullOrWhiteSpace(email) && validateEmailRegex.IsMatch(email))
@@ -24,13 +24,21 @@ public static class InputChecker
         }
         else return false;
     }
-    public static bool CheckRating(int rating)
+    static bool CheckRating(int rating)
     {
         if (rating >= 0 && rating <= 10)
         {
             return true;
         }
         else return false;
+    }
+    public static bool CheckGuid(Guid guid) => guid != Guid.Empty;
+    public static void CheckGuidException(Guid guid)
+    {
+        if (CheckGuid(guid) is false)
+        {
+            throw new ArgumentException("Empty Guid 00000000-0000-0000-0000-000000000000 encountered.");
+        }
     }
     public static void CheckStringException(params string[] strings)
     {
