@@ -1,12 +1,13 @@
-﻿namespace ViAPI.Entities
+﻿namespace ViAPI.Entities;
+
+public class TelegramUser : User
 {
-    public class TelegramUser : User
+    public ulong Id { get; set; }
+
+    public TelegramUser(Guid guid, string firstname, ulong id) : base(guid, firstname)
     {
-        public ulong Id { get; set; }
-        public override string ToString() => $"{base.ToString()}, TelegramID: {Id}";
-        public TelegramUser(Guid guid, string firstname, ulong id) : base(guid, firstname)
-        {
-            Id = id;
-        }
+        Id = id;
     }
+
+    public override string ToString() => $"{base.ToString()}, TelegramID: {Id}";
 }
