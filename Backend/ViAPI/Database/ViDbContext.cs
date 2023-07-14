@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
@@ -8,6 +9,8 @@ public class ViDbContext : DbContext
 {
     public ViDbContext()
     {
+        if (Database.CanConnect() is false) throw new Exception("Bad connection attempt.");
+
         Database.EnsureDeleted();
         Database.EnsureCreated();
     }
@@ -44,7 +47,6 @@ public class ViDbContext : DbContext
 
         modelBuilder.Entity<TelegramUser>(entity =>
         {
-
             entity.HasIndex(entity => entity.TelegramId, "tgId-unique").IsUnique();
         });
 
@@ -57,23 +59,24 @@ public class ViDbContext : DbContext
         });
 
         modelBuilder.Entity<Word>(entity =>
-            {
-                entity.ToTable("words");
-                entity.HasKey(e => e.Guid).HasName("PRIMARY");
-                entity.HasIndex(e => e.DictionaryGuid, "dictguid-unique");
-                entity.Property(e => e.SourceWord).HasMaxLength(512);
-                entity.Property(e => e.TargetWord).HasMaxLength(512);
-                entity.Property(e => e.Rating).HasDefaultValue(0);
-                entity.HasOne(e => e.Dictionary).WithMany(e => e.Words).HasForeignKey(e => e.DictionaryGuid).HasConstraintName("WordToDictionary");
-            });
+        {
+            entity.ToTable("words");
+            entity.HasKey(e => e.Guid).HasName("PRIMARY");
+            entity.HasIndex(e => e.DictionaryGuid, "dictguid-unique");
+            entity.Property(e => e.SourceWord).HasMaxLength(512);
+            entity.Property(e => e.TargetWord).HasMaxLength(512);
+            entity.Property(e => e.Rating).HasDefaultValue(0);
+            entity.ToTable(e => e.HasCheckConstraint("Rating", "Rating > -1 AND Rating < 11").HasName("RatingCheckConstraint"));
+            entity.HasOne(e => e.Dictionary).WithMany(e => e.Words).HasForeignKey(e => e.DictionaryGuid).HasConstraintName("WordToDictionary");
+        });
 
         modelBuilder.Entity<ViDictionary>(entity =>
-            {
-                entity.ToTable("dictionaries");
-                entity.HasKey(e => e.Guid).HasName("PRIMARY");
-                entity.HasIndex(e => e.UserGuid, "userguid-unique").IsUnique();
-                entity.Property(e => e.Name).HasMaxLength(255);
-                entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasConstraintName("DictionaryToUser");
-            });
+        {
+            entity.ToTable("dictionaries");
+            entity.HasKey(e => e.Guid).HasName("PRIMARY");
+            entity.HasIndex(e => e.UserGuid, "userguid-unique");
+            entity.Property(e => e.Name).HasMaxLength(255);
+            entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasConstraintName("DictionaryToUser");
+        });
     }
 }
