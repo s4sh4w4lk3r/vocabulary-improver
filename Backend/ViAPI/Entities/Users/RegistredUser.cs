@@ -12,7 +12,7 @@ public class RegistredUser : User
     {
         InputChecker.CheckStringException(username, hash);
         InputChecker.CheckEmailException(email);
-        Username = username;
+        Username = username.ToLower();
         Email = email;
         Hash = hash;
     }

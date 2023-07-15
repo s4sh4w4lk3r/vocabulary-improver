@@ -1,12 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using MySqlConnector;
+using System.Diagnostics.Eventing.Reader;
 using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
 namespace ViAPI.Database;
 
-public class ViDbContext : DbContext
+public partial class ViDbContext : DbContext
 {
     public ViDbContext()
     {
@@ -14,9 +16,11 @@ public class ViDbContext : DbContext
     }
 
     ILogger Logger { get; set; } = null!;
-    public DbSet<User> Users { get; set; }
-    public DbSet<Word> Words { get; set; }
-    public DbSet<ViDictionary> Dictionaries { get; set; }
+    ILogger DebugLogger { get; set; } = null!; #warning применить этот логгер.
+
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Word> Words => Set<Word>();
+    public DbSet<ViDictionary> Dictionaries => Set<ViDictionary>();
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -34,6 +38,7 @@ public class ViDbContext : DbContext
         optionsBuilder.UseLazyLoadingProxies(true);
 
         Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(GetType().Name);
+        DebugLogger = LoggerFactory.Create(builder => builder.AddDebug()).CreateLogger(GetType().Name);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -82,60 +87,4 @@ public class ViDbContext : DbContext
             entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasConstraintName("DictionaryToUser");
         });
     }
-
-    #region Методы для работы с данными.
-
-    public void AddRegistredUser(string username, string email, string firstname, string password)
-    {
-        RegistredUser user = new(Guid.NewGuid(), firstname, username, email, password);
-        Users.Add(user);
-        SaveChanges();
-        Logger.LogInformation($"Add user OK {user.Guid}");
-    }
-
-    public User AddTelegramUser(uint telegramId, string firstname)
-    {
-        TelegramUser user = new(Guid.NewGuid(), firstname, telegramId);
-        Users.Add(user);
-        SaveChanges();
-        Logger.LogInformation($"Add user OK {user.Guid}");
-        return user;
-    }
-
-    public ViDictionary? AddDictionary(string name, Guid userGuid)
-    {
-        User? user = Users.Find(userGuid);
-        if (user is not null && InputChecker.CheckGuid(userGuid))
-        {
-            ViDictionary dict = new(Guid.NewGuid(), name, user.Guid);
-            Dictionaries.Add(dict);
-            SaveChanges();
-            Logger.LogInformation($"Add dictionary OK {dict.Guid}");
-            return dict;
-        }
-        else
-        {
-            Logger.LogWarning($"User {userGuid} not found FAIL");
-            return null;
-        }
-    }
-
-    public Word? AddWord(string sourceWord, string targetWord, Guid dictGuid)
-    {
-        ViDictionary? dict = Dictionaries.Find(dictGuid);
-        if (dict is not null && InputChecker.CheckGuid(dictGuid))
-        {
-            Word word = new(Guid.NewGuid(), sourceWord, targetWord, dict.Guid);
-            Words.Add(word);
-            SaveChanges();
-            Logger.LogInformation($"Add word OK {word.Guid}");
-            return word;
-        }
-        else
-        {
-            Logger.LogWarning($"Dictionary {dictGuid} not found FAIL");
-            return null;
-        }
-    }
-    #endregion
 }
