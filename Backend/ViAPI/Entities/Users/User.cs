@@ -9,7 +9,7 @@ public abstract class User
 
     public virtual IList<ViDictionary> Dictionaries { get; set; } = new List<ViDictionary>();
 
-    public User() { }
+    protected User() { }
     public User(Guid guid, string firstname)
     {   
         InputChecker.CheckStringException(firstname);

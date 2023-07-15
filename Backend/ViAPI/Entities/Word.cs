@@ -12,7 +12,7 @@ public class Word
     public Guid DictionaryGuid { get; set; }
     public virtual ViDictionary? Dictionary { get; set; }
 
-    public Word() { }
+    protected Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, int rating = 0)
     {
         InputChecker.CheckRatingException(rating);

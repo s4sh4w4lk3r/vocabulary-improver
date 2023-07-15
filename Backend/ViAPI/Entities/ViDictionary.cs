@@ -12,7 +12,7 @@ public class ViDictionary : IList<Word>
     public virtual User? User { get; set; }
     public virtual IList<Word> Words { get; set; } = new List<Word>();
 
-    public ViDictionary() { }
+    protected ViDictionary() { }
     public ViDictionary(Guid guid, string name, User user)
     {
         InputChecker.CheckStringException(name);
