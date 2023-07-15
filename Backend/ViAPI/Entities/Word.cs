@@ -13,7 +13,7 @@ public class Word
     public virtual ViDictionary? Dictionary { get; set; }
 
     protected Word() { }
-    public Word(Guid guid, string sourceWord, string targetWord, int rating = 0)
+    public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)
     {
         InputChecker.CheckRatingException(rating);
         InputChecker.CheckStringException(sourceWord, targetWord);
@@ -22,9 +22,10 @@ public class Word
         SourceWord = sourceWord;
         TargetWord = targetWord;
         Rating = rating;
+        DictionaryGuid = dictGuid;
     }
 
-    public override string ToString() => $"[Word] Guid: {Guid}, Source-Target: {SourceWord} - {TargetWord}, {Rating}, DictGuid: {Guid}";
+    public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Source-Target: {SourceWord} - {TargetWord}, {Rating}, DictGuid: {Guid}";
     
     public void IncreaseRating()
     {
