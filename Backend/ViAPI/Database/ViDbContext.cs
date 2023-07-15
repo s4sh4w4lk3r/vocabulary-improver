@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using MySqlConnector;
 using ViAPI.Entities;
 using ViAPI.StaticMethods;
@@ -10,9 +11,6 @@ public class ViDbContext : DbContext
     public ViDbContext()
     {
         if (Database.CanConnect() is false) throw new Exception("Bad connection attempt.");
-
-        Database.EnsureDeleted();
-        Database.EnsureCreated();
     }
 
     public DbSet<User> Users { get; set; }
@@ -31,6 +29,10 @@ public class ViDbContext : DbContext
         InputChecker.CheckStringException(connstring);
 
         optionsBuilder.UseMySql(connstring, ServerVersion.AutoDetect(connstring));
+
+        optionsBuilder.LogTo(Console.WriteLine, new[] { RelationalEventId.CommandExecuted });
+
+        optionsBuilder.UseLazyLoadingProxies(true);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

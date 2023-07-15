@@ -9,10 +9,10 @@ public class ViDictionary : IList<Word>
     public string Name { get; set; } = string.Empty;
 
     public Guid UserGuid { get; set; }
-    public User? User { get; set; }
-    public IList<Word> Words { get; set; } = new List<Word>();
+    public virtual User? User { get; set; }
+    public virtual IList<Word> Words { get; set; } = new List<Word>();
 
-    private ViDictionary() { }
+    public ViDictionary() { }
     public ViDictionary(Guid guid, string name, User user)
     {
         InputChecker.CheckStringException(name);

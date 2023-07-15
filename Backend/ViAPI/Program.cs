@@ -9,15 +9,13 @@ app.Run();*/
 
 ViDbContext db = new ViDbContext();
 
-FillDb(db);
+/*ReloadDb(db);
+FillDb(db);*/
 
-/*var users = db.Users.ToList();
-var dicts = db.Dictionaries.ToList();
-var words = db.Words.ToList();*/
+var word = db.Words.FirstOrDefault();
 
 
 Console.WriteLine();
-
 
 
 
@@ -50,7 +48,12 @@ void FillDb(ViDbContext database)
     ViDictionary dict3 = new(Guid.NewGuid(), "dict3", masha) { word9, word10, word11, word12 };
 
 
-    database.AddRange(dict1, dict2, dict3);
+    database.AddRange(dima, diva, masha, kolya, dict1, dict2, dict3);
 
     database.SaveChanges();
+}
+void ReloadDb(ViDbContext database)
+{
+    database.Database.EnsureDeleted();
+    database.Database.EnsureCreated();
 }

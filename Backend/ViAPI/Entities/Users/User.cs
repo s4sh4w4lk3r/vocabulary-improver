@@ -7,8 +7,9 @@ public abstract class User
     public Guid Guid { get; set; }
     public string Firstname { get; set; } = string.Empty;
 
-    public IList<ViDictionary> Dictionaries { get; set; } = new List<ViDictionary>();
+    public virtual IList<ViDictionary> Dictionaries { get; set; } = new List<ViDictionary>();
 
+    public User() { }
     public User(Guid guid, string firstname)
     {   
         InputChecker.CheckStringException(firstname);

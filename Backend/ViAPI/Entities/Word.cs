@@ -10,8 +10,9 @@ public class Word
     public int Rating { get; private set; } = 0;
     
     public Guid DictionaryGuid { get; set; }
-    public ViDictionary? Dictionary { get; set; }
+    public virtual ViDictionary? Dictionary { get; set; }
 
+    public Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, int rating = 0)
     {
         InputChecker.CheckRatingException(rating);
