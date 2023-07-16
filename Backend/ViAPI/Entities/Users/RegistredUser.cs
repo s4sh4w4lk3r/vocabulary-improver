@@ -11,9 +11,9 @@ public class RegistredUser : User
     public RegistredUser(Guid guid, string firstname, string username, string email, string hash) : base(guid, firstname)
     {
         InputChecker.CheckStringException(username, hash);
-        InputChecker.CheckEmailException(email);
+        if (email.IsEmail() is false) throw new ArgumentException("The Email string has an invalid format or NULL.");
         Username = username.ToLower();
-        Email = email;
+        Email = email.ToLower();
         Hash = hash;
     }
 

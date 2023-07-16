@@ -7,30 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Database\DbHandler.cs" />
-    <Compile Remove="ScaffoldModels\Dictionary.cs" />
-    <Compile Remove="ScaffoldModels\User.cs" />
-    <Compile Remove="ScaffoldModels\UserdataReg.cs" />
-    <Compile Remove="ScaffoldModels\UserdataTg.cs" />
-    <Compile Remove="ScaffoldModels\VocabularyImproverContext.cs" />
-    <Compile Remove="ScaffoldModels\Word.cs" />
+    <Compile Remove="ScaffoldModels\**" />
+    <Content Remove="ScaffoldModels\**" />
+    <EmbeddedResource Remove="ScaffoldModels\**" />
+    <None Remove="ScaffoldModels\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="ScaffoldModels\Dictionary.cs" />
-    <Content Include="ScaffoldModels\User.cs" />
-    <Content Include="ScaffoldModels\UserdataReg.cs" />
-    <Content Include="ScaffoldModels\UserdataTg.cs" />
-    <Content Include="ScaffoldModels\VocabularyImproverContext.cs" />
-    <Content Include="ScaffoldModels\Word.cs" />
+    <Compile Remove="Database\DbHandler.cs" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Auth\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Database\DbMethods.cs" />
   </ItemGroup>
 
   <ItemGroup>

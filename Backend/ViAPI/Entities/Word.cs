@@ -15,7 +15,7 @@ public class Word
     protected Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)
     {
-        InputChecker.CheckRatingException(rating);
+        if (InputChecker.CheckRating(rating) is false) throw new ArgumentException("The rating value is not in the range from 0 to 10 inclusive.");
         InputChecker.CheckStringException(sourceWord, targetWord);
         InputChecker.CheckGuidException(guid);
         Guid = guid;

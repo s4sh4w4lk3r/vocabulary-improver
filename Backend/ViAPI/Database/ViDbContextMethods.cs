@@ -1,4 +1,6 @@
-﻿using ViAPI.Entities;
+﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Diagnostics.Eventing.Reader;
+using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
 namespace ViAPI.Database;
@@ -7,6 +9,8 @@ public partial class ViDbContext
 {
 
     //ДбСеты, логгеры и тд объявлено в другом файле этого класса.
+
+    public static bool CheckConnection() => new ViDbContext().Database.CanConnect();
 
     #region Методы на добавление.
     public RegistredUser AddRegistredUser(string username, string email, string firstname, string password)
@@ -33,7 +37,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(userGuid) is false)
+        if (userGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status FAIL. Guid is empty.");
             return null;
@@ -60,7 +64,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(dictGuid) is false)
+        if (dictGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
             return null;
@@ -89,7 +93,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(userGuid) is false)
+        if (userGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
             return;
@@ -112,7 +116,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(dictGuid) is false)
+        if (dictGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
             return;
@@ -135,7 +139,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(wordGuid) is false)
+        if (wordGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
         }
@@ -160,7 +164,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(wordGuid) is false)
+        if (wordGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
             return null;
@@ -183,7 +187,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(dictGuid) is false)
+        if (dictGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
             return null;
@@ -206,7 +210,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckGuid(userGuid) is false)
+        if (userGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
             return null;
@@ -252,5 +256,47 @@ public partial class ViDbContext
     }
     #endregion
 
-    Добавить методы на изменение данных в бд.
+    #region Методы на сохранение изменений.
+    public User? SaveEditedUser(User user)
+    {
+        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+
+        try
+        {
+            if (user is TelegramUser tguser)
+            {
+                tguser = new TelegramUser(tguser.Guid, tguser.Firstname, tguser.TelegramId);
+                Users.Update(tguser);
+                SaveChanges();
+                Logger.LogInformation($"Method {methodName}, Status OK. TelegramUser {tguser.Guid} updated.");
+                return tguser;
+            }
+            else if (user is RegistredUser reguser)
+            {
+                reguser = new RegistredUser(reguser.Guid, reguser.Firstname, reguser.Username, reguser.Email, reguser.Hash);
+                Users.Update(reguser);
+                SaveChanges();
+                Logger.LogInformation($"Method {methodName}, Status OK. RegistredUser {reguser.Guid} updated.");
+                return reguser;
+            }
+            Logger.LogWarning($"Method {methodName}, Status FAIL. User downcast fail.");
+            return null;
+        }
+
+        catch
+        {
+            Logger.LogWarning($"Method {methodName}, Status FAIL. Some user properties is null.");
+            return null;
+        }
+    }
+
+/*    public ViDictionary SaveEditedionary()
+    {
+
+    }
+    public Word SaveEditedWord()
+    {
+
+    }*/
+    #endregion
 }

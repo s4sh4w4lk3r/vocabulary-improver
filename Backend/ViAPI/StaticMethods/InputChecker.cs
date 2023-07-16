@@ -1,9 +1,11 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace ViAPI.StaticMethods;
 
 public static class InputChecker
 {
+    #region Проверки.
     public static bool CheckString(params string[] strings)
     {
         foreach (var item in strings)
@@ -15,15 +17,6 @@ public static class InputChecker
         }
         return true;
     }
-    public static bool CheckEmail(string email)
-    {
-        Regex validateEmailRegex = new("^\\S+@\\S+\\.\\S+$");
-        if (!string.IsNullOrWhiteSpace(email) && validateEmailRegex.IsMatch(email))
-        {
-            return true;
-        }
-        else return false;
-    }
     public static bool CheckRating(int rating)
     {
         if (rating >= 0 && rating <= 10)
@@ -32,10 +25,12 @@ public static class InputChecker
         }
         else return false;
     }
-    public static bool CheckGuid(Guid guid) => guid != Guid.Empty;
+    #endregion
+
+    #region Проверки с исключениями.
     public static void CheckGuidException(Guid guid)
     {
-        if (CheckGuid(guid) is false)
+        if (guid.IsNotEmpty() is false)
         {
             throw new ArgumentException("Empty Guid 00000000-0000-0000-0000-000000000000 encountered.");
         }
@@ -47,18 +42,21 @@ public static class InputChecker
             throw new ArgumentException("The string consists of a space, empty or NULL.");
         }
     }
-    public static void CheckEmailException(string email)
+
+    #endregion
+}
+
+
+public static class InputCheckerExtensions
+{
+    public static bool IsNotEmpty(this Guid guid) => guid != Guid.Empty;
+    public static bool IsEmail(this string email)
     {
-        if (CheckEmail(email) is false)
+        Regex validateEmailRegex = new("^\\S+@\\S+\\.\\S+$");
+        if (!string.IsNullOrWhiteSpace(email) && validateEmailRegex.IsMatch(email))
         {
-            throw new ArgumentException("The Email string has an invalid format or NULL.");
+            return true;
         }
-    }
-    public static void CheckRatingException(int rating)
-    {
-        if (CheckRating(rating) is false)
-        {
-            throw new ArgumentException("The rating value is not in the range from 0 to 10 inclusive.");
-        }
+        else return false;
     }
 }

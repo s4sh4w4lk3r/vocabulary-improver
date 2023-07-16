@@ -16,7 +16,8 @@ public partial class ViDbContext : DbContext
     }
 
     ILogger Logger { get; set; } = null!;
-    ILogger DebugLogger { get; set; } = null!; #warning применить этот логгер.
+    ILogger DebugLogger { get; set; } = null!; 
+    #warning применить этот логгер.
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Word> Words => Set<Word>();
