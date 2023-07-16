@@ -1,6 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Diagnostics.Eventing.Reader;
-using ViAPI.Entities;
+﻿using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
 namespace ViAPI.Database;
@@ -276,27 +274,70 @@ public partial class ViDbContext
                 reguser = new RegistredUser(reguser.Guid, reguser.Firstname, reguser.Username, reguser.Email, reguser.Hash);
                 Users.Update(reguser);
                 SaveChanges();
-                Logger.LogInformation($"Method {methodName}, Status OK. RegistredUser {reguser.Guid} updated.");
+                Logger.LogInformation($"Method {methodName}, Status: OK. RegistredUser {reguser.Guid} updated.");
                 return reguser;
             }
-            Logger.LogWarning($"Method {methodName}, Status FAIL. User downcast fail.");
+            Logger.LogWarning($"Method: {methodName}, Status FAIL. User downcast fail.");
             return null;
         }
 
         catch
         {
-            Logger.LogWarning($"Method {methodName}, Status FAIL. Some user properties is null.");
+            Logger.LogWarning($"Method {methodName}, Status: FAIL. Some user properties is null.");
             return null;
         }
     }
 
-/*    public ViDictionary SaveEditedionary()
+    public ViDictionary? SaveEditedDictionary(ViDictionary dict)
     {
+        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+        try
+        {
+            if (dict is not null)
+            {
+                dict = new ViDictionary(dict.Guid, dict.Name, dict.UserGuid);
+                Dictionaries.Update(dict);
+                SaveChanges();
+                Logger.LogInformation($"Method {methodName}, Status: OK. Dictionary {dict.Guid} updated.");
+                return dict;
+            }
+            else
+            {
+                Logger.LogWarning($"Method {methodName}, Status: FAIL. Dict is null.");
+                return null;
+            }
+        }
+        catch
+        {
+            Logger.LogWarning($"Method {methodName}, Status: FAIL. Some dict properties is null.");
+            return null;
+        }
+    }
+    public Word? SaveEditedWord(Word word)
+    {
+        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+        try
+        {
+            if (word is not null)
+            {
+                word = new Word(word.Guid, word.SourceWord, word.TargetWord, word.DictionaryGuid, word.Rating);
+                Words.Update(word);
+                SaveChanges();
+                Logger.LogInformation($"Method {methodName}, Status: OK. Word {word.Guid} updated.");
+                return word;
+            }
+            else
+            {
+                Logger.LogWarning($"Method {methodName}, Status: FAIL. Word is null.");
+                return null;
+            }
+        }
+        catch
+        {
+            Logger.LogWarning($"Method {methodName}, Status: FAIL. Some word properties is null.");
+            return null;
+        }
 
     }
-    public Word SaveEditedWord()
-    {
-
-    }*/
     #endregion
 }

@@ -5,20 +5,13 @@ using static ViAPI.Tests.TestDatabase;
 
 
 
-User user;
+Word word;
 using (ViDbContext db = new ViDbContext())
 {
-/*    ReloadDb(db);
-    FillDb(db);*/
-    user = db.Users.Find(Guid.Parse("2e3bb8ff-8195-489e-bd45-d710e5743902"));
+    /*    ReloadDb(db);
+        FillDb(db);*/
 
+    word = db.Words.First();
 }
 
-
-using (ViDbContext db = new ViDbContext())
-
-{
-    user.Firstname = "pizdeccccc";
-    db.SaveEditedUser(user);
-}
 
