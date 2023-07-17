@@ -8,7 +8,7 @@ public partial class ViDbContext
 
     //ДбСеты, логгеры и тд объявлено в другом файле этого класса.
 
-    public static bool CheckConnection() => new ViDbContext().Database.CanConnect();
+    public bool CheckConnection() => Database.CanConnect();
 
     #region Методы на добавление. Возрващает добавленный объект, если всё прошло успешно, в противном случае вернет null.
     public RegistredUser AddRegistredUser(string username, string email, string firstname, string password)

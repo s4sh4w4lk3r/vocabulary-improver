@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
@@ -33,6 +34,8 @@ public partial class ViDbContext : DbContext
         optionsBuilder.UseLazyLoadingProxies(true);
 
         Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(GetType().Name);
+
+        //optionsBuilder.LogTo(message => Logger.LogInformation(message), new[] { RelationalEventId.CommandExecuted });
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,27 +48,29 @@ public partial class ViDbContext : DbContext
             entity.Property<uint>("Id");
             entity.HasKey("Id").HasName("PRIMARY");
             entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
+            entity.Property<string>("Discriminator").HasMaxLength(30);
             //Ниже используется подход Table Per Hierarchy, вызывается у базовой сущности User. В бд создается таблица Users с столбцом дискриминатора.
             entity.UseTphMappingStrategy();
         });
 
         modelBuilder.Entity<TelegramUser>(entity =>
         {
+            entity.HasBaseType<User>();
             entity.HasIndex(entity => entity.TelegramId, "tgId-unique").IsUnique();
         });
 
         modelBuilder.Entity<RegistredUser>(entity =>
         {
+            entity.HasBaseType<User>();
             entity.HasIndex(e => e.Username, "username-unique").IsUnique();
             entity.HasIndex(e => e.Email, "email-unique").IsUnique();
-            entity.Property(e => e.Hash).HasMaxLength(40).IsFixedLength();
+            entity.Property(e => e.Hash).HasMaxLength(60).IsFixedLength();
             entity.Property(e => e.Firstname).HasMaxLength(255);
         });
 
         modelBuilder.Entity<Word>(entity =>
         {
             entity.ToTable("words");
-
             entity.Property<uint>("Id");
             entity.HasKey("Id").HasName("PRIMARY");
             entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
