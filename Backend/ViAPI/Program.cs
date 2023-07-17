@@ -5,13 +5,10 @@ using static ViAPI.Tests.TestDatabase;
 
 
 
-Word word;
 using (ViDbContext db = new ViDbContext())
 {
-    /*    ReloadDb(db);
-        FillDb(db);*/
+    Console.WriteLine(db.ValidateHash("maria", "423fsdfsdfssd")); ;
 
-    word = db.Words.First();
 }
 
 

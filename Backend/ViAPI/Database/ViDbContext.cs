@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using MySqlConnector;
-using System.Diagnostics.Eventing.Reader;
+﻿using Microsoft.EntityFrameworkCore;
 using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
@@ -16,8 +12,6 @@ public partial class ViDbContext : DbContext
     }
 
     ILogger Logger { get; set; } = null!;
-    ILogger DebugLogger { get; set; } = null!; 
-    #warning применить этот логгер.
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Word> Words => Set<Word>();
@@ -39,7 +33,6 @@ public partial class ViDbContext : DbContext
         optionsBuilder.UseLazyLoadingProxies(true);
 
         Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(GetType().Name);
-        DebugLogger = LoggerFactory.Create(builder => builder.AddDebug()).CreateLogger(GetType().Name);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -49,7 +42,9 @@ public partial class ViDbContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("users");
-            entity.HasKey(e => e.Guid).HasName("PRIMARY");
+            entity.Property<uint>("Id");
+            entity.HasKey("Id").HasName("PRIMARY");
+            entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
             //Ниже используется подход Table Per Hierarchy, вызывается у базовой сущности User. В бд создается таблица Users с столбцом дискриминатора.
             entity.UseTphMappingStrategy();
         });
@@ -70,22 +65,27 @@ public partial class ViDbContext : DbContext
         modelBuilder.Entity<Word>(entity =>
         {
             entity.ToTable("words");
-            entity.HasKey(e => e.Guid).HasName("PRIMARY");
+
+            entity.Property<uint>("Id");
+            entity.HasKey("Id").HasName("PRIMARY");
+            entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
             entity.HasIndex(e => e.DictionaryGuid, "dictguid-unique");
             entity.Property(e => e.SourceWord).HasMaxLength(512);
             entity.Property(e => e.TargetWord).HasMaxLength(512);
             entity.Property(e => e.Rating).HasDefaultValue(0);
             entity.ToTable(e => e.HasCheckConstraint("Rating", "Rating > -1 AND Rating < 11").HasName("RatingCheckConstraint"));
-            entity.HasOne(e => e.Dictionary).WithMany(e => e.Words).HasForeignKey(e => e.DictionaryGuid).HasConstraintName("WordToDictionary");
+            entity.HasOne(e => e.Dictionary).WithMany(e => e.Words).HasForeignKey(e => e.DictionaryGuid).HasPrincipalKey(e => e.Guid).HasConstraintName("WordToDictionary");
         });
 
         modelBuilder.Entity<ViDictionary>(entity =>
         {
             entity.ToTable("dictionaries");
-            entity.HasKey(e => e.Guid).HasName("PRIMARY");
+            entity.Property<uint>("Id");
+            entity.HasKey("Id").HasName("PRIMARY");
+            entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
             entity.HasIndex(e => e.UserGuid, "userguid-unique");
             entity.Property(e => e.Name).HasMaxLength(255);
-            entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasConstraintName("DictionaryToUser");
+            entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasPrincipalKey(e => e.Guid).HasConstraintName("DictionaryToUser");
         });
     }
 }

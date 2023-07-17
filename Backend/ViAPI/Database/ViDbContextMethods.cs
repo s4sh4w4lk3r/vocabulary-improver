@@ -231,26 +231,18 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckString(username.ToLower(), hash) is false)
+        if (InputChecker.CheckString(username, hash) is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Bad input format.");
         }
 
-        RegistredUser? user = Set<RegistredUser>().Where(x => x.Username == username)?.First();
+        username = username.ToLower();
 
+        bool isValid = Set<RegistredUser>().Any(e => e.Username == username && e.Hash == hash);
 
-        if (user is not null)
-        {
-            bool isValid = hash == user.Hash;
+        Logger.LogInformation(message: $"Method {methodName}, Status: OK. Username \"{username}\" hash validation value is \"{isValid}\"");
 
-            Logger.LogInformation(message: $"Method {methodName}, Status: OK. Username \"{username}\" hash validation value is \"{isValid}\"");
-            return isValid;
-        }
-        else
-        {
-            Logger.LogWarning($"Method {methodName}, Status: FAIL. User {username} not found.");
-            return false;
-        }
+        return isValid;
     }
     #endregion
 
