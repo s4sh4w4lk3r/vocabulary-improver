@@ -10,7 +10,7 @@ public partial class ViDbContext
 
     public static bool CheckConnection() => new ViDbContext().Database.CanConnect();
 
-    #region Методы на добавление.
+    #region Методы на добавление. Возрващает добавленный объект, если всё прошло успешно, в противном случае вернет null.
     public RegistredUser AddRegistredUser(string username, string email, string firstname, string password)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
@@ -86,15 +86,15 @@ public partial class ViDbContext
     }
     #endregion
 
-    #region Методы на удаление.
-    public void RemoveUser(Guid userGuid)
+    #region Методы на удаление. Возвращает true если запись была найдена и удалена, в противном случае вернет false.
+    public bool RemoveUser(Guid userGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
         if (userGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
-            return;
+            return false;
         }
 
         User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
@@ -104,20 +104,22 @@ public partial class ViDbContext
             Users.Remove(user);
             SaveChanges();
             Logger.LogInformation($"Method {methodName}, Status: OK. User {userGuid} removed, as well as his entire dictionaries and words.");
+            return true;
         }
         else
         {
             Logger.LogWarning($"Method: {methodName} Status: FAIL. User {userGuid} not found.");
+            return false;
         }
     }
-    public void RemoveDictionary(Guid dictGuid)
+    public bool RemoveDictionary(Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
         if (dictGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
-            return;
+            return false;
         }
 
         ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid).FirstOrDefault();
@@ -127,19 +129,22 @@ public partial class ViDbContext
             Dictionaries.Remove(dict);
             SaveChanges();
             Logger.LogInformation($"Method {methodName}, Status: OK. Dictionary {dictGuid} removed.");
+            return true;
         }
         else
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Dictionary {dictGuid} not found.");
+            return false;
         }
     }
-    public void RemoveWord(Guid wordGuid)
+    public bool RemoveWord(Guid wordGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
         if (wordGuid.IsNotEmpty() is false)
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
+            return false;
         }
 
         Word? word = Words.Where(e => e.Guid == wordGuid).FirstOrDefault();
@@ -149,15 +154,17 @@ public partial class ViDbContext
             Words.Remove(word);
             SaveChanges();
             Logger.LogInformation($"Method {methodName}, Status: OK. Word {wordGuid} removed.");
+            return true;
         }
         else
         {
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Word {wordGuid} not found.");
+            return false;
         }
     }
     #endregion
 
-    #region Методы на выборку.
+    #region Методы на выборку. Вернет найденный объект, если он не был найден, то венется null.
     public Word? GetWord(Guid wordGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
@@ -246,7 +253,7 @@ public partial class ViDbContext
     }
     #endregion
 
-    #region Методы на сохранение изменений.
+    #region Методы на сохранение изменений. Вернет объект, если объект для обновления был найден, в противном случае вернет null.
     public User? SaveEditedUser(User user)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
