@@ -40,8 +40,8 @@ public partial class ViDbContext
             Logger.LogWarning($"Method {methodName}, Status FAIL. Guid is empty.");
             return null;
         }
-
-        User? user = Users.Find(userGuid);
+            
+        User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
 
         if (user is not null)
         {
@@ -68,7 +68,7 @@ public partial class ViDbContext
             return null;
         }
 
-        ViDictionary? dict = Dictionaries.Find(dictGuid);
+        ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid).FirstOrDefault();
 
         if (dict is not null)
         {
@@ -97,7 +97,7 @@ public partial class ViDbContext
             return;
         }
 
-        User? user = Users.Find(userGuid);
+        User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
 
         if (user is not null)
         {
@@ -120,7 +120,7 @@ public partial class ViDbContext
             return;
         }
 
-        ViDictionary? dict = Dictionaries.Find(dictGuid);
+        ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid).FirstOrDefault();
 
         if (dict is not null)
         {
@@ -142,7 +142,7 @@ public partial class ViDbContext
             Logger.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
         }
 
-        Word? word = Words.Find(wordGuid);
+        Word? word = Words.Where(e => e.Guid == wordGuid).FirstOrDefault();
 
         if (word is not null)
         {
@@ -168,7 +168,7 @@ public partial class ViDbContext
             return null;
         }
 
-        Word? word = Words.Find(wordGuid);
+        Word? word = Words.Where(e=>e.Guid == wordGuid).FirstOrDefault();
 
         if (word is not null)
         {
@@ -191,7 +191,7 @@ public partial class ViDbContext
             return null;
         }
 
-        ViDictionary? dict = Dictionaries.Find(dictGuid);
+        ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid).FirstOrDefault();
 
         if (dict is not null)
         {
@@ -214,7 +214,7 @@ public partial class ViDbContext
             return null;
         }
 
-        User? user = Users.Find(userGuid);
+        User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
 
         if (user is not null)
         {
