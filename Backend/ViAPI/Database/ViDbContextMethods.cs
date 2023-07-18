@@ -40,7 +40,7 @@ public partial class ViDbContext
             Logger?.LogWarning($"Method {methodName}, Status FAIL. Guid is empty.");
             return null;
         }
-            
+
         User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
 
         if (user is not null)
@@ -175,7 +175,7 @@ public partial class ViDbContext
             return null;
         }
 
-        Word? word = Words.Where(e=>e.Guid == wordGuid).FirstOrDefault();
+        Word? word = Words.Where(e => e.Guid == wordGuid).FirstOrDefault();
 
         if (word is not null)
         {
@@ -338,5 +338,45 @@ public partial class ViDbContext
         }
 
     }
+    public enum RatingAction
+    {
+        Increase, Decrease
+    }
+    public async Task<int> EditRatingDbAsync(Guid wordGuid, RatingAction action)
+    {
+        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+        var word = Words.Where(e => e.Guid == wordGuid).FirstOrDefault();
+        if (word is not null)
+        {
+            if (action is RatingAction.Increase) { word.IncreaseRating(); }
+            if (action is RatingAction.Decrease) { word.DecreaseRating(); }
+
+            Task saveTask = SaveChangesAsync();
+
+            Logger?.LogInformation($"Method {methodName}, Status: OK. Word {wordGuid} updated.");
+            await saveTask;
+            return word.Rating;
+        }
+        else
+        {
+            Logger?.LogWarning($"Method {methodName}, Status: Fail. Word {wordGuid} not found.");
+            return -1;
+        }
+    }
     #endregion
+#warning        сюда тоже ебануть логгера
+    public bool IsTelegramUserExists(ulong id, out Guid guid)
+    {
+        var user = Set<TelegramUser>().Where(u => u.TelegramId == id).FirstOrDefault();
+        if (user is not null)
+        {
+            guid = user.Guid;
+            return true;
+        }
+        else 
+        { 
+            guid = Guid.Empty;
+            return false;
+        }
+    }
 }

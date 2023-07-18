@@ -3,12 +3,21 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using ViAPI.Database;
+using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
 namespace ViAPI.Auth;
 
 public static class Accounting
 {
+#warning    ебануть логгера сюда ко всем методам
+    static ILogger Logger { get; set; }
+    static Accounting()
+    {
+        Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(typeof(EndpointMethods).Name);
+    }
+
     #region JWT.
     private static string Issuer { get; } = "ViTokenIssuer";
     private static string Audience { get; } = "ViUserAudience"; 
@@ -67,5 +76,35 @@ public static class Accounting
 
     public static string GenerateHash(string password) => BCrypt.Net.BCrypt.EnhancedHashPassword(password);
     public static bool ValidateHash(string password, string hash) => BCrypt.Net.BCrypt.EnhancedVerify(password, hash);
+    #region Telegram.
+    public static string TelegramLoginHandler(string idString, ViDbContext db, HttpContext context)
+    {
+        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+
+        if (ulong.TryParse(idString, out ulong id))
+        {
+            if (db.IsTelegramUserExists(id, out Guid guid) is true) 
+            {
+                Logger?.LogInformation($"Method {methodName}, Status OK. TelegramUser {id} has guid {guid}.");
+                context.Response.StatusCode = 200;
+                return GenerateJwt(guid);
+            }
+            else
+            {
+                string errorMessage = $"TelegramUser {id} not found.";
+                Logger?.LogWarning($"Method {methodName}, Status FAIL. {errorMessage}");
+                context.Response.StatusCode = 400;
+                return errorMessage;
+            }
+        }
+        else
+        {
+            string errorMessage = $"Bad input.";
+            Logger?.LogWarning($"Method {methodName}, Status FAIL. {errorMessage}");
+            context.Response.StatusCode = 400;
+            return errorMessage;
+        }
+    }
+    #endregion
 }
 
