@@ -1,4 +1,9 @@
-﻿namespace ViAPI.StaticMethods;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using ViAPI.Database;
+
+namespace ViAPI.StaticMethods;
 
 public static class ViConfiguration
 {
@@ -40,4 +45,16 @@ public static class ViConfiguration
         }
         return null!;
     }
+    public static DbContextOptions GetDatabaseOptions(DbContextOptionsBuilder optionsBuilder)
+    {
+
+        string connstring = GetSecretString(SecretType.MySql);
+
+        optionsBuilder.UseMySql(connstring, ServerVersion.AutoDetect(connstring));
+
+        optionsBuilder.UseLazyLoadingProxies(true);
+
+        return optionsBuilder.Options;
+    }
 }
+

@@ -7,12 +7,14 @@ namespace ViAPI.Database;
 
 public partial class ViDbContext : DbContext
 {
-    public ViDbContext()
+    public ViDbContext(DbContextOptions<ViDbContext> options) : base(options)
     {
         if (Database.CanConnect() is false) throw new Exception("Bad connection attempt.");
+
+        Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(GetType().Name);
     }
 
-    ILogger Logger { get; set; } = null!;
+    ILogger? Logger { get; set; }
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Word> Words => Set<Word>();
@@ -20,20 +22,6 @@ public partial class ViDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        //Здесь сначала читаются параметры из appsettings.json, а там уже путь на секреты, в которых и есть строка подключения.
-        var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
-        string secretsPath = builder.GetSection("ViApiSettings")["SecretsPath"]!;
-        InputChecker.CheckStringException(secretsPath);
-
-        builder = new ConfigurationBuilder().AddJsonFile(secretsPath).Build();
-        string connstring = builder.GetConnectionString("MySql")!;
-        InputChecker.CheckStringException(connstring);
-
-        optionsBuilder.UseMySql(connstring, ServerVersion.AutoDetect(connstring));
-
-        optionsBuilder.UseLazyLoadingProxies(true);
-
-        Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(GetType().Name);
 
         //optionsBuilder.LogTo(message => Logger.LogInformation(message), new[] { RelationalEventId.CommandExecuted });
     }

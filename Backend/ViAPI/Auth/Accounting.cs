@@ -49,6 +49,20 @@ public static class Accounting
 
         return new JwtSecurityTokenHandler().WriteToken(jwt);
     }
+    public static bool IsContextHasGuid(HttpContext context, out Guid guid)
+    {
+        var claimValue = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrWhiteSpace(claimValue) is false)
+        {
+            guid = Guid.Parse(claimValue);
+            return true;
+        }
+        else
+        {
+            guid = Guid.Empty;
+            return false;
+        }
+    }
     #endregion
 
     public static string GenerateHash(string password) => BCrypt.Net.BCrypt.EnhancedHashPassword(password);
