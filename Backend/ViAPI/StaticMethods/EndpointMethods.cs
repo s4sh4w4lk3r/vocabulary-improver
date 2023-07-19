@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ViAPI.Auth;
+﻿using ViAPI.Auth;
 using ViAPI.Database;
 using ViAPI.Entites.DTO;
 using ViAPI.Entities;
@@ -8,53 +7,61 @@ namespace ViAPI.StaticMethods;
 
 public static class EndpointMethods
 {
-    static ILogger Logger { get; set; }
-    static EndpointMethods()
+    public static IResult GetDictsByUserFromContext(HttpContext context, ViDbContext db)
     {
-        Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(typeof(EndpointMethods).Name);
-    }
-    public static List<ViDictionaryDto> GetDicts(HttpContext context, ViDbContext db)
-    {
-        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+        bool userGuidOk = Accounting.TryGetGuidFromContext(context, out Guid userGuid);
 
-        if (Accounting.IsContextHasGuid(context, out Guid userGuid) is true)
+        if (userGuidOk is true)
         {
-            Logger?.LogInformation($"Method {methodName}, Status: OK. User {userGuid} has been identified, searching dicts...");
-            var dtoDicts = db.GetDictionariesDtoByUser(userGuid)!;
-            return dtoDicts;
+            List<ViDictionaryDto>? dtoDicts = db.GetDictionariesDtoByUser(userGuid);
+            return (dtoDicts is not null) ? Results.Ok(dtoDicts) : Results.BadRequest($"User`s {userGuid} dicts not found.");
         }
         else
         {
-            return new List<ViDictionaryDto>();
+            return Results.Unauthorized();
         }
     }
-    public static List<WordDto> GetWords(ViDbContext db, Guid dictGuid)
+    public static IResult GetWords(HttpContext context, ViDbContext db, Guid dictGuid)
     {
-        string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
+        bool userGuidOk = Accounting.TryGetGuidFromContext(context, out Guid userGuid);
+        bool dictGuidOk = dictGuid.IsNotEmpty();
 
-        if (dictGuid.IsNotEmpty() is true)
+        if (dictGuidOk && userGuidOk is true)
         {
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Dict {dictGuid} recieved, searching words...");
-            var dtoWords = db.GetWordsDtoByDict(dictGuid)!;
-            return dtoWords;
+            List<WordDto>? dtoWords = db.GetWordsDtoByDict(userGuid, dictGuid);
+            return dtoWords is not null ? Results.Ok(dtoWords) : Results.BadRequest($"User {userGuid} or dict {dictGuid} not found.");
         }
         else
         {
-            return new List<WordDto>();
+            return Results.Unauthorized();
         }
     }
-    public static IResult EditRating(ViDbContext db, Guid wordGuid, ViDbContext.RatingAction action)
+    public static IResult EditRating(HttpContext context, ViDbContext db, Guid wordGuid, ViDbContext.RatingAction action)
     {
-        int rating = db.EditRatingDbAsync(wordGuid, action).Result;
+        bool userGuidOk = Accounting.TryGetGuidFromContext(context, out Guid userGuid);
+        bool wordGuidOk = wordGuid.IsNotEmpty();
 
-        if (rating >= 0)
+        if (userGuidOk && wordGuidOk is true)
         {
-#warning    ебануть логгера сюда ко всем методам
-            return Results.Ok(new {wordGuid, rating});
+            Word? word = db.UpdateRatingDbAsync(wordGuid, action).Result;
+            return (word is not null) ? Results.Ok(new { guid = word.Guid, sourceword = word.SourceWord, targetword = word.TargetWord, rating = word.Rating })
+                : Results.BadRequest($"Word {wordGuid} not found.");
         }
         else
         {
-            return Results.BadRequest($"Word {wordGuid} not found.");
+            return Results.Unauthorized();
         }
+    }
+    public static IResult GetJwtByTelegramId(ViDbContext db, string idString)
+    {
+        bool tgIdOk = ulong.TryParse(idString, out ulong id);
+        bool userGuidOk = db.TryGetGuidFromTgId(id, out Guid guid);
+
+        if (tgIdOk && userGuidOk is true)
+        {
+            string jwt = Accounting.GenerateJwt(guid);
+            return Results.Ok(new { jwt });
+        }
+        return Results.BadRequest($"User not found with TgId {idString}");
     }
 }

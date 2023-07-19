@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using System.Runtime.CompilerServices;
 using ViAPI.Auth;
 using ViAPI.Database;
 using ViAPI.StaticMethods;
-using static ViAPI.StaticMethods.EndpointMethods;
 
 var builder = WebApplication.CreateBuilder();
 
@@ -18,18 +16,18 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
 //app.MapGet("/api/auth/login/{userguid}", (string userguid) => Accounting.GenerateJwt(Guid.Parse(userguid), 120));
 
-app.MapGet("/api/auth/login/tg/{telegramid}", (string telegramid, ViDbContext db, HttpContext context) => Accounting.TelegramLoginHandler(telegramid, db, context));
+app.MapGet("/api/auth/login/tg/{telegramid}", (HttpContext http, ViDbContext db, string telegramid) => EndpointMethods.GetJwtByTelegramId(http, db, telegramid));
 
 
-app.MapGet("/api/dicts/get", [Authorize] (HttpContext context, ViDbContext db) => GetDicts(context, db));
+app.MapGet("/api/dicts/get", [Authorize] (HttpContext http, ViDbContext db) => EndpointMethods.GetDictsByUserFromContext(http, db));
 
 
-app.MapGet("/api/words/get/{dictguid:guid}", [Authorize] (ViDbContext db, Guid dictguid) => GetWords(db, dictguid));
-app.MapGet("/api/words/increase/{wordguid:guid}", [Authorize] (ViDbContext db, Guid wordguid) => EditRating(db, wordguid, ViDbContext.RatingAction.Increase));
-app.MapGet("/api/words/decrease/{wordguid:guid}", [Authorize] (ViDbContext db, Guid wordguid) => EditRating(db, wordguid, ViDbContext.RatingAction.Decrease));
+app.MapGet("/api/words/get/{dictguid:guid}", [Authorize] (HttpContext http, ViDbContext db, Guid dictguid) => EndpointMethods.GetWords(http, db, dictguid));
+app.MapGet("/api/words/increase/{wordguid:guid}", [Authorize] (HttpContext http, ViDbContext db, Guid wordguid) => EndpointMethods.EditRating(http, db, wordguid, ViDbContext.RatingAction.Increase));
+app.MapGet("/api/words/decrease/{wordguid:guid}", [Authorize] (HttpContext http, ViDbContext db, Guid wordguid) => EndpointMethods.EditRating(http, db, wordguid, ViDbContext.RatingAction.Decrease));
+
 
 
 app.Run();

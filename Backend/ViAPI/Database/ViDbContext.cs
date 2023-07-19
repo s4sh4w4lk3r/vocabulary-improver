@@ -1,7 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using ViAPI.Entities;
-using ViAPI.StaticMethods;
 
 namespace ViAPI.Database;
 
