@@ -5,7 +5,7 @@ namespace ViAPI.Database;
 
 public partial class ViDbContext
 {
-    public RegistredUser AddRegistredUser(string username, string email, string firstname, string password)
+    private RegistredUser AddRegistredUser(string username, string email, string firstname, string password)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
         RegistredUser user = new(Guid.NewGuid(), firstname, username, email, password);
@@ -15,7 +15,7 @@ public partial class ViDbContext
         return user;
     }
 
-    public TelegramUser AddTelegramUser(uint telegramId, string firstname)
+    private TelegramUser AddTelegramUser(uint telegramId, string firstname)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
         TelegramUser user = new(Guid.NewGuid(), firstname, telegramId);
@@ -25,7 +25,7 @@ public partial class ViDbContext
         return user;
     }
 
-    public ViDictionary? AddDictionary(string name, Guid userGuid)
+    private ViDictionary? AddDictionary(string name, Guid userGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -52,7 +52,7 @@ public partial class ViDbContext
         }
     }
 
-    public Word? AddWord(string sourceWord, string targetWord, Guid dictGuid)
+    private Word? AddWord(string sourceWord, string targetWord, Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 

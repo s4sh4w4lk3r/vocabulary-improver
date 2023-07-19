@@ -6,7 +6,7 @@ namespace ViAPI.StaticMethods;
 public static class InputChecker
 {
     #region Проверки.
-    public static bool CheckString(params string[] strings)
+    public static bool CheckString(params string?[] strings)
     {
         foreach (var item in strings)
         {
@@ -35,7 +35,7 @@ public static class InputChecker
             throw new ArgumentException("Empty Guid 00000000-0000-0000-0000-000000000000 encountered.");
         }
     }
-    public static void CheckStringException(params string[] strings)
+    public static void CheckStringException(params string?[] strings)
     {
         if (CheckString(strings) is false)
         {

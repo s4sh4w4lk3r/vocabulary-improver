@@ -4,7 +4,7 @@ namespace ViAPI.Database;
 
 public partial class ViDbContext
 {
-    public User? SaveEditedUser(User user)
+    private User? SaveEditedUser(User user)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -37,7 +37,7 @@ public partial class ViDbContext
         }
     }
 
-    public ViDictionary? SaveEditedDictionary(ViDictionary dict)
+    private ViDictionary? SaveEditedDictionary(ViDictionary dict)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
         try
@@ -62,7 +62,7 @@ public partial class ViDbContext
             return null;
         }
     }
-    public Word? SaveEditedWord(Word word)
+    private Word? SaveEditedWord(Word word)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
         try
@@ -92,25 +92,24 @@ public partial class ViDbContext
     {
         Increase, Decrease
     }
-    public async Task<Word?> UpdateRatingDbAsync(Guid wordGuid, RatingAction action)
+    public Word? UpdateWordRatingDb(Guid userGuid, Guid wordGuid, RatingAction action)
     {
-#warning проверка на принадлежность нужна
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
-        var word = Words.Where(e => e.Guid == wordGuid).FirstOrDefault();
+
+        Word? word = Words.Where(e => e.Guid == wordGuid && e.Dictionary!.UserGuid == userGuid).FirstOrDefault();
+
         if (word is not null)
         {
             if (action is RatingAction.Increase) { word.IncreaseRating(); }
             if (action is RatingAction.Decrease) { word.DecreaseRating(); }
-
-            Task saveTask = SaveChangesAsync();
+            SaveChanges();
 
             Logger?.LogInformation($"Method {methodName}, Status: OK. Word {wordGuid} updated.");
-            await saveTask;
             return word;
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: Fail. Word {wordGuid} not found.");
+            Logger?.LogWarning($"Method {methodName}, Status: Fail. The combination of User {userGuid} and word {wordGuid} not found.");
             return null;
         }
     }

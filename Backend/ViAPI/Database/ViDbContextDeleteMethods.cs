@@ -5,7 +5,7 @@ namespace ViAPI.Database;
 
 public partial class ViDbContext
 {
-    public bool RemoveUser(Guid userGuid)
+    private bool RemoveUser(Guid userGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -30,7 +30,7 @@ public partial class ViDbContext
             return false;
         }
     }
-    public bool RemoveDictionary(Guid dictGuid)
+    private bool RemoveDictionary(Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -55,7 +55,7 @@ public partial class ViDbContext
             return false;
         }
     }
-    public bool RemoveWord(Guid wordGuid)
+    private bool RemoveWord(Guid wordGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 

@@ -9,13 +9,7 @@ namespace ViAPI.Auth;
 
 public static class Accounting
 {
-#warning    ебануть логгера сюда ко всем методам
-    static ILogger Logger { get; set; }
-
-    static Accounting()
-    {
-        Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(typeof(EndpointMethods).Name);
-    }
+    static ILogger Logger { get; set; } = Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(nameof(Accounting));
 
     #region JWT.
     public static string GenerateJwt(Guid guid, int minutes = 10)
@@ -63,18 +57,21 @@ public static class Accounting
     #endregion
 
     #region GUID
-    public static bool TryGetGuidFromContext(HttpContext http, out Guid guid)
+    public static bool TryGetGuidFromContext(HttpContext http, out Guid userGuid)
     {
+        string methodName = nameof(TryGetGuidFromContext);
+
         string? claimValue = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        if (string.IsNullOrWhiteSpace(claimValue) is false)
+        bool guidOK = Guid.TryParse(claimValue, out userGuid);
+        if (guidOK is true)
         {
-            guid = Guid.Parse(claimValue);
-            return true;
+            Logger.LogInformation($"Method {methodName}, Status OK. Guid: {userGuid}");
+            return guidOK;
         }
         else
         {
-            guid = Guid.Empty;
-            return false;
+            Logger.LogWarning($"Method {methodName}, Status Fail. Guid not getted.");
+            return guidOK;
         }
     }
     #endregion

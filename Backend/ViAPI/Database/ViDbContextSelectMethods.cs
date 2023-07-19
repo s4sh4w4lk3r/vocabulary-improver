@@ -1,4 +1,5 @@
-﻿using ViAPI.Entities;
+﻿using ViAPI.Auth;
+using ViAPI.Entities;
 using ViAPI.StaticMethods;
 
 namespace ViAPI.Database;
@@ -74,22 +75,34 @@ public partial class ViDbContext
             return null;
         }
     }
-    public bool ValidateHash(string username, string hash)
+    public bool IdentifyUser(string username, string password, out Guid userGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckString(username, hash) is false)
+        if (InputChecker.CheckString(username, password) is false)
         {
             Logger?.LogWarning($"Method {methodName}, Status: FAIL. Bad input format.");
         }
 
         username = username.ToLower();
 
-        bool isValid = Set<RegistredUser>().Any(e => e.Username == username && e.Hash == hash);
+        var user = Set<RegistredUser>().Where(e => e.Username == username).Select(u => new { u.Guid, u.Hash }).FirstOrDefault();
 
-        Logger?.LogInformation(message: $"Method {methodName}, Status: OK. Username \"{username}\" hash validation value is \"{isValid}\"");
+        if (user is not null)
+        {
+            bool hashIsValid = Accounting.VerifyHash(password, user.Hash);
 
-        return isValid;
+            if (hashIsValid)
+            {
+                userGuid = user.Guid;
+                Logger?.LogInformation(message: $"Method {methodName}, Status: OK. Username \"{username}\" has identified.");
+                return true;
+            }
+        }
+
+        userGuid = Guid.Empty;
+        Logger?.LogInformation(message: $"Method {methodName}, Status: FAIL. Username \"{username}\" has not identified.");
+        return false;
     }
 
     /// <summary>
@@ -108,28 +121,5 @@ public partial class ViDbContext
             guid = Guid.Empty;
             return false;
         }
-    }
-
-    /// <summary>
-    /// Проверяет принадлежит ли словарь пользователю.
-    /// </summary>
-    public bool CheckAffiliationUserToDict(Guid userGuid, Guid dictGuid)
-    {
-
-        InputChecker.CheckGuidException(userGuid);
-        InputChecker.CheckGuidException(dictGuid);
-        bool affiliation = Dictionaries.Any(d => d.Guid == dictGuid && d.UserGuid == userGuid);
-        return affiliation;
-    }
-
-    /// <summary>
-    ///Проверяет принадлежит ли слово пользователю.
-    /// </summary>
-    public bool CheckAffiliationUserToWord(Guid userGuid, Guid wordGuid)
-    {
-        InputChecker.CheckGuidException(userGuid);
-        InputChecker.CheckGuidException(wordGuid);
-        bool affiliation = Words.Any(d => d.Guid == wordGuid && d.Dictionary!.UserGuid == userGuid);
-        return affiliation;
     }
 }

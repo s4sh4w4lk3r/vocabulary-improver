@@ -8,11 +8,9 @@ public partial class ViDbContext : DbContext
     public ViDbContext(DbContextOptions<ViDbContext> options) : base(options)
     {
         if (Database.CanConnect() is false) throw new Exception("Bad connection attempt.");
-
-        Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(GetType().Name);
     }
 
-    ILogger? Logger { get; set; }
+    ILogger? Logger { get; set; } = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(nameof(ViDbContext));
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Word> Words => Set<Word>();

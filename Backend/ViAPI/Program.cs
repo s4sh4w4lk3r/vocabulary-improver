@@ -16,9 +16,9 @@ var app = builder.Build();
 app.UseAuthentication();
 app.UseAuthorization();
 
-//app.MapGet("/api/auth/login/{userguid}", (string userguid) => Accounting.GenerateJwt(Guid.Parse(userguid), 120));
 
-app.MapGet("/api/auth/login/tg/{telegramid}", (HttpContext http, ViDbContext db, string telegramid) => EndpointMethods.GetJwtByTelegramId(http, db, telegramid));
+app.MapGet("/api/auth/login/tg/{telegramid}", (ViDbContext db, string telegramid) => EndpointMethods.GetJwtByTelegramId(db, telegramid));
+app.MapPost("/api/auth/login", (HttpContext http, ViDbContext db) => EndpointMethods.GetJwtByLogin(http, db));
 
 
 app.MapGet("/api/dicts/get", [Authorize] (HttpContext http, ViDbContext db) => EndpointMethods.GetDictsByUserFromContext(http, db));
