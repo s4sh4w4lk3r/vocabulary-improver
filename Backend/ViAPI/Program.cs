@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Xml.Linq;
 using ViAPI.Auth;
 using ViAPI.Database;
-using ViAPI.StaticMethods;
+using ViAPI.Other;
 
 var builder = WebApplication.CreateBuilder();
 
@@ -22,7 +22,7 @@ app.MapGet("/api/auth/login/tg/{telegramid}", (ViDbContext db, string telegramid
 app.MapGet("/api/auth/register/tg", (HttpContext http, ViDbContext db) => EndpointMethods.RegisterTelegramUser(http, db)); //OK
 
 app.MapPost("/api/auth/login", (HttpContext http, ViDbContext db) => EndpointMethods.GetJwtByLogin(http, db)); //OK
-//app.MapPost("/api/auth/register", (HttpContext http, ViDbContext db) => );
+app.MapPost("/api/auth/register", (HttpContext http, ViDbContext db) => EndpointMethods.RegisterRegistredUser(http, db));
 
 
 app.MapGet("/api/dicts/get", [Authorize] (HttpContext http, ViDbContext db) => EndpointMethods.GetDictsByUserFromContext(http, db)); //OK

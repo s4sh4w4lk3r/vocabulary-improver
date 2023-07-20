@@ -1,5 +1,5 @@
 ﻿using ViAPI.Entites.DTO;
-using ViAPI.StaticMethods;
+using ViAPI.Other;
 
 namespace ViAPI.Database;
 

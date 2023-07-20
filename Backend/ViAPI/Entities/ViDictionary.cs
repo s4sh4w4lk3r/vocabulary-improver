@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using ViAPI.StaticMethods;
+using ViAPI.Other;
 
 namespace ViAPI.Entities;
 

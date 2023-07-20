@@ -5,7 +5,7 @@ using ViAPI.Entites.DTO;
 using ViAPI.Entities;
 using ViAPI.Entities.JsonModels;
 
-namespace ViAPI.StaticMethods;
+namespace ViAPI.Other;
 
 public static class EndpointMethods
 {
@@ -161,5 +161,9 @@ public static class EndpointMethods
             return user is not null ? Results.Ok($"User {user.Guid} added.") : Results.BadRequest("User maybe already exists.");
         }
         return Results.BadRequest("Bad input.");
+    }
+    public async static Task<IResult> RegisterRegistredUser(HttpContext http, ViDbContext db)
+    {
+        throw new NotImplementedException();
     }
 }

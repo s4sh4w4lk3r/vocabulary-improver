@@ -1,16 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using ViAPI.Database;
 
-namespace ViAPI.StaticMethods;
+namespace ViAPI.Other;
 
 public static class ViConfiguration
 {
     public enum SecretType
     {
         MySql,
-        TelegramToken, 
+        TelegramToken,
         APIHostname,
         JWTKey
     }

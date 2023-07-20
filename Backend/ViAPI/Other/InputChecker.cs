@@ -1,7 +1,6 @@
-﻿using System.Reflection;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-namespace ViAPI.StaticMethods;
+namespace ViAPI.Other;
 
 public static class InputChecker
 {

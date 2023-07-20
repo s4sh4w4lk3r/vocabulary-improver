@@ -1,4 +1,4 @@
-﻿using ViAPI.StaticMethods;
+﻿using ViAPI.Other;
 
 namespace ViAPI.Entites.DTO
 {

@@ -1,6 +1,6 @@
 ﻿using ViAPI.Auth;
 using ViAPI.Entities;
-using ViAPI.StaticMethods;
+using ViAPI.Other;
 
 namespace ViAPI.Database;
 
