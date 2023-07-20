@@ -81,12 +81,26 @@ public static class EndpointMethods
     }
     public static IResult AddDictionary(HttpContext http, ViDbContext db, string name)
     {
-#warning ебануть огарничение на длину слова тут и в методах на добавление в бд
-        throw new NotImplementedException();
+        bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
+        bool nameOk = InputChecker.CheckString(name) && name.Length < 255;
+
+        if (userGuidOk && nameOk is true)
+        {
+            var dict = db.AddDictionary(name, userGuid);
+            return dict is not null ? Results.Ok($"Dict {dict.Guid} added.") : Results.BadRequest("User maybe not found.");
+        }
+        return Results.Unauthorized();
     }
-    public static IResult RemoveDictionary(HttpContext http, ViDbContext db, Guid dictguid)
+    public static IResult RemoveDictionary(HttpContext http, ViDbContext db, Guid dictGuid)
     {
-        throw new NotImplementedException();
+        bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
+        bool dictGuidOk = dictGuid.IsNotEmpty();
+        if (userGuidOk && dictGuidOk is true)
+        {
+            bool removed = db.RemoveDictionary(userGuid, dictGuid);
+            return removed is true ? Results.Ok($"Dict {dictGuid} removed.") : Results.BadRequest("Dict maybe not exists or not affiliated.");
+        }
+        return Results.Unauthorized();
     }
     public static IResult EditDictionaryName(HttpContext http, ViDbContext db, Guid dictGuid, string name)
     {
@@ -94,7 +108,7 @@ public static class EndpointMethods
         bool wordGuidOk = dictGuid.IsNotEmpty();
         bool nameOk = InputChecker.CheckString(name);
 
-        if (userGuidOk && wordGuidOk && nameOk is true) 
+        if (userGuidOk && wordGuidOk && nameOk is true)
         {
             var dict = db.UpdateDictionaryNameDb(userGuid, dictGuid, name);
             return dict is not null ? Results.Ok($"New dict name is {name}") : Results.BadRequest("Dict maybe not exists or not affiliated.");
@@ -120,11 +134,11 @@ public static class EndpointMethods
         }
         return Results.Unauthorized();
     }
-    public static IResult RemoveWord(HttpContext http, ViDbContext db, Guid wordGuid) 
+    public static IResult RemoveWord(HttpContext http, ViDbContext db, Guid wordGuid)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
         bool wordGuidOk = wordGuid.IsNotEmpty();
-        if (userGuidOk && wordGuidOk is true) 
+        if (userGuidOk && wordGuidOk is true)
         {
             bool removed = db.RemoveWord(userGuid, wordGuid);
             return removed is true ? Results.Ok($"Word {wordGuid} removed.") : Results.BadRequest("Word maybe not exists or not affiliated.");

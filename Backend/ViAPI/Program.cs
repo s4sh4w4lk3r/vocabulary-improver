@@ -26,8 +26,8 @@ app.MapPost("/api/auth/login", (HttpContext http, ViDbContext db) => EndpointMet
 
 
 app.MapGet("/api/dicts/get", [Authorize] (HttpContext http, ViDbContext db) => EndpointMethods.GetDictsByUserFromContext(http, db)); //OK
-//app.MapGet("/api/dicts/add/{name}", [Authorize] (HttpContext http, ViDbContext db, string name) => EndpointMethods.AddDictionary(http, db, name));
-//app.MapGet("/api/dicts/remove/{dictguid:guid}", [Authorize] (HttpContext http, ViDbContext db, Guid dictguid) => EndpointMethods.RemoveDictionary(http, db, dictguid));
+app.MapGet("/api/dicts/add/{name}", [Authorize] (HttpContext http, ViDbContext db, string name) => EndpointMethods.AddDictionary(http, db, name)); //OK
+app.MapGet("/api/dicts/remove/{dictguid:guid}", [Authorize] (HttpContext http, ViDbContext db, Guid dictguid) => EndpointMethods.RemoveDictionary(http, db, dictguid)); //OK
 app.MapGet("/api/dicts/editname/{dictguid:guid}/{name}", [Authorize] (HttpContext http, ViDbContext db, Guid dictguid, string name) => EndpointMethods.EditDictionaryName(http, db, dictguid, name)); //OK
 
 

@@ -25,7 +25,7 @@ public partial class ViDbContext
         return user;
     }
 
-    private ViDictionary? AddDictionary(string name, Guid userGuid)
+    public ViDictionary? AddDictionary(string name, Guid userGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 

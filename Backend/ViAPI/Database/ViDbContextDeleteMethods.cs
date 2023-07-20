@@ -30,7 +30,7 @@ public partial class ViDbContext
             return false;
         }
     }
-    private bool RemoveDictionary(Guid dictGuid)
+    public bool RemoveDictionary(Guid userGuid, Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -40,7 +40,7 @@ public partial class ViDbContext
             return false;
         }
 
-        ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid).FirstOrDefault();
+        ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid && e.UserGuid == userGuid).FirstOrDefault();
 
         if (dict is not null)
         {
