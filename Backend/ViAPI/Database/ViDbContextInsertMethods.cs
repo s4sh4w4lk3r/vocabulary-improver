@@ -5,14 +5,21 @@ namespace ViAPI.Database;
 
 public partial class ViDbContext
 {
-    private RegistredUser AddRegistredUser(string username, string email, string firstname, string password)
+    public RegistredUser? AddRegistredUser(string username, string email, string firstname, string password)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
-        RegistredUser user = new(Guid.NewGuid(), firstname, username, email, password);
-        Users.Add(user);
-        SaveChanges();
-        Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
-        return user;
+        bool userExists = Set<RegistredUser>().Any(u => u.Username == username || u.Email == email);
+
+        if (userExists is false)
+        {
+            RegistredUser user = new(Guid.NewGuid(), firstname, username, email, password);
+            Users.Add(user);
+            SaveChanges();
+            Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
+            return user;
+        }
+        Logger?.LogWarning($"Method {methodName}, Status Fail. User email: {email}, login:{username} already exists.");
+        return null;
     }
 
     public TelegramUser? AddTelegramUser(ulong telegramId, string firstname)
@@ -28,7 +35,7 @@ public partial class ViDbContext
             Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
             return user;
         }
-        Logger?.LogWarning($"Method {methodName}, Status OK. User tgid: {telegramId} already exists.");
+        Logger?.LogWarning($"Method {methodName}, Status FAIL. User tgid: {telegramId} already exists.");
         return null;
     }
 

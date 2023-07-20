@@ -147,7 +147,7 @@ public static class EndpointMethods
     }
     public async static Task<IResult> RegisterTelegramUser(HttpContext http, ViDbContext db)
     {
-        if (http.Request.HasJsonContentType() is false) { Results.BadRequest("Bad content-type."); }
+        if (http.Request.HasJsonContentType() is false) { return Results.BadRequest("Bad content-type."); }
 
         TelegramUserJson? userJson = await http.Request.ReadFromJsonAsync<TelegramUserJson>();
 
@@ -164,6 +164,25 @@ public static class EndpointMethods
     }
     public async static Task<IResult> RegisterRegistredUser(HttpContext http, ViDbContext db)
     {
-        throw new NotImplementedException();
+        if (http.Request.HasJsonContentType() is false) { return Results.BadRequest("Bad content-type."); }
+
+        RegistredUserJson? userJson = await http.Request.ReadFromJsonAsync<RegistredUserJson>();
+
+        bool emailOk = userJson is not null ? userJson.Email.IsEmail() : false;
+
+        bool stringsOk = InputChecker.CheckString(userJson?.Username, userJson?.Password, userJson?.Firstname);
+
+        if (stringsOk && emailOk is true)
+        {
+            string username = userJson!.Username!;
+            string email = userJson!.Email!;
+            string firstname = userJson!.Firstname!;
+            string hash = Accounting.GenerateHash(userJson!.Password!);
+
+            var user = db.AddRegistredUser(username, email, firstname, hash);
+
+            return user is not null ? Results.Ok($"User {user.Guid} added.") : Results.BadRequest("User maybe already exists.");
+        }
+        return Results.BadRequest("Bad input.");
     }
 }

@@ -49,7 +49,7 @@ public static class InputChecker
 public static class InputCheckerExtensions
 {
     public static bool IsNotEmpty(this Guid guid) => guid != Guid.Empty;
-    public static bool IsEmail(this string email)
+    public static bool IsEmail(this string? email)
     {
         Regex validateEmailRegex = new("^\\S+@\\S+\\.\\S+$");
         if (!string.IsNullOrWhiteSpace(email) && validateEmailRegex.IsMatch(email))
