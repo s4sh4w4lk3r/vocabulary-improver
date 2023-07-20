@@ -1,4 +1,6 @@
-﻿using ViAPI.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Net.WebSockets;
+using ViAPI.Entities;
 
 namespace ViAPI.Database;
 
@@ -37,30 +39,21 @@ public partial class ViDbContext
         }
     }
 
-    private ViDictionary? SaveEditedDictionary(ViDictionary dict)
+    public ViDictionary? UpdateDictionaryNameDb(Guid userGuid, Guid dictGuid, string newName)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
-        try
+        
+        var dict = Dictionaries.Where(e=>e.Guid == dictGuid && e.UserGuid == userGuid).FirstOrDefault();
+
+        if (dict is not null)
         {
-            if (dict is not null)
-            {
-                dict = new ViDictionary(dict.Guid, dict.Name, dict.UserGuid);
-                Dictionaries.Update(dict);
-                SaveChanges();
-                Logger?.LogInformation($"Method {methodName}, Status: OK. Dictionary {dict.Guid} updated.");
-                return dict;
-            }
-            else
-            {
-                Logger?.LogWarning($"Method {methodName}, Status: FAIL. Dict is null.");
-                return null;
-            }
+            dict.Name = newName;
+            SaveChanges();
+            Logger?.LogInformation($"Method {methodName}, Status: OK. Dict {dictGuid} new name is {newName}.");
+            return dict;
         }
-        catch
-        {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Some dict properties is null.");
-            return null;
-        }
+        Logger?.LogWarning($"Method {methodName}, Status: Fail. Dict {dictGuid} not found for user {userGuid}.");
+        return null;
     }
     private Word? SaveEditedWord(Word word)
     {

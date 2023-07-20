@@ -55,17 +55,17 @@ public partial class ViDbContext
             return false;
         }
     }
-    private bool RemoveWord(Guid wordGuid)
+    public bool RemoveWord(Guid userGuid, Guid wordGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (wordGuid.IsNotEmpty() is false)
+        if (wordGuid.IsNotEmpty() && userGuid.IsNotEmpty() is false)
         {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
+            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Guids is empty.");
             return false;
         }
 
-        Word? word = Words.Where(e => e.Guid == wordGuid).FirstOrDefault();
+        Word? word = Words.Where(e => e.Guid == wordGuid && e.Dictionary!.UserGuid == userGuid).FirstOrDefault();
 
         if (word is not null)
         {
@@ -76,7 +76,7 @@ public partial class ViDbContext
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Word {wordGuid} not found.");
+            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Word {wordGuid} not found for user {userGuid}.");
             return false;
         }
     }
