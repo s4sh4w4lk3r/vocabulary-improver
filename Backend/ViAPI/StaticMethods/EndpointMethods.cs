@@ -2,7 +2,7 @@
 using ViAPI.Database;
 using ViAPI.Entites.DTO;
 using ViAPI.Entities;
-using ViAPI.Entities.DTO;
+using ViAPI.Entities.JsonModels;
 
 namespace ViAPI.StaticMethods;
 
@@ -62,7 +62,7 @@ public static class EndpointMethods
 
         if (request.HasJsonContentType() is true)
         {
-            UserDto? user = await request.ReadFromJsonAsync<UserDto>();
+            UserJson? user = await request.ReadFromJsonAsync<UserJson>();
 
             if (user is not null)
             {
@@ -77,5 +77,38 @@ public static class EndpointMethods
             }
         }
         return Results.BadRequest("Bad ContentType.");
+    }
+    public static IResult AddDictionary(HttpContext http, ViDbContext db, string name)
+    {
+#warning ебануть огарничение на длину слова тут и в методах на добавление в бд
+        throw new NotImplementedException();
+    }
+    public static IResult RemoveDictionary(HttpContext http, ViDbContext db, Guid dictguid)
+    {
+        throw new NotImplementedException();
+    }
+    public static IResult EditDictionaryName(HttpContext http, ViDbContext db, Guid dictguid, string name)
+    {
+#warning ебануть огарничение на длину слова тут и в методах на добавление в бд
+        throw new NotImplementedException();
+    }
+    public async static Task<IResult> AddWord(HttpContext http, ViDbContext db)
+    {
+        if (http.Request.HasJsonContentType() is false) return Results.BadRequest("Bad content-type.");
+
+        bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
+
+        WordJson? wordJson = await http.Request.ReadFromJsonAsync<WordJson>();
+
+        if (wordJson is not null && wordJson.DictGuid.IsNotEmpty() && InputChecker.CheckString(wordJson.TargetWord, wordJson.SourceWord) && userGuidOk is true)
+        {
+            Guid dictGuid = wordJson.DictGuid;
+            string sourceWord = wordJson.SourceWord!;
+            string targetWord = wordJson.TargetWord!;
+
+            var word = db.AddWord(userGuid, sourceWord, targetWord, dictGuid);
+            return word is not null ? Results.Ok("Word added.") : Results.BadRequest("Word not added.");
+        }
+        return Results.Unauthorized();
     }
 }

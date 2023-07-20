@@ -1,6 +1,6 @@
-﻿namespace ViAPI.Entities.DTO;
+﻿namespace ViAPI.Entities.JsonModels;
 
-public class UserDto
+public class UserJson
 {
     public string? Username { get; set; }
     public string? Password { get; set; }

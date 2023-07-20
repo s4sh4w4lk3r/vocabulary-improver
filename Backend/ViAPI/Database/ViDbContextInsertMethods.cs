@@ -52,21 +52,18 @@ public partial class ViDbContext
         }
     }
 
-    private Word? AddWord(string sourceWord, string targetWord, Guid dictGuid)
+    public Word? AddWord(Guid userGuid, string sourceWord, string targetWord, Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (dictGuid.IsNotEmpty() is false)
-        {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
-            return null;
-        }
+        bool userGuidOk = userGuid.IsNotEmpty();
+        bool dictGuidOk = dictGuid.IsNotEmpty();
+        bool wordsOk = InputChecker.CheckString(sourceWord, targetWord) && sourceWord.Length < 255 && targetWord.Length < 255;
+        bool affilationUserToDict = CheckAffiliationUserToDict(userGuid, dictGuid);
 
-        ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid).FirstOrDefault();
-
-        if (dict is not null)
+        if (userGuidOk && dictGuidOk && wordsOk && affilationUserToDict is true)
         {
-            Word word = new(Guid.NewGuid(), sourceWord, targetWord, dict.Guid, 0);
+            Word word = new Word(Guid.NewGuid(), sourceWord, targetWord, dictGuid, 0);
             Words.Add(word);
             SaveChanges();
             Logger?.LogInformation($"Method {methodName}, Status: OK. Word {word.Guid} added.");
@@ -74,8 +71,9 @@ public partial class ViDbContext
         }
         else
         {
-            Logger?.LogWarning($"Dictionary {dictGuid}, Status: Fail. Dict {dictGuid} not found.");
-            return null;
+            string bools = $"userGuidOk: {userGuidOk}, dictGuidOk: {dictGuidOk}, wordsOk: {wordsOk}, affilationUserToDict: {affilationUserToDict}.";
+            Logger?.LogWarning($"Method {methodName}, Status: FAIL. {bools}");
+            return null!;
         }
     }
 }

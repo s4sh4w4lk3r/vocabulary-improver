@@ -122,4 +122,27 @@ public partial class ViDbContext
             return false;
         }
     }
+
+    /// <summary>
+    /// Проверяет принадлежит ли словарь пользователю.
+    /// </summary>
+    public bool CheckAffiliationUserToDict(Guid userGuid, Guid dictGuid)
+    {
+
+        InputChecker.CheckGuidException(userGuid);
+        InputChecker.CheckGuidException(dictGuid);
+        bool affiliation = Dictionaries.Any(d => d.Guid == dictGuid && d.UserGuid == userGuid);
+        return affiliation;
+    }
+
+    /// <summary>
+    ///Проверяет принадлежит ли слово пользователю.
+    /// </summary>
+    public bool CheckAffiliationUserToWord(Guid userGuid, Guid wordGuid)
+    {
+        InputChecker.CheckGuidException(userGuid);
+        InputChecker.CheckGuidException(wordGuid);
+        bool affiliation = Words.Any(d => d.Guid == wordGuid && d.Dictionary!.UserGuid == userGuid);
+        return affiliation;
+    }
 }

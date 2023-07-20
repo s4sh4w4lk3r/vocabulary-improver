@@ -5,8 +5,8 @@ namespace ViAPI.Entites.DTO
     public class WordDto
     {
         public Guid Guid { get;}
-        public string SourceWord { get; }
-        public string TargetWord { get; }   
+        public string SourceWord { get; } 
+        public string TargetWord { get; } 
         public int Rating { get; }
         public WordDto(Guid guid, string sourceWord, string targetWord, int rating)
         {
