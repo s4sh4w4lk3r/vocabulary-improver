@@ -19,7 +19,7 @@ app.UseAuthorization();
 
 
 app.MapGet("/api/auth/login/tg/{telegramid}", (ViDbContext db, string telegramid) => EndpointMethods.GetJwtByTelegramId(db, telegramid)); //OK
-/*app.MapGet("/api/auth/regiser/tg/{telegramid}/{firstname}", (ViDbContext db, string telegramid, string firstname) => EndpointMethods.GetJwtByTelegramId(db, telegramid));*/
+app.MapGet("/api/auth/register/tg", (HttpContext http, ViDbContext db) => EndpointMethods.RegisterTelegramUser(http, db)); //OK
 
 app.MapPost("/api/auth/login", (HttpContext http, ViDbContext db) => EndpointMethods.GetJwtByLogin(http, db)); //OK
 //app.MapPost("/api/auth/register", (HttpContext http, ViDbContext db) => );

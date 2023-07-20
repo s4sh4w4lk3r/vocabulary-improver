@@ -1,6 +1,6 @@
 ﻿namespace ViAPI.Entities.JsonModels;
 
-public class UserJson
+public class RegistredUserJson
 {
     public string? Username { get; set; }
     public string? Password { get; set; }

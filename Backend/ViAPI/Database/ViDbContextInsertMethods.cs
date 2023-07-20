@@ -15,14 +15,21 @@ public partial class ViDbContext
         return user;
     }
 
-    private TelegramUser AddTelegramUser(uint telegramId, string firstname)
+    public TelegramUser? AddTelegramUser(ulong telegramId, string firstname)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
-        TelegramUser user = new(Guid.NewGuid(), firstname, telegramId);
-        Users.Add(user);
-        SaveChanges();
-        Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
-        return user;
+        bool userExists = Set<TelegramUser>().Any(u=> u.TelegramId == telegramId);
+
+        if (userExists is false) 
+        {
+            TelegramUser user = new(Guid.NewGuid(), firstname, telegramId);
+            Users.Add(user);
+            SaveChanges();
+            Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
+            return user;
+        }
+        Logger?.LogWarning($"Method {methodName}, Status OK. User tgid: {telegramId} already exists.");
+        return null;
     }
 
     public ViDictionary? AddDictionary(string name, Guid userGuid)

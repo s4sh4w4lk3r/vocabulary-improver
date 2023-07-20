@@ -63,7 +63,7 @@ public static class EndpointMethods
 
         if (request.HasJsonContentType() is true)
         {
-            UserJson? user = await request.ReadFromJsonAsync<UserJson>();
+            RegistredUserJson? user = await request.ReadFromJsonAsync<RegistredUserJson>();
 
             if (user is not null)
             {
@@ -144,5 +144,22 @@ public static class EndpointMethods
             return removed is true ? Results.Ok($"Word {wordGuid} removed.") : Results.BadRequest("Word maybe not exists or not affiliated.");
         }
         return Results.Unauthorized();
+    }
+    public async static Task<IResult> RegisterTelegramUser(HttpContext http, ViDbContext db)
+    {
+        if (http.Request.HasJsonContentType() is false) { Results.BadRequest("Bad content-type."); }
+
+        TelegramUserJson? userJson = await http.Request.ReadFromJsonAsync<TelegramUserJson>();
+
+        bool idOk = ulong.TryParse(userJson?.TelegramId, out ulong id);
+        bool firstnameOk = InputChecker.CheckString(userJson?.Firstname) && userJson?.Firstname?.Length < 255;
+
+        if (firstnameOk && idOk is true)
+        {
+            var user = db.AddTelegramUser(id, userJson?.Firstname!);
+
+            return user is not null ? Results.Ok($"User {user.Guid} added.") : Results.BadRequest("User maybe already exists.");
+        }
+        return Results.BadRequest("Bad input.");
     }
 }
