@@ -79,11 +79,6 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (InputChecker.CheckString(username, password) is false)
-        {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Bad input format.");
-        }
-
         username = username.ToLower();
 
         var user = Set<RegistredUser>().Where(e => e.Username == username).Select(u => new { u.Guid, u.Hash }).FirstOrDefault();
@@ -92,7 +87,7 @@ public partial class ViDbContext
         {
             bool hashIsValid = Accounting.VerifyHash(password, user.Hash);
 
-            if (hashIsValid)
+            if (hashIsValid is true)
             {
                 userGuid = user.Guid;
                 Logger?.LogInformation(message: $"Method {methodName}, Status: OK. Username \"{username}\" has identified.");

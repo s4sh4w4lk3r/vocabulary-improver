@@ -34,12 +34,6 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (dictGuid.IsNotEmpty() is false)
-        {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Guid is empty.");
-            return false;
-        }
-
         ViDictionary? dict = Dictionaries.Where(e => e.Guid == dictGuid && e.UserGuid == userGuid).FirstOrDefault();
 
         if (dict is not null)
@@ -59,14 +53,7 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (wordGuid.IsNotEmpty() && userGuid.IsNotEmpty() is false)
-        {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Guids is empty.");
-            return false;
-        }
-
         Word? word = Words.Where(e => e.Guid == wordGuid && e.Dictionary!.UserGuid == userGuid).FirstOrDefault();
-
         if (word is not null)
         {
             Words.Remove(word);

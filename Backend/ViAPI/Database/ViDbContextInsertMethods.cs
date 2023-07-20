@@ -43,12 +43,6 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        if (userGuid.IsNotEmpty() is false)
-        {
-            Logger?.LogWarning($"Method {methodName}, Status FAIL. Guid is empty.");
-            return null;
-        }
-
         User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
 
         if (user is not null)
@@ -70,12 +64,8 @@ public partial class ViDbContext
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
-        bool userGuidOk = userGuid.IsNotEmpty();
-        bool dictGuidOk = dictGuid.IsNotEmpty();
-        bool wordsOk = InputChecker.CheckString(sourceWord, targetWord) && sourceWord.Length < 255 && targetWord.Length < 255;
         bool affilationUserToDict = CheckAffiliationUserToDict(userGuid, dictGuid);
-
-        if (userGuidOk && dictGuidOk && wordsOk && affilationUserToDict is true)
+        if (affilationUserToDict is true)
         {
             Word word = new Word(Guid.NewGuid(), sourceWord, targetWord, dictGuid, 0);
             Words.Add(word);
@@ -85,9 +75,8 @@ public partial class ViDbContext
         }
         else
         {
-            string bools = $"userGuidOk: {userGuidOk}, dictGuidOk: {dictGuidOk}, wordsOk: {wordsOk}, affilationUserToDict: {affilationUserToDict}.";
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. {bools}");
-            return null!;
+            Logger?.LogWarning($"Method {methodName}, Status: FAIL. The dictionary {dictGuid} does not belong to the user {userGuid}.");
+            return null;
         }
     }
 }

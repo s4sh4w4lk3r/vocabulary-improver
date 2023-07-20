@@ -1,5 +1,4 @@
-﻿using System.Net.WebSockets;
-using ViAPI.Auth;
+﻿using ViAPI.Auth;
 using ViAPI.Database;
 using ViAPI.Entites.DTO;
 using ViAPI.Entities;
@@ -12,138 +11,275 @@ public static class EndpointMethods
     public static IResult GetDictsByUserFromContext(HttpContext http, ViDbContext db)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-
-        if (userGuidOk is true)
+        if (userGuidOk is false)
         {
-            List<ViDictionaryDto>? dtoDicts = db.GetDictionariesDtoByUser(userGuid);
-            return (dtoDicts is not null) ? Results.Ok(dtoDicts) : Results.BadRequest($"User`s {userGuid} dicts not found.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        List<ViDictionaryDto>? dtoDicts = db.GetDictionariesDtoByUser(userGuid);
+        if (dtoDicts is not null)
+        {
+            return Results.Ok(dtoDicts);
+        }
+        else
+        {
+            return Results.BadRequest($"Bad response from database.");
+        }
     }
     public static IResult GetWords(HttpContext http, ViDbContext db, Guid dictGuid)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-        bool dictGuidOk = dictGuid.IsNotEmpty();
-
-        if (dictGuidOk && userGuidOk is true)
+        if (userGuidOk is false)
         {
-            List<WordDto>? dtoWords = db.GetWordsDtoByDict(userGuid, dictGuid);
-            return dtoWords is not null ? Results.Ok(dtoWords) : Results.BadRequest($"The combination of User {userGuid} and dict {dictGuid} not found.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        bool dictGuidOk = dictGuid.IsNotEmpty();
+        if (dictGuidOk is false)
+        {
+            return Results.BadRequest("Dict guid is empty.");
+        }
+
+        List<WordDto>? dtoWords = db.GetWordsDtoByDict(userGuid, dictGuid);
+        if (dtoWords is not null)
+        {
+            return Results.Ok(dtoWords);
+        }
+        else
+        {
+            return Results.BadRequest($"Bad response from database.");
+        }
     }
     public static IResult EditRating(HttpContext http, ViDbContext db, Guid wordGuid, ViDbContext.RatingAction action)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-        bool wordGuidOk = wordGuid.IsNotEmpty();
-
-        if (userGuidOk && wordGuidOk is true)
+        if (userGuidOk is false)
         {
-            Word? word = db.UpdateWordRatingDb(userGuid, wordGuid, action);
-            return (word is not null) ? Results.Ok(new { guid = word.Guid, sourceword = word.SourceWord, targetword = word.TargetWord, rating = word.Rating })
-                : Results.BadRequest($"Word {wordGuid} not found.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        bool wordGuidOk = wordGuid.IsNotEmpty();
+        if (wordGuidOk is false)
+        {
+            return Results.BadRequest("Word guid is empty.");
+        }
+
+        Word? word = db.UpdateWordRatingDb(userGuid, wordGuid, action);
+        if (word is not null)
+        {
+            return Results.Ok(new { guid = word.Guid, sourceword = word.SourceWord, targetword = word.TargetWord, rating = word.Rating });
+        }
+        else
+        {
+            return Results.BadRequest($"Bad response from database.");
+        }
+
     }
     public static IResult GetJwtByTelegramId(ViDbContext db, string idString)
     {
         bool tgIdOk = ulong.TryParse(idString, out ulong id);
-        bool userGuidOk = db.TryGetGuidFromTgId(id, out Guid guid);
-
-        if (tgIdOk && userGuidOk is true)
+        if (tgIdOk is false)
         {
-            string jwt = Accounting.GenerateJwt(guid);
-            return Results.Ok(new { jwt });
+            Results.BadRequest($"Can't parse TelegramId: {idString}.");
         }
-        return Results.BadRequest($"User not found with TelegramId: {idString}");
+
+        bool userGuidOk = db.TryGetGuidFromTgId(id, out Guid guid);
+        if (userGuidOk is false)
+        {
+            Results.BadRequest($"The user with the TelegramId: {id} was not found in the database.");
+        }
+
+        string jwt = Accounting.GenerateJwt(guid);
+        return Results.Ok(new { jwt });
     }
     public async static Task<IResult> GetJwtByLogin(HttpContext http, ViDbContext db)
     {
-        var request = http.Request;
-
-        if (request.HasJsonContentType() is true)
+        if (http.Request.HasJsonContentType() is false)
         {
-            RegistredUserJson? user = await request.ReadFromJsonAsync<RegistredUserJson>();
-
-            if (user is not null)
-            {
-                string username = user.Username!;
-                string password = user.Password!;
-
-                if (InputChecker.CheckString(username, password))
-                {
-                    bool userIdentifed = db.IdentifyUser(username, password, out Guid guid);
-                    return userIdentifed is true ? Results.Ok(Accounting.GenerateJwt(guid, 20)) : Results.BadRequest("Invalid username or password.");
-                }
-            }
+            return Results.BadRequest("Bad ContentType.");
         }
-        return Results.BadRequest("Bad ContentType.");
+
+        try
+        {
+            RegistredUserJson? user = await http.Request.ReadFromJsonAsync<RegistredUserJson>();
+            if (user is null)
+            {
+                return Results.BadRequest("User instance from JSON is null.");
+            }
+
+            string username = user.Username!;
+            string password = user.Password!;
+            if (InputChecker.CheckString(username, password) is false)
+            {
+                return Results.BadRequest("Bad format username or password.");
+            }
+
+            bool userIdentifed = db.IdentifyUser(username, password, out Guid guid);
+            if (userIdentifed is true)
+            {
+                return Results.Ok(Accounting.GenerateJwt(guid, 20));
+            }
+            else
+            {
+                return Results.BadRequest("Invalid username or password.");
+            };
+        }
+        catch
+        {
+            return Results.BadRequest("Bad Json Deserializing.");
+        }
     }
     public static IResult AddDictionary(HttpContext http, ViDbContext db, string name)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-        bool nameOk = InputChecker.CheckString(name) && name.Length < 255;
-
-        if (userGuidOk && nameOk is true)
+        if (userGuidOk is false)
         {
-            var dict = db.AddDictionary(name, userGuid);
-            return dict is not null ? Results.Ok($"Dict {dict.Guid} added.") : Results.BadRequest("User maybe not found.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        bool nameOk = InputChecker.CheckString(name) && name.Length < 255;
+        if (nameOk is false)
+        {
+            return Results.BadRequest($"The string: {name} has bad format, maybe length > 254 chars.");
+        }
+
+        ViDictionary? dict = db.AddDictionary(name, userGuid);
+        if (dict is not null)
+        {
+            return Results.Ok($"Dict {dict.Guid} added.");
+        }
+        else
+        {
+            return Results.BadRequest($"Bad response from database.");
+        }
     }
     public static IResult RemoveDictionary(HttpContext http, ViDbContext db, Guid dictGuid)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-        bool dictGuidOk = dictGuid.IsNotEmpty();
-        if (userGuidOk && dictGuidOk is true)
+        if (userGuidOk is false)
         {
-            bool removed = db.RemoveDictionary(userGuid, dictGuid);
-            return removed is true ? Results.Ok($"Dict {dictGuid} removed.") : Results.BadRequest("Dict maybe not exists or not affiliated.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        bool dictGuidOk = dictGuid.IsNotEmpty();
+        if (dictGuidOk is false)
+        {
+            return Results.BadRequest("Dict guid is empty.");
+        }
+
+        bool removed = db.RemoveDictionary(userGuid, dictGuid);
+        if (removed is true)
+        {
+            return Results.Ok($"Dict {dictGuid} removed.");
+        }
+        else
+        {
+            return Results.BadRequest($"Bad response from database.");
+        }
     }
     public static IResult EditDictionaryName(HttpContext http, ViDbContext db, Guid dictGuid, string name)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-        bool wordGuidOk = dictGuid.IsNotEmpty();
-        bool nameOk = InputChecker.CheckString(name);
-
-        if (userGuidOk && wordGuidOk && nameOk is true)
+        if (userGuidOk is false)
         {
-            var dict = db.UpdateDictionaryNameDb(userGuid, dictGuid, name);
-            return dict is not null ? Results.Ok($"New dict name is {name}") : Results.BadRequest("Dict maybe not exists or not affiliated.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        bool wordGuidOk = dictGuid.IsNotEmpty();
+        if (wordGuidOk is false)
+        {
+            return Results.BadRequest("Word guid is empty.");
+        }
+
+        bool nameOk = InputChecker.CheckString(name) && name.Length < 255;
+        if (nameOk is false)
+        {
+            return Results.BadRequest($"The string: {name} has bad format, maybe length > 254 chars.");
+        }
+
+
+        ViDictionary? dict = db.UpdateDictionaryNameDb(userGuid, dictGuid, name);
+        if (dict is not null)
+        {
+            return Results.Ok($"New dict name is {name}");
+        }
+        else
+        {
+            return Results.BadRequest("Bad response from database.");
+        }
     }
     public async static Task<IResult> AddWord(HttpContext http, ViDbContext db)
     {
-        if (http.Request.HasJsonContentType() is false) return Results.BadRequest("Bad content-type.");
+        if (http.Request.HasJsonContentType() is false)
+        {
+            return Results.BadRequest("Bad content-type.");
+        }
 
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
+        if (userGuidOk is false)
+        {
+            return Results.BadRequest("User guid not recognized.");
+        }
 
         WordJson? wordJson = await http.Request.ReadFromJsonAsync<WordJson>();
-
-        if (wordJson is not null && wordJson.DictGuid.IsNotEmpty() && InputChecker.CheckString(wordJson.TargetWord, wordJson.SourceWord) && userGuidOk is true)
+        if (wordJson is null)
         {
-            Guid dictGuid = wordJson.DictGuid;
-            string sourceWord = wordJson.SourceWord!;
-            string targetWord = wordJson.TargetWord!;
-
-            var word = db.AddWord(userGuid, sourceWord, targetWord, dictGuid);
-            return word is not null ? Results.Ok("Word added.") : Results.BadRequest("Word not added.");
+            return Results.BadRequest("Word instance from JSON is null.");
         }
-        return Results.Unauthorized();
+
+        if (wordJson.DictGuid.IsNotEmpty() is false)
+        {
+            return Results.BadRequest("Empty dict guid from Json.");
+        }
+
+        if (InputChecker.CheckString(wordJson.TargetWord, wordJson.SourceWord) is false)
+        {
+            return Results.BadRequest("Source or target word is bad format.");
+        }
+
+        if(wordJson?.TargetWord?.Length > 254 || wordJson?.SourceWord?.Length > 254 is true)
+        {
+            return Results.BadRequest("Source or target word is so long.");
+        }
+
+        Guid dictGuid = wordJson!.DictGuid;
+        string sourceWord = wordJson.SourceWord!;
+        string targetWord = wordJson.TargetWord!;
+
+        Word? word = db.AddWord(userGuid, sourceWord, targetWord, dictGuid);
+        if (word is not null)
+        {
+            return Results.Ok($"Word {word.Guid} added in dict {word.DictionaryGuid}.");
+        }
+        else
+        {
+            return Results.BadRequest("Bad response from database.");
+        }
+
     }
     public static IResult RemoveWord(HttpContext http, ViDbContext db, Guid wordGuid)
     {
         bool userGuidOk = Accounting.TryGetGuidFromContext(http, out Guid userGuid);
-        bool wordGuidOk = wordGuid.IsNotEmpty();
-        if (userGuidOk && wordGuidOk is true)
+        if (userGuidOk is false)
         {
-            bool removed = db.RemoveWord(userGuid, wordGuid);
-            return removed is true ? Results.Ok($"Word {wordGuid} removed.") : Results.BadRequest("Word maybe not exists or not affiliated.");
+            return Results.BadRequest("User guid not recognized.");
         }
-        return Results.Unauthorized();
+
+        bool wordGuidOk = wordGuid.IsNotEmpty();
+        if (wordGuidOk is false)
+        {
+            return Results.BadRequest("Word guid is empty.");
+        }
+
+        bool removed = db.RemoveWord(userGuid, wordGuid);
+        if (removed is true)
+        { 
+            return Results.Ok($"Word {wordGuid} removed."); 
+        }
+        else
+        {
+            return Results.BadRequest("Bad response from database.");
+        }
     }
     public async static Task<IResult> RegisterTelegramUser(HttpContext http, ViDbContext db)
     {
