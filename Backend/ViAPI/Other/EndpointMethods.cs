@@ -1,4 +1,5 @@
-﻿using ViAPI.Auth;
+﻿using Microsoft.AspNetCore.Cors.Infrastructure;
+using ViAPI.Auth;
 using ViAPI.Database;
 using ViAPI.Entites.DTO;
 using ViAPI.Entities;
@@ -231,41 +232,47 @@ public static class EndpointMethods
         }
         Guid userGuid = userGuidResult.ResultValue;
 
-        WordJson? wordJson = await http.Request.ReadFromJsonAsync<WordJson>();
-        if (wordJson is null)
+        try
         {
-            return Results.BadRequest("Word instance from JSON is null.");
-        }
+            WordJson? wordJson = await http.Request.ReadFromJsonAsync<WordJson>();
+            if (wordJson is null)
+            {
+                return Results.BadRequest("Word instance from JSON is null.");
+            }
 
-        if (wordJson.DictGuid.IsNotEmpty() is false)
+            if (wordJson.DictGuid.IsNotEmpty() is false)
+            {
+                return Results.BadRequest("Empty dict guid from Json.");
+            }
+
+            if (InputChecker.CheckString(wordJson.TargetWord, wordJson.SourceWord) is false)
+            {
+                return Results.BadRequest("Source or target word is bad format.");
+            }
+
+            if (wordJson?.TargetWord?.Length > 254 || wordJson?.SourceWord?.Length > 254 is true)
+            {
+                return Results.BadRequest("Source or target word is so long.");
+            }
+
+            Guid dictGuid = wordJson!.DictGuid;
+            string sourceWord = wordJson.SourceWord!;
+            string targetWord = wordJson.TargetWord!;
+
+            ViResult<Word> wordResult = db.AddWord(userGuid, sourceWord, targetWord, dictGuid);
+            if (wordResult.ResultValue is not null && wordResult.ResultCode is ViResultTypes.Created)
+            {
+                return Results.Ok($"Word {wordResult.ResultValue.Guid} added in dict {wordResult.ResultValue.DictionaryGuid}.");
+            }
+            else
+            {
+                return Results.BadRequest(wordResult);
+            }
+        }
+        catch (Exception)
         {
-            return Results.BadRequest("Empty dict guid from Json.");
+            return Results.BadRequest("Bad Json.");
         }
-
-        if (InputChecker.CheckString(wordJson.TargetWord, wordJson.SourceWord) is false)
-        {
-            return Results.BadRequest("Source or target word is bad format.");
-        }
-
-        if(wordJson?.TargetWord?.Length > 254 || wordJson?.SourceWord?.Length > 254 is true)
-        {
-            return Results.BadRequest("Source or target word is so long.");
-        }
-
-        Guid dictGuid = wordJson!.DictGuid;
-        string sourceWord = wordJson.SourceWord!;
-        string targetWord = wordJson.TargetWord!;
-
-        ViResult<Word> wordResult = db.AddWord(userGuid, sourceWord, targetWord, dictGuid);
-        if (wordResult.ResultValue is not null && wordResult.ResultCode is ViResultTypes.Created)
-        {
-            return Results.Ok($"Word {wordResult.ResultValue.Guid} added in dict {wordResult.ResultValue.DictionaryGuid}.");
-        }
-        else
-        {
-            return Results.BadRequest(wordResult);
-        }
-
     }
     public static IResult RemoveWord(HttpContext http, ViDbContext db, Guid wordGuid)
     {
@@ -299,28 +306,35 @@ public static class EndpointMethods
             return Results.BadRequest("Bad content-type."); 
         }
 
-        TelegramUserJson? userJson = await http.Request.ReadFromJsonAsync<TelegramUserJson>();
-        bool idOk = ulong.TryParse(userJson?.TelegramId, out ulong id);
-        if (idOk is false)
+        try
         {
-            return Results.BadRequest("TelgramId bad parse.");
-        }
+            TelegramUserJson? userJson = await http.Request.ReadFromJsonAsync<TelegramUserJson>();
+            bool idOk = ulong.TryParse(userJson?.TelegramId, out ulong id);
+            if (idOk is false)
+            {
+                return Results.BadRequest("TelgramId bad parse.");
+            }
 
-        bool firstnameOk = InputChecker.CheckString(userJson?.Firstname) && userJson?.Firstname?.Length < 255;
-        if (firstnameOk is false)
+            bool firstnameOk = InputChecker.CheckString(userJson?.Firstname) && userJson?.Firstname?.Length < 255;
+            if (firstnameOk is false)
+            {
+                return Results.BadRequest("Firstname bad format or length > 254.");
+            }
+
+            ViResult<TelegramUser> addUserResult = db.AddTelegramUser(id, userJson?.Firstname!);
+
+            if (addUserResult.ResultCode == ViResultTypes.Created && (addUserResult.ResultValue is not null) is true)
+            {
+                return Results.Ok($"User {addUserResult.ResultValue.Guid} added.");
+            }
+            else
+            {
+                return Results.BadRequest(addUserResult);
+            }
+        }
+        catch (Exception)
         {
-            return Results.BadRequest("Firstname bad format or length > 254.");
-        }
-
-        ViResult<TelegramUser> addUserResult = db.AddTelegramUser(id, userJson?.Firstname!);
-
-        if (addUserResult.ResultCode == ViResultTypes.Created && (addUserResult.ResultValue is not null) is true) 
-        { 
-            return Results.Ok($"User {addUserResult.ResultValue.Guid} added.");
-        }
-        else 
-        {
-            return Results.BadRequest(addUserResult); 
+            return Results.BadRequest("Bad Json.");
         }
     }
     public async static Task<IResult> RegisterRegistredUserAsync(HttpContext http, ViDbContext db)
@@ -330,33 +344,40 @@ public static class EndpointMethods
             return Results.BadRequest("Bad content-type."); 
         }
 
-        RegistredUserJson? userJson = await http.Request.ReadFromJsonAsync<RegistredUserJson>();
-
-        bool emailOk = userJson is not null ? userJson.Email.IsEmail() : false;
-        if (emailOk is false) 
+        try
         {
-            Results.BadRequest("Bad email format."); 
+            RegistredUserJson? userJson = await http.Request.ReadFromJsonAsync<RegistredUserJson>();
+
+            bool emailOk = userJson is not null ? userJson.Email.IsEmail() : false;
+            if (emailOk is false)
+            {
+                Results.BadRequest("Bad email format.");
+            }
+
+            bool stringsOk = InputChecker.CheckString(userJson?.Username, userJson?.Password, userJson?.Firstname);
+            if (stringsOk is false)
+            {
+                Results.BadRequest("Username || password || firstname is null, empty, or contain whitespace.");
+            }
+
+            string username = userJson!.Username!;
+            string email = userJson!.Email!;
+            string firstname = userJson!.Firstname!;
+            string hash = Accounting.GenerateHash(userJson!.Password!);
+
+            ViResult<RegistredUser> addUserResult = db.AddRegistredUser(username, email, firstname, hash);
+            if (addUserResult.ResultCode == ViResultTypes.Created && addUserResult.ResultValue is not null)
+            {
+                return Results.Ok($"User {addUserResult.ResultValue.Guid} added.");
+            }
+            else
+            {
+                return Results.BadRequest(addUserResult);
+            }
         }
-
-        bool stringsOk = InputChecker.CheckString(userJson?.Username, userJson?.Password, userJson?.Firstname);
-        if (stringsOk is false) 
+        catch (Exception)
         {
-            Results.BadRequest("Username || password || firstname is null, empty, or contain whitespace."); 
-        }
-
-        string username = userJson!.Username!;
-        string email = userJson!.Email!;
-        string firstname = userJson!.Firstname!;
-        string hash = Accounting.GenerateHash(userJson!.Password!);
-
-        ViResult<RegistredUser> addUserResult = db.AddRegistredUser(username, email, firstname, hash);
-        if (addUserResult.ResultCode == ViResultTypes.Created && addUserResult.ResultValue is not null) 
-        {
-            return Results.Ok($"User {addUserResult.ResultValue.Guid} added."); 
-        } 
-        else 
-        {
-            return Results.BadRequest(addUserResult); 
+            return Results.BadRequest("Bad Json.");
         }
     }
 }
