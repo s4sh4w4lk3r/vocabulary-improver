@@ -103,18 +103,19 @@ public partial class ViDbContext
     /// <summary>
     /// Проверяет есть ли тг пользователь в базе, если есть, вернет верный Guid.
     /// </summary>
-    public bool TryGetGuidFromTgId(ulong id, out Guid guid)
+    public ViResult<Guid> TryGetGuidFromTgId(ulong id)
     {
-        var user = Set<TelegramUser>().Where(u => u.TelegramId == id).FirstOrDefault();
+        string methodName = nameof(TryGetGuidFromTgId);
+        TelegramUser? user = Set<TelegramUser>().Where(u => u.TelegramId == id).FirstOrDefault();
         if (user is not null)
         {
-            guid = user.Guid;
-            return true;
+            string message = $"User with TgId {id} founded, guid is {user.Guid}";
+            return new ViResult<Guid>(ViResultTypes.Founded, user.Guid, methodName, message);
         }
         else
         {
-            guid = Guid.Empty;
-            return false;
+            string message = $"User with TgId {id} not found";
+            return new ViResult<Guid>(ViResultTypes.NotFoundDb, Guid.Empty, methodName, message);
         }
     }
 

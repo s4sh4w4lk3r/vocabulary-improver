@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Net.WebSockets;
 using ViAPI.Entities;
+using ViAPI.Other;
 
 namespace ViAPI.Database;
 
@@ -39,7 +40,7 @@ public partial class ViDbContext
         }
     }
 
-    public ViDictionary? UpdateDictionaryNameDb(Guid userGuid, Guid dictGuid, string newName)
+    public ViResult<ViDictionary> UpdateDictionaryNameDb(Guid userGuid, Guid dictGuid, string newName)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
         
@@ -49,11 +50,14 @@ public partial class ViDbContext
         {
             dict.Name = newName;
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Dict {dictGuid} new name is {newName}.");
-            return dict;
+            string message = $"Method {methodName}, Status: OK. Dict {dictGuid} new name is {newName}.";
+            return new ViResult<ViDictionary>(ViResultTypes.Updated, dict, methodName, message);
         }
-        Logger?.LogWarning($"Method {methodName}, Status: Fail. Dict {dictGuid} not found for user {userGuid}.");
-        return null;
+        else
+        {
+            string message = $"Method {methodName}, Status: Fail. Dict {dictGuid} not found for user {userGuid}.";
+            return new ViResult<ViDictionary>(ViResultTypes.NotFoundOrNoAffilationDb, null, methodName, message);
+        }
     }
     private Word? SaveEditedWord(Word word)
     {
@@ -81,11 +85,8 @@ public partial class ViDbContext
         }
 
     }
-    public enum RatingAction
-    {
-        Increase, Decrease
-    }
-    public Word? UpdateWordRatingDb(Guid userGuid, Guid wordGuid, RatingAction action)
+    
+    public ViResult<Word> UpdateWordRatingDb(Guid userGuid, Guid wordGuid, RatingAction action)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -97,13 +98,17 @@ public partial class ViDbContext
             if (action is RatingAction.Decrease) { word.DecreaseRating(); }
             SaveChanges();
 
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Word {wordGuid} updated.");
-            return word;
+            string message = $"Word {wordGuid} updated.";
+            return new ViResult<Word>(ViResultTypes.Updated, word, methodName, message);
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: Fail. The combination of User {userGuid} and word {wordGuid} not found.");
-            return null;
+            string message = $"The combination of User {userGuid} and word {wordGuid} not found.";
+            return new ViResult<Word>(ViResultTypes.NotFoundOrNoAffilationDb, word, methodName, message);
         }
     }
+}
+public enum RatingAction
+{
+    Increase, Decrease
 }

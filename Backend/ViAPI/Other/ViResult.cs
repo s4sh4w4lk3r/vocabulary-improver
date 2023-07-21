@@ -2,15 +2,22 @@
 
 public class ViResult<T>
 {
-    public StatusType Status { get; private set; }
-    public string Info { get; private set; }
+    public ViResultTypes ResultCode { get; private set; }
     public T? ResultValue { get; private set; }
-
-    public ViResult(StatusType status, T? value, string info = "")
+    public string MethodName { get; set; }
+    public string Message { get; set; }
+    public ViResult(ViResultTypes code, T? value, string methodName, string message = "")
     {
-        Status = status;
+        ResultCode = code;
         ResultValue = value;
-        Info = info;
+        MethodName = methodName;
+        Message = message;
     }
-    public enum StatusType { Ok, Fail}
+    public override string ToString() => $"Code: {ResultCode}({(int)ResultCode}), Value: {ResultValue}, Method: {MethodName}, Message: {Message}.";
+}
+public enum ViResultTypes
+{
+    Created, Removed, Updated, Founded,
+    BadGuid, GuidOK, GetGuidFromHttpOk, BadClaim,
+    NotFoundDb, NotFoundOrNoAffilationDb, UserExists
 }

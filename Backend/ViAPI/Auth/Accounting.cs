@@ -9,8 +9,6 @@ namespace ViAPI.Auth;
 
 public static class Accounting
 {
-    static ILogger Logger { get; set; } = Logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(nameof(Accounting));
-
     #region JWT.
     public static string GenerateJwt(Guid guid, int minutes = 10)
     {
@@ -57,21 +55,24 @@ public static class Accounting
     #endregion
 
     #region GUID
-    public static bool TryGetGuidFromContext(HttpContext http, out Guid userGuid)
+    public static ViResult<Guid> TryGetGuidFromHttpContext(HttpContext http)
     {
-        string methodName = nameof(TryGetGuidFromContext);
+        string methodName = nameof(TryGetGuidFromHttpContext);
 
         string? claimValue = http.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        bool guidOK = Guid.TryParse(claimValue, out userGuid);
+        if (claimValue is null) 
+        {
+            return new ViResult<Guid>(ViResultTypes.BadClaim, Guid.Empty, methodName, "Claim is null.");
+        }
+
+        bool guidOK = Guid.TryParse(claimValue, out Guid userGuid);
         if (guidOK is true)
         {
-            Logger.LogInformation($"Method {methodName}, Status OK. Guid: {userGuid}");
-            return guidOK;
+            return new ViResult<Guid>(ViResultTypes.GetGuidFromHttpOk, userGuid, methodName, "Guid is OK.");
         }
         else
         {
-            Logger.LogWarning($"Method {methodName}, Status Fail. Guid not getted.");
-            return guidOK;
+            return new ViResult<Guid>(ViResultTypes.BadGuid, Guid.Empty, methodName, "Bad guid parsing.");
         }
     }
     #endregion

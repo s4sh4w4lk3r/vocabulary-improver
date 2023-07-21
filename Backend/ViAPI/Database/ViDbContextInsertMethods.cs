@@ -5,7 +5,7 @@ namespace ViAPI.Database;
 
 public partial class ViDbContext
 {
-    public RegistredUser? AddRegistredUser(string username, string email, string firstname, string password)
+    public ViResult<RegistredUser> AddRegistredUser(string username, string email, string firstname, string password)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -15,17 +15,15 @@ public partial class ViDbContext
             RegistredUser user = new(Guid.NewGuid(), firstname, username, email, password);
             Users.Add(user);
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
-            return user;
+            return new ViResult<RegistredUser>(ViResultTypes.Created, user, methodName, "RegUser added.");
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status Fail. User email: {email}, login:{username} already exists.");
-            return null;
+            return new ViResult<RegistredUser>(ViResultTypes.UserExists, null, methodName, $"RegUser with username: {username} or {email} exists.");
         }
     }
 
-    public TelegramUser? AddTelegramUser(ulong telegramId, string firstname)
+    public ViResult<TelegramUser> AddTelegramUser(ulong telegramId, string firstname)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -35,17 +33,15 @@ public partial class ViDbContext
             TelegramUser user = new(Guid.NewGuid(), firstname, telegramId);
             Users.Add(user);
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
-            return user;
+            return new ViResult<TelegramUser>(ViResultTypes.Created, user, methodName, "TelegramUser added.");
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status FAIL. User tgid: {telegramId} already exists.");
-            return null;
+            return new ViResult<TelegramUser>(ViResultTypes.UserExists, null, methodName, $"TelegramUser with {telegramId} exists.");
         }
     }
 
-    public ViDictionary? AddDictionary(string name, Guid userGuid)
+    public ViResult<ViDictionary> AddDictionary(string name, Guid userGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -55,17 +51,17 @@ public partial class ViDbContext
             ViDictionary dict = new(Guid.NewGuid(), name, user.Guid);
             Dictionaries.Add(dict);
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Dictionary {dict.Guid} added.");
-            return dict;
+            string message = $"Dictionary {dict.Guid} added.";
+            return new ViResult<ViDictionary>(ViResultTypes.Created, dict, methodName, message);
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. User {userGuid} not found.");
-            return null;
+            string message = $"User {userGuid} not found.";
+            return new ViResult<ViDictionary>(ViResultTypes.NotFoundDb, null, methodName, message);
         }
     }
 
-    public Word? AddWord(Guid userGuid, string sourceWord, string targetWord, Guid dictGuid)
+    public ViResult<Word> AddWord(Guid userGuid, string sourceWord, string targetWord, Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -75,13 +71,13 @@ public partial class ViDbContext
             Word word = new Word(Guid.NewGuid(), sourceWord, targetWord, dictGuid, 0);
             Words.Add(word);
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Word {word.Guid} added.");
-            return word;
+            string message = $"Method {methodName}, Status: OK. Word {word.Guid} added.";
+            return new ViResult<Word>(ViResultTypes.Created, word, methodName, message);
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. The dictionary {dictGuid} does not belong to the user {userGuid}.");
-            return null;
+            string message = $"Method {methodName}, Status: FAIL. The dictionary {dictGuid} does not belong to the user {userGuid}.";
+            return new ViResult<Word>(ViResultTypes.NotFoundOrNoAffilationDb, null, methodName, message);
         }
     }
 }

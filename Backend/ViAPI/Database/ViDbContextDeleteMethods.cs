@@ -30,7 +30,7 @@ public partial class ViDbContext
             return false;
         }
     }
-    public bool RemoveDictionary(Guid userGuid, Guid dictGuid)
+    public ViResult<ViDictionary> RemoveDictionary(Guid userGuid, Guid dictGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -40,16 +40,16 @@ public partial class ViDbContext
         {
             Dictionaries.Remove(dict);
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Dictionary {dictGuid} removed.");
-            return true;
+            string message = $"Dictionary {dictGuid} removed.";
+            return new ViResult<ViDictionary>(ViResultTypes.Removed, dict, methodName, message);
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Dictionary {dictGuid} not found.");
-            return false;
+            string message = $"Dictionary {dictGuid} with {userGuid} not found.";
+            return new ViResult<ViDictionary>(ViResultTypes.NotFoundOrNoAffilationDb, dict, methodName, message);
         }
     }
-    public bool RemoveWord(Guid userGuid, Guid wordGuid)
+    public ViResult<Word> RemoveWord(Guid userGuid, Guid wordGuid)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
@@ -58,13 +58,13 @@ public partial class ViDbContext
         {
             Words.Remove(word);
             SaveChanges();
-            Logger?.LogInformation($"Method {methodName}, Status: OK. Word {wordGuid} removed.");
-            return true;
+            string message = $"Dictionary {wordGuid} removed.";
+            return new ViResult<Word>(ViResultTypes.Removed, word, methodName, message);
         }
         else
         {
-            Logger?.LogWarning($"Method {methodName}, Status: FAIL. Word {wordGuid} not found for user {userGuid}.");
-            return false;
+            string message = $"Word {wordGuid} with {userGuid} not found.";
+            return new ViResult<Word>(ViResultTypes.NotFoundOrNoAffilationDb, word, methodName, message);
         }
     }
 }
