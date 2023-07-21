@@ -117,7 +117,8 @@ public static class EndpointMethods
             bool userIdentifed = db.IdentifyUser(username, password, out Guid guid);
             if (userIdentifed is true)
             {
-                return Results.Ok(Accounting.GenerateJwt(guid, 20));
+                string jwt = Accounting.GenerateJwt(guid, 20);
+                return Results.Ok(new { jwt });
             }
             else
             {
@@ -283,42 +284,69 @@ public static class EndpointMethods
     }
     public async static Task<IResult> RegisterTelegramUser(HttpContext http, ViDbContext db)
     {
-        if (http.Request.HasJsonContentType() is false) { return Results.BadRequest("Bad content-type."); }
+        if (http.Request.HasJsonContentType() is false) 
+        { 
+            return Results.BadRequest("Bad content-type."); 
+        }
 
         TelegramUserJson? userJson = await http.Request.ReadFromJsonAsync<TelegramUserJson>();
-
         bool idOk = ulong.TryParse(userJson?.TelegramId, out ulong id);
-        bool firstnameOk = InputChecker.CheckString(userJson?.Firstname) && userJson?.Firstname?.Length < 255;
+        if (idOk is false)
+        {
+            return Results.BadRequest("TelgramId bad parse.");
+        }
 
-        if (firstnameOk && idOk is true)
+
+        bool firstnameOk = InputChecker.CheckString(userJson?.Firstname) && userJson?.Firstname?.Length < 255;
+        if (firstnameOk is true)
         {
             var user = db.AddTelegramUser(id, userJson?.Firstname!);
 
-            return user is not null ? Results.Ok($"User {user.Guid} added.") : Results.BadRequest("User maybe already exists.");
+            if (user is not null) 
+            { 
+                return Results.Ok($"User {user.Guid} added.");
+            }
+            else 
+            {
+                return Results.BadRequest("Bad response from database."); 
+            }
         }
-        return Results.BadRequest("Bad input.");
+        return Results.BadRequest("Firstname bad format or length > 254.");
     }
     public async static Task<IResult> RegisterRegistredUser(HttpContext http, ViDbContext db)
     {
-        if (http.Request.HasJsonContentType() is false) { return Results.BadRequest("Bad content-type."); }
+        if (http.Request.HasJsonContentType() is false) 
+        { 
+            return Results.BadRequest("Bad content-type."); 
+        }
 
         RegistredUserJson? userJson = await http.Request.ReadFromJsonAsync<RegistredUserJson>();
 
         bool emailOk = userJson is not null ? userJson.Email.IsEmail() : false;
+        if (emailOk is false) 
+        {
+            Results.BadRequest("Bad email format."); 
+        }
 
         bool stringsOk = InputChecker.CheckString(userJson?.Username, userJson?.Password, userJson?.Firstname);
-
-        if (stringsOk && emailOk is true)
+        if (stringsOk is false) 
         {
-            string username = userJson!.Username!;
-            string email = userJson!.Email!;
-            string firstname = userJson!.Firstname!;
-            string hash = Accounting.GenerateHash(userJson!.Password!);
-
-            var user = db.AddRegistredUser(username, email, firstname, hash);
-
-            return user is not null ? Results.Ok($"User {user.Guid} added.") : Results.BadRequest("User maybe already exists.");
+            Results.BadRequest("Username || password || firstname is null, empty, or contain whitespace."); 
         }
-        return Results.BadRequest("Bad input.");
+
+        string username = userJson!.Username!;
+        string email = userJson!.Email!;
+        string firstname = userJson!.Firstname!;
+        string hash = Accounting.GenerateHash(userJson!.Password!);
+
+        RegistredUser? user = db.AddRegistredUser(username, email, firstname, hash);
+        if (user is not null) 
+        {
+            return Results.Ok($"User {user.Guid} added."); 
+        } 
+        else 
+        { 
+            return Results.BadRequest("User maybe already exists."); 
+        }
     }
 }

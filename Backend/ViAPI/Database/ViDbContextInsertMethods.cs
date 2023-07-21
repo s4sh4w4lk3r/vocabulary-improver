@@ -8,8 +8,8 @@ public partial class ViDbContext
     public RegistredUser? AddRegistredUser(string username, string email, string firstname, string password)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
-        bool userExists = Set<RegistredUser>().Any(u => u.Username == username || u.Email == email);
 
+        bool userExists = Set<RegistredUser>().Any(u => u.Username == username || u.Email == email);
         if (userExists is false)
         {
             RegistredUser user = new(Guid.NewGuid(), firstname, username, email, password);
@@ -18,15 +18,18 @@ public partial class ViDbContext
             Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
             return user;
         }
-        Logger?.LogWarning($"Method {methodName}, Status Fail. User email: {email}, login:{username} already exists.");
-        return null;
+        else
+        {
+            Logger?.LogWarning($"Method {methodName}, Status Fail. User email: {email}, login:{username} already exists.");
+            return null;
+        }
     }
 
     public TelegramUser? AddTelegramUser(ulong telegramId, string firstname)
     {
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
-        bool userExists = Set<TelegramUser>().Any(u=> u.TelegramId == telegramId);
 
+        bool userExists = Set<TelegramUser>().Any(u=> u.TelegramId == telegramId);
         if (userExists is false) 
         {
             TelegramUser user = new(Guid.NewGuid(), firstname, telegramId);
@@ -35,8 +38,11 @@ public partial class ViDbContext
             Logger?.LogInformation($"Method {methodName}, Status OK. User {user.Guid} added.");
             return user;
         }
-        Logger?.LogWarning($"Method {methodName}, Status FAIL. User tgid: {telegramId} already exists.");
-        return null;
+        else
+        {
+            Logger?.LogWarning($"Method {methodName}, Status FAIL. User tgid: {telegramId} already exists.");
+            return null;
+        }
     }
 
     public ViDictionary? AddDictionary(string name, Guid userGuid)
@@ -44,7 +50,6 @@ public partial class ViDbContext
         string methodName = System.Reflection.MethodBase.GetCurrentMethod()!.Name;
 
         User? user = Users.Where(e => e.Guid == userGuid).FirstOrDefault();
-
         if (user is not null)
         {
             ViDictionary dict = new(Guid.NewGuid(), name, user.Guid);
