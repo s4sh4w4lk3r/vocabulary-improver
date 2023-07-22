@@ -9,7 +9,7 @@ namespace ViAPI.Other;
 
 public static class EndpointMethods
 {
-    private const int JWT_DURATION_MINUTES = 17280; //(24 hours).
+    private const int JWT_DURATION_MINUTES = 1440; //(24 hours).
     public static IResult GetDictsByUserFromContext(HttpContext http, ViDbContext db)
     {
         ViResult<Guid> userGuidResult = Accounting.TryGetGuidFromHttpContext(http);
