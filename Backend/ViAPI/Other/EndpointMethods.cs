@@ -9,6 +9,7 @@ namespace ViAPI.Other;
 
 public static class EndpointMethods
 {
+    private const int JWT_DURATION_MINUTES = 17280; //(24 hours).
     public static IResult GetDictsByUserFromContext(HttpContext http, ViDbContext db)
     {
         ViResult<Guid> userGuidResult = Accounting.TryGetGuidFromHttpContext(http);
@@ -95,7 +96,7 @@ public static class EndpointMethods
             Results.BadRequest(userGuidResult);
         }
 
-        string jwt = Accounting.GenerateJwt(guid);
+        string jwt = Accounting.GenerateJwt(guid, JWT_DURATION_MINUTES);
         return Results.Ok(new { jwt });
     }
     public async static Task<IResult> GetJwtByLoginAsync(HttpContext http, ViDbContext db)
@@ -123,7 +124,7 @@ public static class EndpointMethods
             bool userIdentifed = db.IdentifyUser(username, password, out Guid guid);
             if (userIdentifed is true)
             {
-                string jwt = Accounting.GenerateJwt(guid, 20);
+                string jwt = Accounting.GenerateJwt(guid, JWT_DURATION_MINUTES);
                 return Results.Ok(new { jwt });
             }
             else

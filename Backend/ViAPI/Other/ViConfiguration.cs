@@ -8,7 +8,6 @@ public static class ViConfiguration
     {
         MySql,
         TelegramToken,
-        APIHostname,
         JWTKey
     }
     public static string GetSecretString(SecretType type)
@@ -24,16 +23,6 @@ public static class ViConfiguration
                 string connstring = builder.GetConnectionString("MySql")!;
                 InputChecker.CheckStringException(connstring);
                 return connstring;
-
-            case SecretType.TelegramToken:
-                string token = builder.GetRequiredSection("Tokens")["TelegramBot"]!;
-                InputChecker.CheckStringException(token);
-                return token;
-
-            case SecretType.APIHostname:
-                string hostname = builder.GetRequiredSection("Hostnames")["API"]!;
-                InputChecker.CheckStringException(hostname);
-                return hostname;
 
             case SecretType.JWTKey:
                 string key = builder.GetRequiredSection("JWT")["SecurityKey"]!;
