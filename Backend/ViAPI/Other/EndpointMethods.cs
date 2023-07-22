@@ -154,7 +154,7 @@ public static class EndpointMethods
         ViResult<ViDictionary> dictResult = db.AddDictionary(name, userGuid);
         if (dictResult.ResultValue is not null && dictResult.ResultCode is ViResultTypes.Created)
         {
-            return Results.Ok($"Dict {dictResult.ResultValue.Guid} added.");
+            return Results.Ok( new {dictGuid = dictResult.ResultValue.Guid });
         }
         else
         {
@@ -179,7 +179,7 @@ public static class EndpointMethods
         ViResult<ViDictionary> removedResult = db.RemoveDictionary(userGuid, dictGuid);
         if (removedResult.ResultCode is ViResultTypes.Removed && removedResult.ResultValue is not null)
         {
-            return Results.Ok($"Dict {dictGuid} removed.");
+            return Results.Ok(new {dictGuid = removedResult.ResultValue.Guid });
         }
         else
         {
@@ -211,7 +211,7 @@ public static class EndpointMethods
         ViResult<ViDictionary> dictResult = db.UpdateDictionaryNameDb(userGuid, dictGuid, name);
         if (dictResult.ResultCode is ViResultTypes.Updated && dictResult.ResultValue is not null)
         {
-            return Results.Ok($"New dict name is {dictResult.ResultValue.Name}.");
+            return Results.Ok(new {dictGuid, name = dictResult.ResultValue.Name });
         }
         else
         {
@@ -262,7 +262,7 @@ public static class EndpointMethods
             ViResult<Word> wordResult = db.AddWord(userGuid, sourceWord, targetWord, dictGuid);
             if (wordResult.ResultValue is not null && wordResult.ResultCode is ViResultTypes.Created)
             {
-                return Results.Ok($"Word {wordResult.ResultValue.Guid} added in dict {wordResult.ResultValue.DictionaryGuid}.");
+                return Results.Ok(new { wordGuid = wordResult.ResultValue.Guid, dictGuid = wordResult.ResultValue.DictionaryGuid});
             }
             else
             {
@@ -290,9 +290,9 @@ public static class EndpointMethods
         }
 
         ViResult<Word> removeResult = db.RemoveWord(userGuid, wordGuid);
-        if (removeResult.ResultCode is ViResultTypes.Removed)
+        if (removeResult.ResultCode is ViResultTypes.Removed && removeResult.ResultValue is not null)
         { 
-            return Results.Ok($"Word {wordGuid} removed."); 
+            return Results.Ok( new {wordGuid = removeResult.ResultValue.Guid }); 
         }
         else
         {
@@ -325,7 +325,7 @@ public static class EndpointMethods
 
             if (addUserResult.ResultCode == ViResultTypes.Created && (addUserResult.ResultValue is not null) is true)
             {
-                return Results.Ok($"User {addUserResult.ResultValue.Guid} added.");
+                return Results.Ok(new {userGuid = addUserResult.ResultValue.Guid });
             }
             else
             {
@@ -368,7 +368,7 @@ public static class EndpointMethods
             ViResult<RegistredUser> addUserResult = db.AddRegistredUser(username, email, firstname, hash);
             if (addUserResult.ResultCode == ViResultTypes.Created && addUserResult.ResultValue is not null)
             {
-                return Results.Ok($"User {addUserResult.ResultValue.Guid} added.");
+                return Results.Ok(new { userGuid = addUserResult.ResultValue.Guid });
             }
             else
             {

@@ -46,7 +46,7 @@ public partial class ViDbContext
         else
         {
             string message = $"Dictionary {dictGuid} with {userGuid} not found.";
-            return new ViResult<ViDictionary>(ViResultTypes.NotFoundOrNoAffilationDb, dict, methodName, message);
+            return new ViResult<ViDictionary>(ViResultTypes.NotFoundOrNoAffilationDb, null, methodName, message);
         }
     }
     public ViResult<Word> RemoveWord(Guid userGuid, Guid wordGuid)
@@ -64,7 +64,7 @@ public partial class ViDbContext
         else
         {
             string message = $"Word {wordGuid} with {userGuid} not found.";
-            return new ViResult<Word>(ViResultTypes.NotFoundOrNoAffilationDb, word, methodName, message);
+            return new ViResult<Word>(ViResultTypes.NotFoundOrNoAffilationDb, null, methodName, message);
         }
     }
 }
