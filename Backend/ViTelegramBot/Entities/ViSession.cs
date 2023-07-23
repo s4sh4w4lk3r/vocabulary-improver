@@ -1,14 +1,14 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 
-namespace ViTelegramBot;
+namespace ViTelegramBot.Entities;
 
 public class ViSession
 {
-    public ulong TelegramId { get; }
+    public long TelegramId { get; }
     public string JwtToken { get; }
-    public DateTime TokenExpiration { get; private set; } 
+    public DateTime TokenExpiration { get; private set; }
 
-    public ViSession(ulong telegramId, string jwtToken)
+    public ViSession(long telegramId, string jwtToken)
     {
         TelegramId = telegramId;
         JwtToken = jwtToken;

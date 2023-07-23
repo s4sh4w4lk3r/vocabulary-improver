@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections;
 
-namespace ViTelegramBot;
+namespace ViTelegramBot.Entities;
 
 public class ViSessionList : ICollection<ViSession>
 {
@@ -33,13 +33,13 @@ public class ViSessionList : ICollection<ViSession>
 
     public bool IsReadOnly => false;
 
-    public void Add(ViSession item) 
+    public void Add(ViSession item)
     {
         ViSessions.Add(item);
         SaveJson();
     }
 
-    public void Clear() 
+    public void Clear()
     {
         ViSessions.Clear();
         SaveJson();
@@ -51,8 +51,8 @@ public class ViSessionList : ICollection<ViSession>
 
     public IEnumerator<ViSession> GetEnumerator() => ViSessions.GetEnumerator();
 
-    public bool Remove(ViSession item) 
-    { 
+    public bool Remove(ViSession item)
+    {
         bool removed = ViSessions.Remove(item);
         SaveJson();
         return removed;
