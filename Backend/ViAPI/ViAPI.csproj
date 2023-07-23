@@ -18,6 +18,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="run.bat" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Auth\" />
   </ItemGroup>
 

@@ -12,6 +12,7 @@ public static class Accounting
     #region JWT.
     public static string GenerateJwt(Guid guid, int minutes = 10)
     {
+        if (guid.IsNotEmpty() is false) { throw new ArgumentException("Guid is empty.");  }
         var claims = new List<Claim> { new Claim(ClaimTypes.NameIdentifier, guid.ToString()) };
         var jwt = new JwtSecurityToken(
                 issuer: Issuer,

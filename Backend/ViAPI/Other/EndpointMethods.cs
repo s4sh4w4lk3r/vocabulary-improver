@@ -86,14 +86,14 @@ public static class EndpointMethods
         bool tgIdOk = ulong.TryParse(idString, out ulong id);
         if (tgIdOk is false)
         {
-            Results.BadRequest($"Can't parse TelegramId: {idString}.");
+            return Results.BadRequest($"Can't parse TelegramId: {idString}.");
         }
 
         ViResult<Guid> userGuidResult = db.TryGetGuidFromTgId(id);
         Guid guid = userGuidResult.ResultValue;
         if (userGuidResult.ResultCode is ViResultTypes.NotFoundDb)
         {
-            Results.BadRequest(userGuidResult);
+            return Results.BadRequest(userGuidResult);
         }
 
         string jwt = Accounting.GenerateJwt(guid, JWT_DURATION_MINUTES);
@@ -352,13 +352,13 @@ public static class EndpointMethods
             bool emailOk = userJson is not null ? userJson.Email.IsEmail() : false;
             if (emailOk is false)
             {
-                Results.BadRequest("Bad email format.");
+                return Results.BadRequest("Bad email format.");
             }
 
             bool stringsOk = InputChecker.CheckString(userJson?.Username, userJson?.Password, userJson?.Firstname);
             if (stringsOk is false)
             {
-                Results.BadRequest("Username || password || firstname is null, empty, or contain whitespace.");
+                return Results.BadRequest("Username || password || firstname is null, empty, or contain whitespace.");
             }
 
             string username = userJson!.Username!;
