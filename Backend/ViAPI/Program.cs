@@ -18,6 +18,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 
+app.MapGet("/", () => Results.Ok("Hello World.")); 
+
 app.MapGet("/api/auth/login/tg/{telegramid}", (ViDbContext db, string telegramid) => EndpointMethods.GetJwtByTelegramId(db, telegramid)); 
 app.MapPost("/api/auth/register/tg", (HttpContext http, ViDbContext db) => EndpointMethods.RegisterTelegramUserAsync(http, db)); 
 

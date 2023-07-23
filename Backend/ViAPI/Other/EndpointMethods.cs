@@ -97,7 +97,7 @@ public static class EndpointMethods
         }
 
         string jwt = Accounting.GenerateJwt(guid, JWT_DURATION_MINUTES);
-        return Results.Ok(new { jwt });
+        return Results.Ok(new { jwttoken = jwt });
     }
     public async static Task<IResult> GetJwtByLoginAsync(HttpContext http, ViDbContext db)
     {
@@ -125,7 +125,7 @@ public static class EndpointMethods
             if (userIdentifed is true)
             {
                 string jwt = Accounting.GenerateJwt(guid, JWT_DURATION_MINUTES);
-                return Results.Ok(new { jwt });
+                return Results.Ok(new { jwttoken = jwt });
             }
             else
             {
