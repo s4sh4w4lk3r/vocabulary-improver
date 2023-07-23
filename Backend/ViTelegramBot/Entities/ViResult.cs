@@ -17,5 +17,7 @@ public class ViResult<T>
 }
 public enum ViResultTypes
 {
-    Founded, NotFounded, BadInput
+    Founded, NotFounded, BadInput, 
+    Created, Removed, Updated, 
+    Fail,
 }

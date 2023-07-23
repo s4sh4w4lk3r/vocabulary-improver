@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using System.Reflection;
 using Telegram.Bot.Types;
 using ViTelegramBot.Entities;
 using ViTelegramBot.Http;
@@ -14,34 +15,23 @@ public class ViApiClient
         SessionList = new ViSessionList(sessionListPath);
         ApiHttpClient = new ViApiHttpClient(hostname);
     }
-/*    public ViResult<object> GetDicts(ChatId id)
+
+    private async Task<ViResult<string>> GetJwtAsync(long id)
     {
-        string methodName = nameof(GetDicts);
-
-        ViResult<string> jwtResult = GetJwt(id);
-        if (jwtResult.ResultCode is ViResultTypes.NotFounded && jwtResult.ResultValue is null)
-        {
-            return new ViResult<object>(ViResultTypes.NotFounded, null, methodName, jwtResult.Message);
-        }
-
-        HttpClient httpClient = new HttpClient();
-
-
-    }*/
-    public ViResult<string> GetJwt(long id)
-    {
-        string methodName = nameof(GetJwt);
+        string methodName = nameof(GetJwtAsync);
 
         ViSession? session = SessionList.Where(s => s.TelegramId == id).FirstOrDefault();
-        
+
         if (session is not null && (session.IsNotExpried() is true)) //Если Jwt есть в сессиях и действителен
         {
             return new ViResult<string>(ViResultTypes.Founded, session.JwtToken, methodName, $"Jwt for chatId: {id} was found in local storage.");
         }
 
+        Task<ViResult<string>> getJwtTask = ApiHttpClient.GetJwtFromApiAsync(id);
+
         if (session is not null && (session.IsNotExpried() is false)) //Если Jwt есть в сессиях, но устарел
         {
-            ViResult<string> apiResult = ApiHttpClient.GetJwtFromApi(id);
+            ViResult<string> apiResult = await getJwtTask;
             if (apiResult.ResultCode is ViResultTypes.Founded && apiResult.ResultValue is not null)
             {
                 string jwtToken = apiResult.ResultValue;
@@ -51,19 +41,36 @@ public class ViApiClient
             }
         }
 
-
-        { ViResult<string> apiResult = ApiHttpClient.GetJwtFromApi(id);
-        if (apiResult.ResultCode is ViResultTypes.Founded && apiResult.ResultValue is not null)
         {
-            string jwtToken = apiResult.ResultValue;
-            SessionList.Add(new ViSession(id, jwtToken));
-            return new ViResult<string>(ViResultTypes.Founded, jwtToken, methodName, $"Jwt for chatId: {id} was found in API database and added locally.");
-        }}
-
+            ViResult<string> apiResult = await getJwtTask;
+            if (apiResult.ResultCode is ViResultTypes.Founded && apiResult.ResultValue is not null)
+            {
+                string jwtToken = apiResult.ResultValue;
+                SessionList.Add(new ViSession(id, jwtToken));
+                return new ViResult<string>(ViResultTypes.Founded, jwtToken, methodName, $"Jwt for chatId: {id} was found in API database and added locally.");
+            }
+        }
 
         return new ViResult<string>(ViResultTypes.NotFounded, null!, methodName, $"Jwt for chatId: {id} was not found.");
+    }
 
+    public async Task<ViResult<string>> SignUpUserAsync(long id, string firstname)
+    {
+        string methodName = nameof(SignUpUserAsync);
 
+        ViResult<string> tryGetJwtResult = await GetJwtAsync(id);
+        if (tryGetJwtResult.ResultCode is ViResultTypes.Founded && tryGetJwtResult.ResultValue is not null)
+        {
+            return new ViResult<string>(ViResultTypes.Founded, tryGetJwtResult.ResultValue, methodName, $"Jwt for chatId: {id} already exists.");
+        }
 
+        ViResult<string> addApiResult = await ApiHttpClient.AddNewUser(id, firstname);
+        if (addApiResult.ResultCode is ViResultTypes.Created && addApiResult.ResultValue is not null)
+        {
+            addApiResult.MethodName = methodName;
+            return addApiResult;
+        }
+
+        return new ViResult<string>(ViResultTypes.Fail, null, methodName, $"The user chatid:{id} was not able to add.");
     }
 }

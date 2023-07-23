@@ -9,9 +9,9 @@ var configuration = new ConfigurationBuilder().AddJsonFile(confPath).Build();
 string hostname = configuration.GetSection("Hostname").Value!;
 string token = configuration.GetSection("Token").Value!;
 long chatId64 = long.Parse(configuration.GetSection("ChatId").Value!);
+
 ChatId chatId = new(chatId64);
 
 var api = new ViApiClient(hostname, sessionsPath);
 
-var results = api.GetJwt(chatId64);
-Console.WriteLine();
+api.SignUpUserAsync(12345, "Миша").Wait();
