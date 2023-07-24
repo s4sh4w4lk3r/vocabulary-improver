@@ -14,4 +14,5 @@ ChatId chatId = new(chatId64);
 
 var api = new ViApiClient(hostname, sessionsPath);
 
-api.SignUpUserAsync(12345, "Миша").Wait();
+var a = await api.GetDictList(chatId64);
+Console.WriteLine();
