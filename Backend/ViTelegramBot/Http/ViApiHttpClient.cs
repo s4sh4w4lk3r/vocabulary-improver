@@ -2,7 +2,6 @@
 using ViTelegramBot.Http.JsonEntites;
 using ViTelegramBot.Entities;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
 
 namespace ViTelegramBot.Http;
 
@@ -57,9 +56,9 @@ public class ViApiHttpClient
         }
         return new ViResult<string>(ViResultTypes.NotFounded, null, methodName, $"Jwt for chatId: {id} was not recieved from API.");
     }
-    public async Task<ViResult<string>> AddNewUserApi(long id, string firstname)
+    public async Task<ViResult<string>> AddUserToApi(long id, string firstname)
     {
-        string methodName = nameof(AddNewUserApi);
+        string methodName = nameof(AddUserToApi);
 
         string url = $"{hostname}/api/auth/register/tg";
 
@@ -79,9 +78,9 @@ public class ViApiHttpClient
         }
         return new ViResult<string>(ViResultTypes.Fail, null, methodName, $"User not added in db.");
     }
-    public async Task<ViResult<List<ViDictionary>>> GetDictsApiAsync(long id, string jwt)
+    public async Task<ViResult<List<ViDictionary>>> GetDictsFromApiAsync(string jwt)
     {
-        string methodName = nameof(GetDictsApiAsync);
+        string methodName = nameof(GetDictsFromApiAsync);
         string url = $"{hostname}/api/dicts/get";
 
         httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
@@ -103,5 +102,23 @@ public class ViApiHttpClient
             }
         }
         return new ViResult<List<ViDictionary>>(ViResultTypes.NotFounded, null, methodName, $"Do dicts recieved.");
+    }
+    public async Task<ViResult<Guid>> AddNewDictToApiAsync(string jwt, string dictName)
+    {
+        string methodName = nameof(AddNewDictToApiAsync);
+        string url = $"{hostname}/api/dicts/add/{dictName}";
+
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await httpClient.GetAsync(url);
+        if (response.IsSuccessStatusCode)
+        {
+            ViDictionary? dict = await response.Content.ReadFromJsonAsync<ViDictionary>();
+            if (dict is not null && dict.DictGuid != Guid.Empty)
+            {
+                return new ViResult<Guid>(ViResultTypes.Created, dict.DictGuid, methodName, $"Dict with name {dictName} created. Guid is {dict.DictGuid}.");
+            }
+        }
+        
+        return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, $"Dict doesnt created. Http status code: {response.StatusCode}");
     }
 }

@@ -6,5 +6,5 @@ using System.Threading.Tasks;
 
 namespace ViTelegramBot.Http.JsonEntites
 {
-    public record class ViDictionary(string Name, Guid Guid);
+    public record class ViDictionary(string? Name, Guid DictGuid);
 }

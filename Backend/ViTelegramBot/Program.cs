@@ -14,5 +14,7 @@ ChatId chatId = new(chatId64);
 
 var api = new ViApiClient(hostname, sessionsPath);
 
-var a = await api.GetDictList(chatId64);
+var a = await api.AddDictionary(chatId64, "Мой слоdварик");
 Console.WriteLine();
+
+#error сделать добавление и изменение имени словаря не через url строку, а через json, чтобы можно любоые названия юзать.

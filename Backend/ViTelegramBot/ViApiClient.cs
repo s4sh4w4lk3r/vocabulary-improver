@@ -17,7 +17,8 @@ public class ViApiClient
         ApiHttpClient = new ViApiHttpClient(hostname);
     }
 
-    public async Task<ViResult<string>> GetJwtAsync(long id)
+
+    private async Task<ViResult<string>> GetJwtAsync(long id)
     {
         string methodName = nameof(GetJwtAsync);
 
@@ -64,7 +65,7 @@ public class ViApiClient
             return new ViResult<string>(ViResultTypes.Founded, tryGetJwtResult.ResultValue, methodName, $"Jwt for chatId: {id} already exists.");
         }
 
-        ViResult<string> addApiResult = await ApiHttpClient.AddNewUserApi(id, firstname);
+        ViResult<string> addApiResult = await ApiHttpClient.AddUserToApi(id, firstname);
         if (addApiResult.ResultCode is ViResultTypes.Created && addApiResult.ResultValue is not null)
         {
             addApiResult.MethodName = methodName;
@@ -73,6 +74,7 @@ public class ViApiClient
 
         return new ViResult<string>(ViResultTypes.Fail, null, methodName, $"The user chatid:{id} was not able to add.");
     }
+    
     public async Task<ViResult<List<ViDictionary>>> GetDictList(long id)
     {
         string methodName = nameof(GetDictList);
@@ -86,7 +88,7 @@ public class ViApiClient
         if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
         {
             string jwt = getJwtResult.ResultValue;
-            ViResult<List<ViDictionary>> getDictsResult = await ApiHttpClient.GetDictsApiAsync(id, jwt);
+            ViResult<List<ViDictionary>> getDictsResult = await ApiHttpClient.GetDictsFromApiAsync(jwt);
             if (getDictsResult.ResultCode is ViResultTypes.Founded && getDictsResult.ResultValue is not null)
             {
                 return new ViResult<List<ViDictionary>>(ViResultTypes.Founded, getDictsResult.ResultValue, methodName, $"Dict found, Capacity: {getDictsResult.ResultValue.Count}.");
@@ -94,5 +96,31 @@ public class ViApiClient
         }
 
         return new ViResult<List<ViDictionary>>(ViResultTypes.NotFounded, null, methodName, $"Bad response from API.");
+    }
+
+    public async Task<ViResult<Guid>> AddDictionary(long id, string dictName)
+    {
+        string methodName = nameof(AddDictionary);
+
+        ViResult<string> getJwtResult = await GetJwtAsync(id);
+        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        {
+            return new ViResult<Guid>(ViResultTypes.NotFounded, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
+        }
+
+        if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
+        {
+            string jwt = getJwtResult.ResultValue;
+            ViResult<Guid> addDictResult = await ApiHttpClient.AddNewDictToApiAsync(jwt, dictName);
+            if (addDictResult.ResultCode is ViResultTypes.Created && addDictResult.ResultValue != Guid.Empty)
+            {
+                return new ViResult<Guid>(ViResultTypes.Created, addDictResult.ResultValue, methodName, $"Dict with name {dictName} created. Guid is {addDictResult.ResultValue}.");
+            }
+            else
+            {
+                return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, addDictResult.Message);
+            }
+        }
+        return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
     }
 }
