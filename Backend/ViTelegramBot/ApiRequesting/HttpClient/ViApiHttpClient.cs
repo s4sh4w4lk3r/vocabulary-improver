@@ -51,10 +51,10 @@ public partial class ViApiHttpClient
             ApiResponse? apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
             if (apiResponse is not null)
             { 
-                return new ViResult<string>(ViResultTypes.NotFounded, apiResponse.ResultValue, methodName, apiResponse.Message);
+                return new ViResult<string>(ViResultTypes.Fail, apiResponse.ResultValue, methodName, apiResponse.Message);
             }
         }
-        return new ViResult<string>(ViResultTypes.NotFounded, null, methodName, $"Jwt for chatId: {id} was not recieved from API.");
+        return new ViResult<string>(ViResultTypes.Fail, null, methodName, $"Jwt for chatId: {id} was not recieved from API.");
     }
     public async Task<ViResult<string>> AddUserToApi(long id, string firstname)
     {

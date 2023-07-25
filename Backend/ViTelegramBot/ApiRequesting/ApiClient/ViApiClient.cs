@@ -52,7 +52,7 @@ public partial class ViApiClient
             }
         }
 
-        return new ViResult<string>(ViResultTypes.NotFounded, null!, methodName, $"Jwt for chatId: {id} was not found.");
+        return new ViResult<string>(ViResultTypes.Fail, null!, methodName, $"Jwt for chatId: {id} was not found.");
     }
 
     public async Task<ViResult<string>> SignUpUserAsync(long id, string firstname)

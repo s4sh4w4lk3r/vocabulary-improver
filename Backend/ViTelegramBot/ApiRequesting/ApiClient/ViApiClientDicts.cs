@@ -10,9 +10,9 @@ public partial class ViApiClient
         string methodName = nameof(GetDictList);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
-        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
         {
-            return new ViResult<List<ViDictionary>>(ViResultTypes.NotFounded, null, methodName, $"Jwt for chatId: {id} not found.");
+            return new ViResult<List<ViDictionary>>(ViResultTypes.Fail, null, methodName, $"Jwt for chatId: {id} not found.");
         }
 
         if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
@@ -25,7 +25,7 @@ public partial class ViApiClient
             }
         }
 
-        return new ViResult<List<ViDictionary>>(ViResultTypes.NotFounded, null, methodName, $"Bad response from API.");
+        return new ViResult<List<ViDictionary>>(ViResultTypes.Fail, null, methodName, $"Bad response from API.");
     }
 
     public async Task<ViResult<Guid>> AddDictionary(long id, string dictName)
@@ -33,9 +33,9 @@ public partial class ViApiClient
         string methodName = nameof(AddDictionary);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
-        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
         {
-            return new ViResult<Guid>(ViResultTypes.NotFounded, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
+            return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
         }
 
         if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
@@ -59,9 +59,9 @@ public partial class ViApiClient
         string methodName = nameof(RemoveDictionary);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
-        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
         {
-            return new ViResult<Guid>(ViResultTypes.NotFounded, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
+            return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
         }
 
         if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
@@ -84,9 +84,9 @@ public partial class ViApiClient
         string methodName = nameof(UpdateDictName);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
-        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
         {
-            return new ViResult<Guid>(ViResultTypes.NotFounded, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
+            return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
         }
 
         if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)

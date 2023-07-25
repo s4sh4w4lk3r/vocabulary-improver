@@ -32,10 +32,10 @@ public partial class ViApiHttpClient
             ApiResponse? apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
             if (apiResponse is not null)
             {
-                return new ViResult<List<ViDictionary>>(ViResultTypes.NotFounded, null, methodName, apiResponse.Message);
+                return new ViResult<List<ViDictionary>>(ViResultTypes.Fail, null, methodName, apiResponse.Message);
             }
         }
-        return new ViResult<List<ViDictionary>>(ViResultTypes.NotFounded, null, methodName, $"Do dicts recieved.");
+        return new ViResult<List<ViDictionary>>(ViResultTypes.Fail, null, methodName, $"Do dicts recieved.");
     }
     public async Task<ViResult<Guid>> AddNewDictToApiAsync(string jwt, string dictName)
     {
