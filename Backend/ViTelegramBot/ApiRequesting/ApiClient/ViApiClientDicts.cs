@@ -53,4 +53,30 @@ public partial class ViApiClient
         }
         return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
     }
+
+    public async Task<ViResult<Guid>> RemoveDictionary(long id, Guid dictGuid)
+    {
+        string methodName = nameof(RemoveDictionary);
+
+        ViResult<string> getJwtResult = await GetJwtAsync(id);
+        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        {
+            return new ViResult<Guid>(ViResultTypes.NotFounded, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
+        }
+
+        if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
+        {
+            string jwt = getJwtResult.ResultValue;
+            ViResult<Guid> removeDictResult = await ApiHttpClient.RemoveDictFromApiAsync(jwt, dictGuid);
+            if (removeDictResult.ResultCode is ViResultTypes.Removed && removeDictResult.ResultValue != Guid.Empty)
+            {
+                return new ViResult<Guid>(ViResultTypes.Removed, removeDictResult.ResultValue, methodName, $"Dict {dictGuid} has been removed.");
+            }
+            else
+            {
+                return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, removeDictResult.Message);
+            }
+        }
+        return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
+    }
 }

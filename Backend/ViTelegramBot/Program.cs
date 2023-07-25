@@ -14,5 +14,5 @@ ChatId chatId = new(chatId64);
 
 var api = new ViApiClient(hostname, sessionsPath);
 
-var a = await api.AddDictionary(chatId64, "hahA(-=_d)");
+var a = await api.RemoveDictionary(chatId64, Guid.Parse("06f4b053-9b58-41bc-9519-6bb67a87a794"));
 Console.WriteLine();
