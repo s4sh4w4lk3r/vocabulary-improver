@@ -79,4 +79,30 @@ public partial class ViApiClient
         }
         return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
     }
+    public async Task<ViResult<Guid>> UpdateDictName(long id, Guid dictGuid, string newName)
+    {
+        string methodName = nameof(UpdateDictName);
+
+        ViResult<string> getJwtResult = await GetJwtAsync(id);
+        if (getJwtResult.ResultCode is ViResultTypes.NotFounded || getJwtResult.ResultValue is null)
+        {
+            return new ViResult<Guid>(ViResultTypes.NotFounded, Guid.Empty, methodName, $"Jwt for chatId: {id} not found.");
+        }
+
+        if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
+        {
+            string jwt = getJwtResult.ResultValue;
+            ViResult<Guid> updateDictResult = await ApiHttpClient.UpdateDictNameApi(jwt, dictGuid, newName);
+            if (updateDictResult.ResultCode is ViResultTypes.Updated && updateDictResult.ResultValue != Guid.Empty)
+            {
+                return new ViResult<Guid>(ViResultTypes.Updated, updateDictResult.ResultValue, methodName, $"Dict {dictGuid} has been updated.");
+            }
+            else
+            {
+                return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, updateDictResult.Message);
+            }
+        }
+
+        return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
+    }
 }

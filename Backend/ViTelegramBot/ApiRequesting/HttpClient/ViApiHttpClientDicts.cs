@@ -85,4 +85,34 @@ public partial class ViApiHttpClient
         }
         return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, $"Dict doesnt removed. Http status code: {response.StatusCode}");
     }
+    public async Task<ViResult<Guid>> UpdateDictNameApi(string jwt, Guid dictGuid, string newName)
+    {
+        string methodName = nameof(UpdateDictNameApi);
+        string url = $"{hostname}/api/dicts/editname/{dictGuid}/{newName}";
+
+        if (dictGuid == Guid.Empty)
+        {
+            return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Entered guid is empty.");
+        }
+
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await httpClient.GetAsync(url);
+        if (response.IsSuccessStatusCode)
+        {
+            ViDictionary? dict = await response.Content.ReadFromJsonAsync<ViDictionary>();
+            if (dict is not null && dict.DictGuid != Guid.Empty)
+            {
+                return new ViResult<Guid>(ViResultTypes.Updated, dict.DictGuid, methodName, $"Dict with guid {dict.DictGuid} updated.");
+            }
+        }
+        else
+        {
+            ApiResponse? apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+            if (apiResponse is not null && apiResponse.Message is not null)
+            {
+                return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, apiResponse.Message);
+            }
+        }
+        return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, $"Dict doesnt updated. Http status code: {response.StatusCode}");
+    }
 }
