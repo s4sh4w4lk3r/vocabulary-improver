@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Telegram.Bot.Types;
-using ViTelegramBot;
+using ViTelegramBot.ApiRequesting;
 
 string confPath = @"C:\Users\sanchous\Desktop\ViTgClinetSecrets.json";
 string sessionsPath = @"C:\Users\sanchous\Desktop\ViTgSessions.json";
@@ -14,7 +14,5 @@ ChatId chatId = new(chatId64);
 
 var api = new ViApiClient(hostname, sessionsPath);
 
-var a = await api.AddDictionary(chatId64, "Мой слоdварик");
+var a = await api.AddDictionary(chatId64, "hahA(-=_d)");
 Console.WriteLine();
-
-#error сделать добавление и изменение имени словаря не через url строку, а через json, чтобы можно любоые названия юзать.

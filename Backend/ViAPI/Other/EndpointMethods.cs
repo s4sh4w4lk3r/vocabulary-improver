@@ -161,7 +161,6 @@ public static class EndpointMethods
         {
             return Results.BadRequest(dictResult);
         }
-#error сделать добавление и изменение имени словаря не через url строку, а через json, чтобы можно любоые названия юзать.
     }
     public static IResult RemoveDictionary(HttpContext http, ViDbContext db, Guid dictGuid)
     {
