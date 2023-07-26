@@ -7,28 +7,21 @@ namespace ViTelegramBot.ApiRequesting;
 
 public partial class ViApiHttpClient
 {
-    #region Dependency Injection and HttpClient
-    private ServiceCollection services = new ServiceCollection();
-    private ServiceProvider serviceProvider = null!;
-    IHttpClientFactory httpClientFactory = null!;
-    private HttpClient httpClient = null!;
 
-    private void InitalizeDIHttpFactory()
-    {
-        services.AddHttpClient();
-        serviceProvider = services.BuildServiceProvider();
-        httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
-        httpClient = httpClientFactory.CreateClient();
-    } 
-    #endregion
-
+    HttpClient httpClient = null!;
     private readonly string hostname;
 
-    public ViApiHttpClient(string hostname)
+    public ViApiHttpClient(string hostname, ServiceProvider serviceProvider)
     {
-        InitalizeDIHttpFactory();
+        InitalizeDIHttpFactory(serviceProvider);
         this.hostname = hostname;
         httpClient.GetAsync($"{hostname}/").Result.EnsureSuccessStatusCode();
+    }
+
+    private void InitalizeDIHttpFactory(ServiceProvider serviceProvider)
+    {
+        IHttpClientFactory httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
+        httpClient = httpClientFactory.CreateClient();
     }
 
     public async Task<ViResult<string>> GetJwtFromApiAsync(long id)

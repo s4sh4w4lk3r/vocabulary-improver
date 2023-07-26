@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using System.Reflection;
 using Telegram.Bot.Types;
 using ViTelegramBot.Entities;
@@ -11,10 +12,10 @@ public partial class ViApiClient
 {
     private ViSessionList SessionList { get; }
     private ViApiHttpClient ApiHttpClient { get; }
-    public ViApiClient(string hostname, string sessionListPath)
+    public ViApiClient(string hostname, string sessionListPath, ServiceProvider serviceProvider)
     {
         SessionList = new ViSessionList(sessionListPath);
-        ApiHttpClient = new ViApiHttpClient(hostname);
+        ApiHttpClient = new ViApiHttpClient(hostname, serviceProvider);
     }
 
 
