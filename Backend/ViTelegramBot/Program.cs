@@ -14,8 +14,5 @@ ChatId chatId = new(chatId64);
 
 var api = new ViApiClient(hostname, sessionsPath);
 
-var a = await api.EditRatingWord(chatId64, Guid.Parse("5b469f2d-e257-417b-85f1-2c1204cc3605"), RatingAction.Decrease);
-var ab = await api.EditRatingWord(chatId64, Guid.Parse("5b469f2d-e257-417b-85f1-2c1204cc3605"), RatingAction.Decrease);
-var ad = await api.EditRatingWord(chatId64, Guid.Parse("5b469f2d-e257-417b-85f1-2c1204cc3605"), RatingAction.Decrease);
-#error добавить метод на удаление слова из апи и можно уже бота пилить.
+var a = await api.RemoveWordAsync(chatId64, Guid.Parse("7373dfef-2ba0-11ee-8add-d85ed37b16aa"));
 Console.WriteLine();

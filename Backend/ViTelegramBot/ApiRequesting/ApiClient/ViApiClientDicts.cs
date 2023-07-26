@@ -28,9 +28,9 @@ public partial class ViApiClient
         return new ViResult<List<ViDictionary>>(ViResultTypes.Fail, null, methodName, $"Bad response from API.");
     }
 
-    public async Task<ViResult<Guid>> AddDictionary(long id, string dictName)
+    public async Task<ViResult<Guid>> AddDictionaryAsync(long id, string dictName)
     {
-        string methodName = nameof(AddDictionary);
+        string methodName = nameof(AddDictionaryAsync);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
         if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
@@ -54,9 +54,9 @@ public partial class ViApiClient
         return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
     }
 
-    public async Task<ViResult<Guid>> RemoveDictionary(long id, Guid dictGuid)
+    public async Task<ViResult<Guid>> RemoveDictionaryAsync(long id, Guid dictGuid)
     {
-        string methodName = nameof(RemoveDictionary);
+        string methodName = nameof(RemoveDictionaryAsync);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
         if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
@@ -79,9 +79,9 @@ public partial class ViApiClient
         }
         return new ViResult<Guid>(ViResultTypes.Fail, Guid.Empty, methodName, "Ne poluchilos.");
     }
-    public async Task<ViResult<Guid>> UpdateDictName(long id, Guid dictGuid, string newName)
+    public async Task<ViResult<Guid>> UpdateDictNameAsync(long id, Guid dictGuid, string newName)
     {
-        string methodName = nameof(UpdateDictName);
+        string methodName = nameof(UpdateDictNameAsync);
 
         ViResult<string> getJwtResult = await GetJwtAsync(id);
         if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)

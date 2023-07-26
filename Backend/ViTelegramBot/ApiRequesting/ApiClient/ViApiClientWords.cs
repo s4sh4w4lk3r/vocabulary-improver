@@ -77,4 +77,24 @@ public partial class ViApiClient
         }
         return new ViResult<Word>(ViResultTypes.Fail, null, methodName, $"Bad response from API, maybe no word or affilation.");
     }
+    public async Task<ViResult<bool>> RemoveWordAsync(long id, Guid wordGuid)
+    {
+        string methodName = nameof(RemoveWordAsync);
+
+        ViResult<string> getJwtResult = await GetJwtAsync(id);
+        if (getJwtResult.ResultCode is ViResultTypes.Fail || getJwtResult.ResultValue is null)
+        {
+            return new ViResult<bool>(ViResultTypes.Fail, false, methodName, $"Jwt for chatId: {id} not found.");
+        }
+        if (getJwtResult.ResultCode is ViResultTypes.Founded && getJwtResult.ResultValue is not null)
+        {
+            string jwt = getJwtResult.ResultValue;
+            ViResult<bool> removeResult = await ApiHttpClient.RemoveWordFromApiAsync(jwt, wordGuid);
+            if (removeResult.ResultCode is ViResultTypes.Removed && removeResult.ResultValue is not false)
+            {
+                return removeResult;
+            }
+        }
+        return new ViResult<bool>(ViResultTypes.Fail, false, methodName, $"Bad response from API, maybe no word or affilation.");
+    }
 }

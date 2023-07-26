@@ -297,7 +297,7 @@ public static class EndpointMethods
         }
         else
         {
-            return Results.BadRequest(ViResultTypes.NotFoundOrNoAffilationDb.ToString());
+            return Results.BadRequest(removeResult);
         }
     }
     public async static Task<IResult> RegisterTelegramUserAsync(HttpContext http, ViDbContext db)

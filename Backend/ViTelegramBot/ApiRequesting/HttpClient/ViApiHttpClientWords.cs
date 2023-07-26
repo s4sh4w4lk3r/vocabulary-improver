@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http.Json;
+using System.Reflection;
+using System.Text.Json;
 using ViTelegramBot.Entities;
 using ViTelegramBot.Http.JsonEntites;
 
@@ -101,6 +103,32 @@ public partial class ViApiHttpClient
             }
         }
         return new ViResult<Word>(ViResultTypes.Fail, null, methodName, $"Word {wordGuid} rating not changed in api.");
+    }
+    public async Task<ViResult<bool>> RemoveWordFromApiAsync(string jwt, Guid wordGuid)
+    {
+        string methodName = nameof(RemoveWordFromApiAsync);
+        string url = $"{hostname}/api/words/remove/{wordGuid}";
+
+        if (wordGuid == Guid.Empty)
+        {
+            return new ViResult<bool>(ViResultTypes.Fail, false, methodName, $"Bad input.");
+        }
+
+        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
+        using var response = await httpClient.GetAsync(url);
+        if (response.IsSuccessStatusCode)
+        {
+            return new ViResult<bool>(ViResultTypes.Removed, true, methodName, $"Word {wordGuid} removed.");
+        }
+        else
+        {
+            ApiResponse? apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse>();
+            if (apiResponse is not null && apiResponse.Message is not null)
+            {
+                return new ViResult<bool>(ViResultTypes.Fail, false, methodName, apiResponse.Message);
+            }
+        }
+        return new ViResult<bool>(ViResultTypes.Fail, false, methodName, $"Not removed from api. Status code: {response.StatusCode}.");
     }
 }
 public enum RatingAction { Increase, Decrease}
