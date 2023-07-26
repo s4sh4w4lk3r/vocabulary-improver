@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ViAPI.Entities;
+using static ViAPI.Other.ViConfiguration;
 
 namespace ViAPI.Database;
 
@@ -7,7 +8,6 @@ public partial class ViDbContext : DbContext
 {
     public ViDbContext(DbContextOptions<ViDbContext> options) : base(options)
     {
-        if (Database.CanConnect() is false) throw new Exception("Bad connection attempt.");
     }
 
     ILogger? Logger { get; set; } = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger(nameof(ViDbContext));
@@ -20,6 +20,13 @@ public partial class ViDbContext : DbContext
     {
 
         //optionsBuilder.LogTo(message => Logger.LogInformation(message), new[] { RelationalEventId.CommandExecuted });
+    }
+
+    public static void EnsureDatabaseWorking()
+    {
+        string connstring = GetSecretString(SecretType.MySql);
+        var dbOptionsBuilder = new DbContextOptionsBuilder<ViDbContext>().UseMySql(connstring, ServerVersion.AutoDetect(connstring)).Options;
+        if (new ViDbContext(dbOptionsBuilder).Database.CanConnect() is false) { throw new InvalidOperationException("Database bad connect."); }
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
