@@ -59,7 +59,7 @@ public partial class ViApiHttpClient
         
         if (response.IsSuccessStatusCode)
         {
-            return new ViResult<string>(ViResultTypes.Created, null, methodName, $"Jwt for chatId: {id} added to database.");
+            return new ViResult<string>(ViResultTypes.Created, "ok", methodName, $"Jwt for chatId: {id} added to database.");
         }
         else
         {

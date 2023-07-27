@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Telegram.Bot;
 using Telegram.Bot.Types;
 using ViTelegramBot.ApiRequesting;
 using ViTelegramBot.ViBot;
@@ -21,10 +22,10 @@ long chatId64 = long.Parse(configuration.GetSection("ChatId").Value!);
 
 ChatId chatId = new(chatId64);
 
-/*var api = new ViApiClient(hostname, sessionsPath, serviceProvider);*/
+var api = new ViApiClient(apiHostname, sessionsPath, serviceProvider);
 
-var wh = new ConfigureWebhook(serviceProvider, ngrokApiToken, botToken, "test123");
-await wh.StartAsync();
-Thread.Sleep(10000);
-await wh.StopAsync();
+var bot = new ViBot(serviceProvider, ngrokApiToken, botToken, "test123", api);
+await bot.StartAsync();
+Console.ReadLine();
+await bot.StopAsync();
 
