@@ -25,7 +25,7 @@ ChatId chatId = new(chatId64);
 var api = new ViApiClient(apiHostname, sessionsPath, serviceProvider);
 
 var bot = new ViBot(serviceProvider, ngrokApiToken, botToken, "test123", api);
-await bot.StartAsync();
-Console.ReadLine();
-await bot.StopAsync();
+bot.Start();
+while ()
+bot.Stop();
 

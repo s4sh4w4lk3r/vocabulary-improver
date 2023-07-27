@@ -39,26 +39,37 @@ internal class ViBot
         this.viApi = viApi;
     }
 
-    public async Task StartAsync()
+    public void Start()
     {
         httpListener.Start();
-        List < UpdateType> updates = new() { UpdateType.Message };
-        await botClient.SetWebhookAsync(
-            url: $"{url}/bot",
-            allowedUpdates: updates,
-            secretToken: secretToken,
-            cancellationToken: cancellationTokenSource.Token);
-        var me = await botClient.GetMeAsync();
-        await Console.Out.WriteLineAsync(me.Username);
+        SetWebHook();
         GetUpdatesFromTgApiAsync();
     }
 
-    public async Task StopAsync()
+    public void Stop()
     {
-        await botClient.DeleteWebhookAsync(cancellationToken: cancellationTokenSource.Token, dropPendingUpdates: true);
-        httpListener.Close();
+        DeleteWebHook();
         cancellationTokenSource.Cancel();
     }
+    #region WebHookSetting
+    private void SetWebHook()
+    {
+        List<UpdateType> updates = new() { UpdateType.Message };
+        botClient.SetWebhookAsync(
+            url: $"{url}/bot",
+            allowedUpdates: updates,
+            secretToken: secretToken,
+            cancellationToken: cancellationTokenSource.Token).Wait();
+        var me = botClient.GetMeAsync().Result;
+        Console.WriteLine($"Webhook setted, Bot: {me.Username}");
+    }
+    private void DeleteWebHook()
+    {
+        botClient.DeleteWebhookAsync(cancellationToken: cancellationTokenSource.Token, dropPendingUpdates: true).Wait();
+        Console.WriteLine($"Webhook deleted.");
+    } 
+    #endregion
+
     private async Task GetWebhookUrl(string ngrokToken)
     {
         IHttpClientFactory httpClientFactory = serviceProvider.GetRequiredService<IHttpClientFactory>();
@@ -73,8 +84,13 @@ internal class ViBot
     }
     private async void GetUpdatesFromTgApiAsync()
     {
-        while (cancellationTokenSource.IsCancellationRequested is false && httpListener.IsListening is true)
-        { 
+        while (true)
+        {   
+            if (cancellationTokenSource.IsCancellationRequested is true) 
+            { 
+                httpListener.Stop(); 
+                return; 
+            }
             var context = httpListener.GetContext();
             var insputstream = context.Request.InputStream;
             string json = new StreamReader(insputstream).ReadToEnd();
