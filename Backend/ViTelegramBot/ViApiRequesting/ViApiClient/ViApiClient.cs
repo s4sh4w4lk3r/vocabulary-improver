@@ -1,10 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Newtonsoft.Json.Linq;
-using System.Reflection;
-using Telegram.Bot.Types;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using ViTelegramBot.Entities;
-using ViTelegramBot.Http;
-using ViTelegramBot.Http.JsonEntites;
 
 namespace ViTelegramBot.ApiRequesting;
 
@@ -12,10 +8,12 @@ public partial class ViApiClient
 {
     private ViSessionList SessionList { get; }
     private ViApiHttpClient ApiHttpClient { get; }
-    public ViApiClient(string hostname, string sessionListPath, ServiceProvider serviceProvider)
+    public ViApiClient(ServiceProvider serviceProvider)
     {
+        string sessionListPath = serviceProvider.GetRequiredService<IConfiguration>().GetRequiredSection("SessionsPath").Value!;
         SessionList = new ViSessionList(sessionListPath);
-        ApiHttpClient = new ViApiHttpClient(hostname, serviceProvider);
+
+        ApiHttpClient = new ViApiHttpClient(serviceProvider);
     }
 
 
@@ -75,5 +73,5 @@ public partial class ViApiClient
 
         return new ViResult<string>(ViResultTypes.Fail, null, methodName, $"The user chatid:{id} was not able to add.");
     }
-    
+
 }

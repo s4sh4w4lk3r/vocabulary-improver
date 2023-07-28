@@ -2,6 +2,7 @@
 using ViTelegramBot.Http.JsonEntites;
 using ViTelegramBot.Entities;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 
 namespace ViTelegramBot.ApiRequesting;
 
@@ -11,10 +12,10 @@ public partial class ViApiHttpClient
     HttpClient httpClient = null!;
     private readonly string hostname;
 
-    public ViApiHttpClient(string hostname, ServiceProvider serviceProvider)
+    public ViApiHttpClient(ServiceProvider serviceProvider)
     {
         InitalizeDIHttpFactory(serviceProvider);
-        this.hostname = hostname;
+        hostname = serviceProvider.GetRequiredService<IConfiguration>().GetRequiredSection("ApiHostname").Value!;
         httpClient.GetAsync($"{hostname}/").Result.EnsureSuccessStatusCode();
     }
 

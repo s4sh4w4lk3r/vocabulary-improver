@@ -1,31 +1,32 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 using Telegram.Bot;
-using Telegram.Bot.Types;
 using ViTelegramBot.ApiRequesting;
 using ViTelegramBot.ViBot;
 
+var configuration = new ConfigurationBuilder().AddJsonFile(@"C:\Users\sanchous\Desktop\ViTgConfig.json").Build();
+var botClient = new TelegramBotClient(configuration.GetRequiredSection("BotToken").Value!);
+
 ServiceCollection services = new ServiceCollection();
 services.AddHttpClient();
+services.AddSingleton<IConfiguration>(configuration);
+services.AddSingleton<ITelegramBotClient>(botClient);
+
 ServiceProvider serviceProvider = services.BuildServiceProvider();
 
 
-string confPath = @"C:\Users\sanchous\Desktop\ViTgClinetSecrets.json";
-string sessionsPath = @"C:\Users\sanchous\Desktop\ViTgSessions.json";
+var api = new ViApiClient(serviceProvider);
+var vibot = new ViBot(serviceProvider, api);
 
-var configuration = new ConfigurationBuilder().AddJsonFile(confPath).Build();
-string apiHostname = configuration.GetSection("ApiHostname").Value!;
-string botToken = configuration.GetSection("BotToken").Value!;
-string ngrokApiToken = configuration.GetSection("ngrokToken").Value!;
-long chatId64 = long.Parse(configuration.GetSection("ChatId").Value!);
 
-ChatId chatId = new(chatId64);
 
-var api = new ViApiClient(apiHostname, sessionsPath, serviceProvider);
 
-var bot = new ViBot(serviceProvider, ngrokApiToken, botToken, "test123", api);
-bot.Start();
-while ()
-bot.Stop();
+_ = Task.Run(vibot.Start);
 
+Console.CancelKeyPress += delegate
+{
+    vibot.Stop();
+    Environment.Exit(0);
+};
+
+while (true) { }
