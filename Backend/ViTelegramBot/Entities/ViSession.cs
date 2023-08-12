@@ -4,14 +4,17 @@ namespace ViTelegramBot.Entities;
 
 public class ViSession
 {
-    public long TelegramId { get; }
-    public string JwtToken { get; }
+    public long TelegramId { get; private set; }
+    public string JwtToken { get; private set; }
     public DateTime TokenExpiration { get; private set; }
+    public UserState State { get; set; }
+    public Guid SelectedDictionaryGuid { get; set; }
 
     public ViSession(long telegramId, string jwtToken)
     {
         TelegramId = telegramId;
         JwtToken = jwtToken;
+        State = UserState.Default;
         SetTokenExpiration();
     }
 
@@ -35,4 +38,9 @@ public class ViSession
         var jwtSecurityToken = handler.ReadJwtToken(JwtToken);
         TokenExpiration = jwtSecurityToken.ValidTo;
     }
+}
+public enum UserState
+{
+    Default, ChoosingDict, ChoosingWord, Playing, DictSelected,
+    AddingWord, AddingDict, DeletingWord, DeletingDict,
 }

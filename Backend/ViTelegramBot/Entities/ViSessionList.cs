@@ -59,4 +59,25 @@ public class ViSessionList : ICollection<ViSession>
     }
 
     IEnumerator IEnumerable.GetEnumerator() => ViSessions.GetEnumerator();
+
+    public void UpdateState(long telegramId, UserState state)
+    {
+        this.Where(s => s.TelegramId == telegramId).ToList().ForEach(s => { s.State = state; });
+        SaveJson();
+    }
+    public void UpdateState(ViSession session, UserState state)
+    {
+        this.Where(s => s == session).ToList().ForEach(s => { s.State = state; });
+        SaveJson();
+    }
+    public void UpdateDictGuid(long telegramId, Guid dictGuid)
+    {
+        this.Where(s => s.TelegramId == telegramId).ToList().ForEach(s => { s.SelectedDictionaryGuid = dictGuid; });
+        SaveJson();
+    }
+    public void UpdateSelectedDictGuid(ViSession session, Guid dictGuid)
+    {
+        this.Where(s => s == session).ToList().ForEach(s => { s.SelectedDictionaryGuid = dictGuid; });
+        SaveJson();
+    }
 }

@@ -10,8 +10,7 @@ public partial class ViApiClient
     private ViApiHttpClient ApiHttpClient { get; }
     public ViApiClient(ServiceProvider serviceProvider)
     {
-        string sessionListPath = serviceProvider.GetRequiredService<IConfiguration>().GetRequiredSection("SessionsPath").Value!;
-        SessionList = new ViSessionList(sessionListPath);
+        SessionList = serviceProvider.GetRequiredService<ViSessionList>();
 
         ApiHttpClient = new ViApiHttpClient(serviceProvider);
     }

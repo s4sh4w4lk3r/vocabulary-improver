@@ -16,6 +16,7 @@ namespace ViTelegramBot.ViBot;
 
 internal class ViBot
 {
+    private ViSessionList ViSessions { get; set; }
     private HttpListener HttpListener { get; set; } = new HttpListener();
     private ServiceProvider ServiceProvider { get; set; }
     private ViApiClient ViApi { get; set; }
@@ -31,6 +32,7 @@ internal class ViBot
         SecretToken = serviceProvider.GetRequiredService<IConfiguration>().GetRequiredSection("WebhookSecretToken").Value!;
         ViApi = viApi;
         BotClient = serviceProvider.GetRequiredService<ITelegramBotClient>();
+        ViSessions = serviceProvider.GetRequiredService<ViSessionList>();
 
         GetWebhookUrl(ngrokToken).Wait();
         HttpListener.Prefixes.Add("http://127.0.0.1:8443/vibot/");
@@ -94,7 +96,7 @@ internal class ViBot
                 var insputstream = context.Request.InputStream;
                 string json = new StreamReader(insputstream).ReadToEnd();
                 Update update = JsonConvert.DeserializeObject<Update>(json)!;
-                string updateInfo = $"UpdateId: {update.Id}, Type: {update.Type}";
+                string updateInfo = $"UpdateId: {update.Id}, UserId: {update.Message?.Chat.Id}, Type: {update.Type}, Message: {update.Message?.Text}";
                 _ = Console.Out.WriteLineAsync(updateInfo);
                 context.Response.StatusCode = 200;
                 context.Response.Close();
@@ -102,15 +104,74 @@ internal class ViBot
             }
         }).Start();
     }
-
     private async Task OnUpdateHandler(Update update)
     {
         string messageText = update.Message!.Text!;
+        long chatId = update.Message.Chat.Id;
+        ViSession? userSession = ViSessions.FirstOrDefault(s => s.TelegramId == chatId);
+        if (userSession is null)
+        {
+            await ViApi.SignUpUserAsync(chatId, update.Message.Chat.FirstName!);
+            userSession = ViSessions.FirstOrDefault(s => s.TelegramId == chatId);
+            if (userSession is null)
+            {
+                await Console.Out.WriteLineAsync("Что-то не так. Пользователя нет в сессиях.");
+                return;
+            }
+        }
 
         if (messageText == "/start")
         {
-            await OnStartAsync(ServiceProvider, ViApi, update);
+            await OnStartAsync(ServiceProvider, ViApi, userSession, update);
+            return;
+
+        }
+        if (messageText == "Выбрать словарь")
+        {
+            await GetMyDicts(ServiceProvider, ViApi, update);
+            await BotClient.SendTextMessageAsync(chatId, "Введите номер словаря:");
+            ViSessions.UpdateState(userSession, UserState.ChoosingDict);
+            return;
+        }
+
+        switch (userSession.State)
+        {
+
+            case UserState.Default:
+                break;
+            case UserState.ChoosingDict:
+                await ChooseDict(ServiceProvider, ViApi, update, userSession, messageText);
+                break;
+            case UserState.ChoosingWord:
+                break;
+            case UserState.Playing:
+                break;
+            case UserState.AddingWord:
+                await AddNewWord(ServiceProvider, ViApi, update, userSession, messageText);
+                break;
+            case UserState.AddingDict:
+                break;
+            case UserState.DeletingWord:
+                break;
+            case UserState.DeletingDict:
+                break;
+
+                /*switch (messageText)
+                {
+                    case "/start":
+                        
+                        break;
+
+                    case "Угадай-ка":
+                        break;
+                    case "Мои словари":
+                        await GetMyDicts(ServiceProvider, ViApi, update);
+                        break;
+
+                    default:
+                        await UpdateHandlers.SendMessageAsync(ServiceProvider, update, "Не понял. Если вы потярялись, нажмите /start");
+                        break;
+                }*/
         }
     }
-
 }
