@@ -1,10 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
-using System.Text;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Throw;
 using ViTelegramBot.ApiRequesting;
 using ViTelegramBot.Entities;
 using ViTelegramBot.Http.JsonEntites;
@@ -13,35 +9,6 @@ namespace ViTelegramBot.ViBot;
 
 public static class UpdateHandlers
 {
-    private static ReplyKeyboardMarkup GetDefaultKeyboard()
-    {
-        var buttons = new List<KeyboardButton[]>()
-        {
-            new KeyboardButton[] { "Выбрать словарь", "Добавить новый словарь" },
-        };
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = new(buttons)
-        {
-            ResizeKeyboard = true
-        };
-
-        return replyKeyboardMarkup;
-    }
-
-    private static ReplyKeyboardMarkup GetDictKeyboard()
-    {
-        var buttons = new List<KeyboardButton[]>()
-        {
-            new KeyboardButton[] { "Жобавить слова", "Удалить слова", "Переименовать словарь", "Удалить словарь" },
-        };
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = new(buttons)
-        {
-            ResizeKeyboard = true
-        };
-
-        return replyKeyboardMarkup;
-    }
     public static async Task OnStartAsync(ServiceProvider serviceProvider, ViApiClient viApi, ViSession userSession, Update update)
     {
         ChatId chatId = new(update.Message!.Chat.Id);
@@ -58,17 +25,15 @@ public static class UpdateHandlers
         {
             helloMessage = "Снова здраствуйте!";
         }
-  
-        var sendHelloTask = botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: helloMessage, 
-                replyMarkup: GetDefaultKeyboard());
-
-        var getMyDictsTask = GetMyDicts(serviceProvider, viApi, update);
 
         viSessions.UpdateState(userSession, UserState.Default);
+        viSessions.UpdateSelectedDictGuid(userSession, Guid.Empty);
+        viSessions.UpdateSelectedWordGuid(userSession, Guid.Empty);
 
-        await Task.WhenAll(sendHelloTask, getMyDictsTask);
+        await botClient.SendTextMessageAsync(
+                chatId: chatId,
+                text: helloMessage,
+                replyMarkup: KeyboardSet.GetDefaultKeyboard());
     }
     public static async Task GetMyDicts(ServiceProvider serviceProvider, ViApiClient viApi, Update update)
     {
@@ -79,7 +44,7 @@ public static class UpdateHandlers
         var getDictResult = await getDictsTask;
 
 
-        if (getDictResult.ResultCode is ViResultTypes.Founded && getDictResult.ResultValue is not null) 
+        if (getDictResult.ResultCode is ViResultTypes.Founded && getDictResult.ResultValue is not null)
         {
             string message = "Список ваших словарей:";
             int dictIndex = 1;
@@ -97,7 +62,7 @@ public static class UpdateHandlers
             await botClient.SendTextMessageAsync(
                chatId: chatId,
                text: "У вас нет словарей.",
-               replyMarkup: GetDefaultKeyboard());
+               replyMarkup: KeyboardSet.GetDefaultKeyboard());
         }
     }
     public static async Task AddNewWord(ServiceProvider serviceProvider, ViApiClient viApi, Update update, ViSession userSession, string messageText)
@@ -121,19 +86,19 @@ public static class UpdateHandlers
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Неправильный ввод. Вводите в формате \"оригинал:перевод\".",
-                replyMarkup: GetDefaultKeyboard());
+                replyMarkup: KeyboardSet.GetDefaultKeyboard());
             viSessions.UpdateState(userSession, UserState.Default);
 
             return;
         }
 
         var addNewDictResult = await viApi.AddNewWord(chatId64, userSession.SelectedDictionaryGuid, sourceWord, targetWord);
-        if (addNewDictResult.ResultCode is ViResultTypes.Founded && addNewDictResult.ResultValue is true) 
+        if (addNewDictResult.ResultCode is ViResultTypes.Founded && addNewDictResult.ResultValue is true)
         {
             await botClient.SendTextMessageAsync(
                 chatId: chatId,
                 text: "Слово добавлено",
-                replyMarkup: GetDefaultKeyboard());
+                replyMarkup: KeyboardSet.GetDefaultKeyboard());
 
             userSession.SelectedDictionaryGuid = userSession.SelectedDictionaryGuid;
             viSessions.UpdateState(userSession, UserState.DictSelected);
@@ -172,21 +137,75 @@ public static class UpdateHandlers
         var wordsResult = await getDictWordsTask;
         var words = wordsResult.ResultValue;
 
-        if (words is null || words.Count == 0) 
+        if (words is null || words.Count == 0)
         {
-            await botClient.SendTextMessageAsync(chatID, "Словарь пустой.");
+            await botClient.SendTextMessageAsync(chatID, "Словарь пустой.", replyMarkup: KeyboardSet.GetDictKeyboard());
             return;
         }
         else
         {
-            messageText = string.Empty;
+            messageText = $" Словарь: {selectedDict.Name!}\n\n";
             foreach (var word in words)
             {
                 messageText += $"{word.SourceWord} - {word.TargetWord} - {word.Rating}\n";
             }
-            await botClient.SendTextMessageAsync(chatID, messageText);
+            await botClient.SendTextMessageAsync(chatID, messageText, replyMarkup: KeyboardSet.GetDictKeyboard());
             return;
         }
+    }
+    public static async Task WhenDictSelected(ServiceProvider serviceProvider, ViApiClient viApi, Update update, ViSession userSession, string messageText)
+    {
+        if (userSession.State is not UserState.DictSelected) { return; }
+
+        var bot = serviceProvider.GetRequiredService<ITelegramBotClient>();
+        var viSessionsList = serviceProvider.GetRequiredService<ViSessionList>();
+        var chatID = new ChatId(update.Message!.Chat.Id);
+
+        switch (messageText)
+        {
+            case "Добавить слово":
+                viSessionsList.UpdateState(userSession, UserState.AddingWord);
+                await bot.SendTextMessageAsync(chatID, text: "Добавьте слово, отправив \"оригинал - перевод\".");
+                break;
+
+            case "Удалить слово":
+                viSessionsList.UpdateState(userSession, UserState.DeletingWord);
+                await bot.SendTextMessageAsync(chatID, text: "Напишите номер слова, которое надо удалить.");
+                break;
+
+            case "Переименовать словарь":
+                viSessionsList.UpdateState(userSession, UserState.RenamingDict);
+                await bot.SendTextMessageAsync(chatID, text: "Напишите новое имя словаря.");
+                break;
+
+            case "Удалить словарь":
+                await viApi.RemoveDictionaryAsync(update.Message!.Chat.Id, userSession.SelectedDictionaryGuid);
+                await bot.SendTextMessageAsync(chatID, text: "Словарь удален.", replyMarkup: KeyboardSet.GetDefaultKeyboard());
+                viSessionsList.UpdateState(userSession, UserState.Default);
+                viSessionsList.UpdateSelectedDictGuid(userSession, Guid.Empty);
+                break;
+
+            case "Угадай-ка":
+
+                break;
+        }
+    }
+    private static Word RecognizeWord(ViSession userSession, ViApiClient viApi, int wordId)
+    {
+        throw new NotImplementedException();
+    }
+    public static async Task RenameDict(ServiceProvider serviceProvider, ViApiClient viApi, Update update, ViSession userSession, string newName)
+    {
+        if (userSession.State is not UserState.RenamingDict) { return; }
+        if (string.IsNullOrWhiteSpace(newName)) { return; }
+
+        var bot = serviceProvider.GetRequiredService<ITelegramBotClient>();
+        var viSessionsList = serviceProvider.GetRequiredService<ViSessionList>();
+        var chatID = new ChatId(update.Message!.Chat.Id);
+
+        await viApi.UpdateDictNameAsync(update.Message!.Chat.Id, userSession.SelectedDictionaryGuid, newName);
+        await bot.SendTextMessageAsync(chatID, "Имя словаря изменено.", replyMarkup: KeyboardSet.GetDictKeyboard());
+        viSessionsList.UpdateState(userSession, UserState.DictSelected);
 
     }
 }

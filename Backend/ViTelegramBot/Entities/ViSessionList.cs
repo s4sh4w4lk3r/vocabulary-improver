@@ -70,7 +70,7 @@ public class ViSessionList : ICollection<ViSession>
         this.Where(s => s == session).ToList().ForEach(s => { s.State = state; });
         SaveJson();
     }
-    public void UpdateDictGuid(long telegramId, Guid dictGuid)
+    public void UpdateSelectedDictGuid(long telegramId, Guid dictGuid)
     {
         this.Where(s => s.TelegramId == telegramId).ToList().ForEach(s => { s.SelectedDictionaryGuid = dictGuid; });
         SaveJson();
@@ -78,6 +78,16 @@ public class ViSessionList : ICollection<ViSession>
     public void UpdateSelectedDictGuid(ViSession session, Guid dictGuid)
     {
         this.Where(s => s == session).ToList().ForEach(s => { s.SelectedDictionaryGuid = dictGuid; });
+        SaveJson();
+    }
+    public void UpdateSelectedWordGuid(ViSession session, Guid wordGuid)
+    {
+        this.Where(s => s == session).ToList().ForEach(s => { s.SelectedWordGuid = wordGuid; });
+        SaveJson();
+    }
+    public void UpdateSelectedWordGuid(long telegramId, Guid wordGuid)
+    {
+        this.Where(s => s.TelegramId == telegramId).ToList().ForEach(s => { s.SelectedWordGuid = wordGuid; });
         SaveJson();
     }
 }

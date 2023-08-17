@@ -9,6 +9,7 @@ public class ViSession
     public DateTime TokenExpiration { get; private set; }
     public UserState State { get; set; }
     public Guid SelectedDictionaryGuid { get; set; }
+    public Guid SelectedWordGuid { get; set; }
 
     public ViSession(long telegramId, string jwtToken)
     {
@@ -42,5 +43,5 @@ public class ViSession
 public enum UserState
 {
     Default, ChoosingDict, ChoosingWord, Playing, DictSelected,
-    AddingWord, AddingDict, DeletingWord, DeletingDict,
+    AddingWord, AddingDict, DeletingWord, RenamingDict
 }

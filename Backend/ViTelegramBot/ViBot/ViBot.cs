@@ -153,25 +153,12 @@ internal class ViBot
                 break;
             case UserState.DeletingWord:
                 break;
-            case UserState.DeletingDict:
+            case UserState.DictSelected:
+                await WhenDictSelected(ServiceProvider, ViApi, update, userSession, messageText);
                 break;
-
-                /*switch (messageText)
-                {
-                    case "/start":
-                        
-                        break;
-
-                    case "Угадай-ка":
-                        break;
-                    case "Мои словари":
-                        await GetMyDicts(ServiceProvider, ViApi, update);
-                        break;
-
-                    default:
-                        await UpdateHandlers.SendMessageAsync(ServiceProvider, update, "Не понял. Если вы потярялись, нажмите /start");
-                        break;
-                }*/
+            case UserState.RenamingDict:
+                await RenameDict(ServiceProvider, ViApi, update, userSession, messageText);
+                break;
         }
     }
 }
