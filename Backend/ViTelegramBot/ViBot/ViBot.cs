@@ -128,9 +128,17 @@ internal class ViBot
         }
         if (messageText == "Выбрать словарь")
         {
-            await GetMyDicts(ServiceProvider, ViApi, update);
+            bool dictIsNotEmpty = await GetMyDicts(ServiceProvider, ViApi, update);
+            if (dictIsNotEmpty is false) { return; }
+
             await BotClient.SendTextMessageAsync(chatId, "Введите номер словаря:");
             ViSessions.UpdateState(userSession, UserState.ChoosingDict);
+            return;
+        }
+        if (messageText == "Добавить новый словарь")
+        {
+            ViSessions.UpdateState(userSession, UserState.AddingDict);
+            await BotClient.SendTextMessageAsync(chatId, "Введите название словаря");
             return;
         }
 
@@ -138,6 +146,7 @@ internal class ViBot
         {
 
             case UserState.Default:
+                
                 break;
             case UserState.ChoosingDict:
                 await ChooseDict(ServiceProvider, ViApi, update, userSession, messageText);
@@ -150,8 +159,10 @@ internal class ViBot
                 await AddNewWord(ServiceProvider, ViApi, update, userSession, messageText);
                 break;
             case UserState.AddingDict:
+                await AddNewDict(ServiceProvider, ViApi, userSession, messageText);
                 break;
             case UserState.DeletingWord:
+                await DeleteWord(ServiceProvider, ViApi, update, userSession, messageText);
                 break;
             case UserState.DictSelected:
                 await WhenDictSelected(ServiceProvider, ViApi, update, userSession, messageText);
