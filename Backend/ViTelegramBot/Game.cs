@@ -15,18 +15,22 @@ public class Game
     private List<Word> Words { get; set; } = null!;
     private ViSession UserSession { get; set; }
 
-    public Game(IServiceProvider serviceProvider, ViApiClient viApiClient, ViSession userSession)
+    event Action<string>? WordNotifier;
+
+    public Game(IServiceProvider serviceProvider, ViApiClient viApiClient, ViSession userSession, out Action<string>? wordNotifier)
     {
         ViApiClient = viApiClient;
         DictionaryGuid = userSession.SelectedDictionaryGuid;
         BotClient = serviceProvider.GetRequiredService<ITelegramBotClient>();
         UserSession = userSession;
+        wordNotifier = WordNotifier;
     }
 
     public async Task Start(CancellationToken token)
     {
         var chatId = new ChatId(UserSession.TelegramId);
         Words = (await ViApiClient.GetWordsAsync(UserSession.TelegramId, DictionaryGuid)).ResultValue!;
+
         if (Words is null) 
         { 
             await BotClient.SendTextMessageAsync(chatId, "Произошла ошибка, слова есть нулл.");
