@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using NgrokApi;
 using Telegram.Bot;
@@ -13,8 +13,11 @@ namespace ViApi
     {
         public static async Task Main(string[] args)
         {
+            //Должен быть только один аргумент командной строки в виде путя до конфига.
+            args.Length.Throw(_ => new ArgumentException("Неправильно указан путь до файла с настройками и секретами в аргументах командной строки.")).IfNotEquals(1);
             var builder = WebApplication.CreateBuilder(args);
-            string viApiConfigPath = @"C:\Users\sanchous\Desktop\ViApiConfig.json";
+            string viApiConfigPath = args.FirstOrDefault()!;
+            File.Exists(viApiConfigPath).Throw(_ => new FileNotFoundException($"Файл по пути {viApiConfigPath} не найден.")).IfFalse();
             builder.Configuration.AddJsonFile(viApiConfigPath);
 
 
@@ -25,7 +28,7 @@ namespace ViApi
             string ngrokToken = builder.Configuration.GetRequiredSection("ngrokToken").Value!;
 
             bool stringsOk = ViValidation.IsNotEmptyStrings(mySqlConnString, mongoDbConnString, dbNameMongo, telegramBotToken, ngrokToken);
-            stringsOk.Throw(_ => new ArgumentException("��������� ��������� �������� �� ������� �� ���� ����������."));
+            stringsOk.Throw(_ => new ArgumentException("Некоторые строковые значения из конфига не были распознаны."));
 
 
             IMongoDatabase mongoDb = new MongoClient(mongoDbConnString).GetDatabase(dbNameMongo);
@@ -51,5 +54,4 @@ namespace ViApi
             app.Run();
         }
     }
-
 }

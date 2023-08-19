@@ -10,6 +10,7 @@
     },
     "https": {
       "commandName": "Project",
+      "commandLineArgs": "C:\\Users\\sanchous\\Desktop\\ViApiConfig.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -18,6 +19,7 @@
     },
     "IIS Express": {
       "commandName": "IISExpress",
+      "commandLineArgs": "C:\\Users\\sanchous\\Desktop\\ViApiConfig.json",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
