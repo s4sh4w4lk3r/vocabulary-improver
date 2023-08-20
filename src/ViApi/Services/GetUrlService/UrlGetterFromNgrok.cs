@@ -3,10 +3,10 @@ using Throw;
 
 namespace ViApi.Services.GetUrlService
 {
-    public class NgrokUrlGetter : IUrlGetter
+    public class UrlGetterFromNgrok : IUrlGetter
     {
         private Ngrok Ngrok { get; set; }
-        public NgrokUrlGetter(string ngrokApiToken)
+        public UrlGetterFromNgrok(string ngrokApiToken)
         {
             ngrokApiToken.Throw("NgrokApiToken не введен.").IfWhiteSpace();
             Ngrok = new Ngrok(ngrokApiToken);

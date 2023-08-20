@@ -1,4 +1,5 @@
 ﻿using ViApi.Extensions;
+using ViApi.Services.GetUrlService;
 
 namespace ViApi
 {
@@ -16,7 +17,7 @@ namespace ViApi
             {
                 return;
             }
-#error написать класс который выбирает реализацию для IUrlGetter или найти чьи-то примеры. Также попробовать написать реализацию для неNgrok
+
             app.MapGet("/", () => "Hello World!");
 
             app.Run();

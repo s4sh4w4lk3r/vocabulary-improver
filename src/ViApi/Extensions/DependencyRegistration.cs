@@ -18,51 +18,62 @@ public static class DependencyRegistration
         builder.RegisterMySql();
         builder.RegisterMongoDb();
         builder.RegisterTelegramBot();
-        var urlSerivce = builder.RegisterNgrok();
-        string url = urlSerivce.GetUrl();
-        Console.WriteLine($"Публичный URL: {url}");
+        builder.RegisterUrl();
     }
-    private static IMongoDatabase RegisterMongoDb(this WebApplicationBuilder builder)
+    private static void RegisterMongoDb(this WebApplicationBuilder builder)
     {
         string mongoDbConnString = builder.Configuration.GetRequiredSection("MongoDb").Value!;
         string dbNameMongo = builder.Configuration.GetRequiredSection("dbNameMongo").Value!;
 
-        mongoDbConnString.Throw("MySqlConnString не получен.").IfWhiteSpace();
-        dbNameMongo.Throw("DbNameMongo не получен.").IfWhiteSpace();
+        mongoDbConnString.Throw("MySqlConnString не получен.").IfNullOrWhiteSpace(s => s);
+        dbNameMongo.Throw("DbNameMongo не получен.").IfNullOrWhiteSpace(s => s);
 
         IMongoDatabase mongoDb = new MongoClient(mongoDbConnString).GetDatabase(dbNameMongo);
         builder.Services.AddSingleton(mongoDb);
-
-        return mongoDb;
     }
     private static void RegisterMySql(this WebApplicationBuilder builder)
     {
         string mySqlConnString = builder.Configuration.GetRequiredSection("MySql").Value!;
 
-        mySqlConnString.Throw("MySqlConnString не получен.").IfWhiteSpace();
+        mySqlConnString.Throw("MySqlConnString не получен.").IfNullOrWhiteSpace(s => s);
 
         builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(mySqlConnString, ServerVersion.AutoDetect(mySqlConnString)));
     }
-    private static ITelegramBotClient RegisterTelegramBot(this WebApplicationBuilder builder)
+    private static void RegisterTelegramBot(this WebApplicationBuilder builder)
     {
         string telegramBotToken = builder.Configuration.GetRequiredSection("BotToken").Value!;
 
-        telegramBotToken.Throw("TelegramBotToken не получен.").IfWhiteSpace();
+        telegramBotToken.Throw("TelegramBotToken не получен.").IfNullOrWhiteSpace(s => s);
 
         ITelegramBotClient telegramBotClient = new TelegramBotClient(telegramBotToken);
         builder.Services.AddSingleton(telegramBotClient);
-
-        return telegramBotClient;
     }
-    private static IUrlGetter RegisterNgrok(this WebApplicationBuilder builder)
+    private static void RegisterUrlGetterNgrok(this WebApplicationBuilder builder)
     {
         string ngrokToken = builder.Configuration.GetRequiredSection("ngrokToken").Value!;
 
-        ngrokToken.Throw("NgrokApiToken не получен.").IfWhiteSpace();
+        ngrokToken.Throw("NgrokApiToken не получен.").IfNullOrWhiteSpace(s => s);
 
-        IUrlGetter ngrokService = new NgrokUrlGetter(ngrokToken);
-        builder.Services.AddSingleton(ngrokService);
+        IUrlGetter ngrokService = new UrlGetterFromNgrok(ngrokToken);
+        builder.Services.AddSingleton<IUrlGetter>(ngrokService);
+    }
+    private static void RegisterUrlGetterFromConfig(this WebApplicationBuilder builder)
+    {
+        string url = builder.Configuration.GetRequiredSection("PublicURL").Value!;
+        url.Throw("PublicURL не получен из конфига.").IfNullOrWhiteSpace(s => s);
+        IUrlGetter getter = new UrlGetterFromConfig(url);
+        builder.Services.AddSingleton<IUrlGetter>(getter);
 
-        return ngrokService;
+    }
+    private static void RegisterUrl(this WebApplicationBuilder builder)
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.RegisterUrlGetterNgrok();
+        }
+        if (builder.Environment.IsProduction()) 
+        {
+            builder.RegisterUrlGetterFromConfig();
+        }
     }
 }

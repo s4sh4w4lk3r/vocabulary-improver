@@ -2,6 +2,7 @@
 using MongoDB.Driver;
 using Telegram.Bot;
 using ViApi.Database;
+using ViApi.Services.GetUrlService;
 
 namespace ViApi.Extensions
 {
@@ -28,6 +29,7 @@ namespace ViApi.Extensions
             bool mySqlOk = false;
             bool mongoDbOk = false;
             bool botOk = false;
+            bool urlOk = false;
 
             try
             {
@@ -50,8 +52,14 @@ namespace ViApi.Extensions
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
+            try
+            {
+                urlOk = EnsureUrlGetted(serviceProvider, out string url);
+                logger.LogInformation("Публичный URL: {url}", url);
+            }
+            catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
-            bool servicesOk = mySqlOk && mongoDbOk && botOk;
+            bool servicesOk = mySqlOk && mongoDbOk && botOk && urlOk;
             if (servicesOk is true)
             {
                 logger.LogInformation("Все сервисы работают.");
@@ -59,7 +67,7 @@ namespace ViApi.Extensions
             }
             else
             {
-                logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nTelegramBot: {botOk}.", mySqlOk, mongoDbOk, botOk);
+                logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nTelegramBot: {botOk},\nURL Getter: {urlOk}.", mySqlOk, mongoDbOk, botOk, urlOk);
                 return servicesOk;
             }
         }
@@ -92,6 +100,13 @@ namespace ViApi.Extensions
             var bot = serviceProvider.GetBotClient();
             var name = (await bot.GetMyNameAsync(cancellationToken: cts.Token)).Name;
             return string.IsNullOrWhiteSpace(name) is false;
+        }
+        private static bool EnsureUrlGetted(IServiceProvider serviceProvider, out string url)
+        {
+            var urlGetter = serviceProvider.GetRequiredService<IUrlGetter>();
+            url = urlGetter.GetUrl();
+            return string.IsNullOrWhiteSpace(url) is false;
+            
         }
         #endregion
     }
