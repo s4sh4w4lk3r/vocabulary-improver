@@ -1,5 +1,4 @@
 ﻿using ViApi.Extensions;
-using ViApi.Services.GetUrlService;
 
 namespace ViApi
 {
