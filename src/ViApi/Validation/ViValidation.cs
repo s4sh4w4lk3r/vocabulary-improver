@@ -1,4 +1,6 @@
-﻿namespace ViApi.Validation;
+﻿using Throw;
+
+namespace ViApi.Validation;
 
 public class ViValidation
 {

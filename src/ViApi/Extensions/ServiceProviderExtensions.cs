@@ -1,102 +1,98 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
-using NgrokApi;
-using System.Threading;
 using Telegram.Bot;
-using Throw;
 using ViApi.Database;
 
 namespace ViApi.Extensions
 {
     public static class ServiceProviderExtensions
     {
+        #region Публичные методы.
         public static IMongoDatabase GetMongoDb(this IServiceProvider serviceProvider)
         {
             return serviceProvider.GetRequiredService<IMongoDatabase>();
         }
+
         public static ITelegramBotClient GetBotClient(this IServiceProvider serviceProvider)
         {
             return serviceProvider.GetRequiredService<ITelegramBotClient>();
         }
+
         public static IConfiguration GetConfiguration(this IServiceProvider serviceProvider)
         {
             return serviceProvider.GetRequiredService<IConfiguration>();
+        }
 
-        }
-        public async static Task<string?> GetFirstTunnelUrlAsync(this Ngrok ngrok, CancellationToken cancellationToken)
-        {
-            var tunnel = await ngrok.Tunnels.List().FirstOrDefaultAsync(cancellationToken);
-            return tunnel?.PublicUrl;
-        }
         public async static Task<bool> EnsureServicesOkAsync(this IServiceProvider serviceProvider, ILogger logger)
         {
             bool mySqlOk = false;
             bool mongoDbOk = false;
             bool botOk = false;
-            bool ngrokOk = false;
-
-            string? ngrokUrl = null;
-
 
             try
             {
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                var ngrok = serviceProvider.GetRequiredService<Ngrok>();
-                var ngrokTask = ngrok.GetFirstTunnelUrlAsync(cts.Token);
-                ngrokUrl = await ngrokTask;
-                ngrokOk = string.IsNullOrWhiteSpace(ngrokUrl) is false;
-                ngrokOk.Throw(_ => new Exception("Не получен Ngrok URL.")).IfFalse();
+
+                botOk = await EnsureTelegramBotAsync(serviceProvider);
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
 
             try
             {
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-
-                var bot = serviceProvider.GetBotClient();
-                var botTask = bot.GetMyNameAsync(cancellationToken: cts.Token);
-                botOk = string.IsNullOrWhiteSpace((await botTask).Name) is false;
+                mySqlOk = await EnsureMySqlAsync(serviceProvider);
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
 
             try
             {
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-
-                var mySqlConnString = serviceProvider.GetConfiguration().GetRequiredSection("MySql").Value;
-                var mySqlOptions = new DbContextOptionsBuilder<MySqlDbContext>().UseMySql(mySqlConnString, ServerVersion.AutoDetect(mySqlConnString)).Options;
-                var mySql = new MySqlDbContext(mySqlOptions);
-                var mySqlTask = mySql.Database.CanConnectAsync(cts.Token);
-                mySqlOk = await mySqlTask;
+                mongoDbOk = await EnsureMongoDbAsync(serviceProvider);
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
 
-            try
-            {
-                var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-
-                var mongoDb = serviceProvider.GetMongoDb();
-                var mongoDbTask = (await mongoDb.Client.ListDatabaseNamesAsync(cts.Token)).AnyAsync(cts.Token);
-                mongoDbOk = await mongoDbTask;
-            }
-            catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
-
-
-            bool servicesOk = mySqlOk && mongoDbOk && ngrokOk && botOk;
+            bool servicesOk = mySqlOk && mongoDbOk && botOk;
             if (servicesOk is true)
             {
                 logger.LogInformation("Все сервисы работают.");
-                logger.LogInformation("Ngrok URL: {ngrokUrl}", ngrokUrl);
                 return servicesOk;
             }
             else
             {
-                logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nNgrok: {ngrokOk},\nTelegramBot: {botOk}.", mySqlOk, mongoDbOk, ngrokOk, botOk);
+                logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nTelegramBot: {botOk}.", mySqlOk, mongoDbOk, botOk);
                 return servicesOk;
             }
         }
+        #endregion
+
+
+        #region Приватные методы.
+        private static async Task<bool> EnsureMySqlAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
+
+            var mySqlConnString = serviceProvider.GetConfiguration().GetRequiredSection("MySql").Value;
+            var mySqlOptions = new DbContextOptionsBuilder<MySqlDbContext>().UseMySql(mySqlConnString, ServerVersion.AutoDetect(mySqlConnString)).Options;
+            var mySql = new MySqlDbContext(mySqlOptions);
+            return await mySql.Database.CanConnectAsync(cts.Token);
+        }
+
+        private static async Task<bool> EnsureMongoDbAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
+
+            var mongoDb = serviceProvider.GetMongoDb();
+            return await (await mongoDb.Client.ListDatabaseNamesAsync(cts.Token)).AnyAsync(cts.Token);
+        }
+
+        private static async Task<bool> EnsureTelegramBotAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)
+        {
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
+
+            var bot = serviceProvider.GetBotClient();
+            var name = (await bot.GetMyNameAsync(cancellationToken: cts.Token)).Name;
+            return string.IsNullOrWhiteSpace(name) is false;
+        }
+        #endregion
     }
 }
