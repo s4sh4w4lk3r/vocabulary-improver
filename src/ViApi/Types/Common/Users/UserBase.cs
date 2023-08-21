@@ -1,6 +1,6 @@
 ﻿using Throw;
 
-namespace ViApi.Types.Users;
+namespace ViApi.Types.Common.Users;
 
 public abstract class UserBase
 {
@@ -8,7 +8,7 @@ public abstract class UserBase
     public string Firstname { get; set; }
     public UserBase(Guid userGuid, string firstname)
     {
-        userGuid.Throw("В конструктор UserBase передан пустой GUID.").IfEquals(Guid.Empty);
+        userGuid.Throw("В конструктор UserBase передан пустой GUID.").IfDefault();
         firstname.Throw("В конструктор UserBase передано пустое имя.").IfNullOrWhiteSpace(f => f);
         Firstname = firstname;
         Guid = userGuid;

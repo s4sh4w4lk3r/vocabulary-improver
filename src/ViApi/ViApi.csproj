@@ -20,7 +20,8 @@
 
   <ItemGroup>
     <Folder Include="Contollers\" />
-    <Folder Include="Types\Enums\" />
+    <Folder Include="Database\MongoDb\" />
+    <Folder Include="Database\MySql\Queries\" />
   </ItemGroup>
 
 </Project>
