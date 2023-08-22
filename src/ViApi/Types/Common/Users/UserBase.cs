@@ -1,5 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using Throw;
+﻿using Throw;
 
 namespace ViApi.Types.Common.Users;
 
@@ -7,7 +6,7 @@ public abstract class UserBase
 {
     public Guid Guid { get; set; }
     public string Firstname { get; set; } = null!;
-    [BsonIgnore] public List<Dictionary>? Dictionaries { get; set; }
+    public List<Dictionary>? Dictionaries { get; set; }
     public UserBase() { }
     public UserBase(Guid userGuid, string firstname)
     {
@@ -16,5 +15,5 @@ public abstract class UserBase
         Firstname = firstname;
         Guid = userGuid;
     }
-    public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Firstname: {Firstname}.";
+    public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Firstname: {Firstname}";
 }

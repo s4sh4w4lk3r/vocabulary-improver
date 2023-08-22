@@ -25,7 +25,7 @@ namespace ViApi.Types.Users
             Password = password;
         }
 
-        public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Username: {Username}, Email: {Email}, Firstname: {Firstname}.";
+        public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Username: {Username}, Email: {Email}, Firstname: {Firstname}";
 
 
         [GeneratedRegex("^\\S+@\\S+\\.\\S+$")]

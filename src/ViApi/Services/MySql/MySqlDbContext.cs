@@ -11,8 +11,7 @@ public class MySqlDbContext : DbContext
     public DbSet<Word> Words => Set<Word>();
     public DbSet<Dictionary> Dictionaries => Set<Dictionary>();
 
-    public MySqlDbContext(DbContextOptions<MySqlDbContext> options)
-        : base(options)
+    public MySqlDbContext(DbContextOptions<MySqlDbContext> options) : base(options)
     {
 
     }

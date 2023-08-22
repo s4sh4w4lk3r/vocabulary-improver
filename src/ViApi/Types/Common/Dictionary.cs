@@ -1,5 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using System.Collections;
+﻿using System.Collections;
 using Throw;
 using ViApi.Types.Common.Users;
 
@@ -10,8 +9,8 @@ public class Dictionary : IEnumerable<Word>
     public Guid Guid { get; set; }
     public string Name { get; set; } = null!;
     public Guid UserGuid { get; set; }
-    [BsonIgnore] public UserBase? User { get; set; }
-    public IEnumerable<Word> Words { get; set; } = new List<Word>();
+    public UserBase? User { get; set; }
+    public List<Word> Words { get; set; } = new List<Word>();
 
     private Dictionary() { }
     public Dictionary(Guid guid, string name, Guid userGuid, IEnumerable<Word> words)
@@ -24,10 +23,10 @@ public class Dictionary : IEnumerable<Word>
         Guid = guid;
         Name = name;
         UserGuid = userGuid;
-        Words = words;
+        Words = words.ToList();
     }
 
-    public override string ToString() => $"[Guid {Guid}, Name: {Name}, WordsCount: {Words.Count()}, UserGuid: {UserGuid}";
+    public override string ToString() => $"[Guid {Guid}, Name: {Name}, WordsCount: {Words.Count}, UserGuid: {UserGuid}";
 
     public IEnumerator<Word> GetEnumerator() => Words.GetEnumerator();
 
