@@ -32,7 +32,7 @@ public class Dictionary : IEnumerable<Word>
         set => _words = value.ThrowIfNull("В конструктор Dictionary получена null коллекция.").Value;
     }
 
-    public Dictionary() { }
+    private Dictionary() { }
     public Dictionary(Guid dictGuid, string name, Guid userGuid, IEnumerable<Word> words)
     {
         Guid = dictGuid;

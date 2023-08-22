@@ -26,7 +26,7 @@ namespace ViApi.Types.Users
                 .Throw("В конструктор ApiUser передан слабый пароль.").IfNotMatches(PasswordRegex()).Value;
         }
 
-        public ApiUser() { }
+        private ApiUser() { }
         public ApiUser(Guid userGuid, string firstname, string username, string email, string password) : base(userGuid, firstname)
         {
             Username = username;

@@ -29,7 +29,7 @@ public class UserSession
     }
     public UserState State { get; set; }
 
-    public UserSession() { }
+    private UserSession() { }
     public UserSession(Guid userGuid, Guid dictGuid, Stack<Word> gameStack, UserState state = UserState.Default)
     {
         UserGuid = userGuid;

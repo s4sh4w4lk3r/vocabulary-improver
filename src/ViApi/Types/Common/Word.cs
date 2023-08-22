@@ -38,7 +38,7 @@ public class Word
     [BsonIgnore] public Dictionary? Dictionary { get; set; }
 
 
-    public Word() { }
+    private Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)
     {
         Guid = guid;

@@ -15,7 +15,7 @@ public abstract class UserBase
         set => _firstname = value.Throw("В конструктор UserBase передано пустое имя.").IfNullOrWhiteSpace(f => f).Value;
     }
     public List<Dictionary>? Dictionaries { get; set; }
-    public UserBase() { }
+    protected UserBase() { }
     public UserBase(Guid userGuid, string firstname)
     {
         Firstname = firstname;
