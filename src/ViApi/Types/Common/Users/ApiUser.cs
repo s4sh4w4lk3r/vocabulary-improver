@@ -6,10 +6,11 @@ namespace ViApi.Types.Users
 {
     public partial class ApiUser : UserBase
     {
-        public string Username { get; set; }
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public string Username { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string Password { get; set; } = null!;
 
+        private ApiUser() { }
         public ApiUser(Guid userGuid, string firstname, string username, string email, string password) : base(userGuid, firstname)
         {
             username.Throw("В конструктор ApiUser передан пустой ник.").IfNullOrWhiteSpace(f => f);

@@ -1,15 +1,19 @@
-﻿using System.Collections;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using System.Collections;
 using Throw;
+using ViApi.Types.Common.Users;
 
 namespace ViApi.Types.Common;
 
 public class Dictionary : IEnumerable<Word>
 {
     public Guid Guid { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = null!;
     public Guid UserGuid { get; set; }
-    public IEnumerable<Word> Words { get; set; }
+    [BsonIgnore] public UserBase? User { get; set; }
+    public IEnumerable<Word> Words { get; set; } = new List<Word>();
 
+    private Dictionary() { }
     public Dictionary(Guid guid, string name, Guid userGuid, IEnumerable<Word> words)
     {
         guid.Throw("В конструктор Dictionary получен пустой Guid.").IfDefault();

@@ -9,6 +9,7 @@ public class TelegramUser : UserBase
     {
         TelegramId = telegramId;
     }
+    private TelegramUser() { }
     public TelegramUser(Guid userGuid, string firstname, long? telegramId) : base(userGuid, firstname)
     {
         telegramId.ThrowIfNull(_ => new ArgumentNullException("В конструктор User передан telegramId который null."));

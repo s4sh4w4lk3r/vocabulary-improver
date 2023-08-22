@@ -1,4 +1,4 @@
-﻿using ViApi.Types.Common;
+﻿using ViApi.Extensions;
 
 namespace ViApi
 {
@@ -6,8 +6,7 @@ namespace ViApi
     {
         public static async Task Main(string[] args)
         {
-            new Word(Guid.NewGuid(), "f", "f", Guid.NewGuid(), -1);
-            /*var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);
             builder.RegisterDependencies(args);
 
             var app = builder.Build();
@@ -18,10 +17,11 @@ namespace ViApi
                 return;
             }
 
-            
+
+/*
             app.MapGet("/", () => "Hello World!");
 
-            app.Run();*/
+            app.Run()*/;
 
         }
     }

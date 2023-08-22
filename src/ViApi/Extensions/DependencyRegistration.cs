@@ -2,8 +2,8 @@
 using MongoDB.Driver;
 using Telegram.Bot;
 using Throw;
-using ViApi.Database.MySql;
 using ViApi.Services.GetUrlService;
+using ViApi.Services.MySql;
 
 namespace ViApi.Extensions;
 
@@ -25,10 +25,11 @@ public static class DependencyRegistration
         string mongoDbConnString = builder.Configuration.GetRequiredSection("MongoDb").Value!;
         string dbNameMongo = builder.Configuration.GetRequiredSection("dbNameMongo").Value!;
 
-        mongoDbConnString.Throw("MySqlConnString не получен.").IfNullOrWhiteSpace(s => s);
+        mongoDbConnString.Throw("mongoDbConnString не получен.").IfNullOrWhiteSpace(s => s);
         dbNameMongo.Throw("DbNameMongo не получен.").IfNullOrWhiteSpace(s => s);
 
         IMongoDatabase mongoDb = new MongoClient(mongoDbConnString).GetDatabase(dbNameMongo);
+
         builder.Services.AddSingleton(mongoDb);
     }
     private static void RegisterMySql(this WebApplicationBuilder builder)
@@ -71,7 +72,7 @@ public static class DependencyRegistration
         {
             builder.RegisterUrlGetterNgrok();
         }
-        if (builder.Environment.IsProduction()) 
+        if (builder.Environment.IsProduction())
         {
             builder.RegisterUrlGetterFromConfig();
         }

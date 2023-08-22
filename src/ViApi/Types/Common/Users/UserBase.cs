@@ -1,11 +1,14 @@
-﻿using Throw;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Throw;
 
 namespace ViApi.Types.Common.Users;
 
 public abstract class UserBase
 {
     public Guid Guid { get; set; }
-    public string Firstname { get; set; }
+    public string Firstname { get; set; } = null!;
+    [BsonIgnore] public List<Dictionary>? Dictionaries { get; set; }
+    public UserBase() { }
     public UserBase(Guid userGuid, string firstname)
     {
         userGuid.Throw("В конструктор UserBase передан пустой GUID.").IfDefault();

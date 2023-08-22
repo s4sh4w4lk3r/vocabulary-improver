@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Telegram.Bot;
-using ViApi.Database.MySql;
 using ViApi.Services.GetUrlService;
+using ViApi.Services.MySql;
 
 namespace ViApi.Extensions
 {
@@ -90,7 +90,10 @@ namespace ViApi.Extensions
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
 
             var mongoDb = serviceProvider.GetMongoDb();
-            return await (await mongoDb.Client.ListDatabaseNamesAsync(cts.Token)).AnyAsync(cts.Token);
+            var dbNamesCoursor = await mongoDb.Client.ListDatabaseNamesAsync(cts.Token);
+            var dbNamesList = await dbNamesCoursor.ToListAsync(cts.Token);
+
+            return dbNamesList.Contains("vocabulary-improver");
         }
 
         private static async Task<bool> EnsureTelegramBotAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)

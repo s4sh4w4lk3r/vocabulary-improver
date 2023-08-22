@@ -20,8 +20,6 @@
 
   <ItemGroup>
     <Folder Include="Contollers\" />
-    <Folder Include="Database\MongoDb\" />
-    <Folder Include="Database\MySql\Queries\" />
   </ItemGroup>
 
 </Project>

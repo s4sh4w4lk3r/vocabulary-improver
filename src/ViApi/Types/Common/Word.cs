@@ -1,4 +1,5 @@
-﻿using Throw;
+﻿using MongoDB.Bson.Serialization.Attributes;
+using Throw;
 
 namespace ViApi.Types.Common;
 
@@ -9,7 +10,10 @@ public class Word
     public string TargetWord { get; set; } = string.Empty;
     public int Rating { get; private set; }
     public Guid DictionaryGuid { get; set; }
+    [BsonIgnore] public Dictionary? Dictionary { get; set; }
 
+
+    private Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)
     {
         guid.Throw("В конструктор Word попал пустой Guid.").IfDefault();

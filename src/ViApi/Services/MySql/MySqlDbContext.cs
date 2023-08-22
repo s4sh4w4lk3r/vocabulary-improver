@@ -3,7 +3,7 @@ using ViApi.Types.Common;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Users;
 
-namespace ViApi.Database.MySql;
+namespace ViApi.Services.MySql;
 
 public class MySqlDbContext : DbContext
 {
@@ -46,6 +46,29 @@ public class MySqlDbContext : DbContext
             entity.Property(e => e.Firstname).HasMaxLength(255);
         });
 
-#error надо в типы добавить нав. свойства и допилить этот метод.
+        modelBuilder.Entity<Word>(entity =>
+        {
+            entity.ToTable("words");
+            entity.Property<int>("Id");
+            entity.HasKey("Id").HasName("PRIMARY");
+            entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
+            entity.HasIndex(e => e.DictionaryGuid, "dictguid-unique");
+            entity.Property(e => e.SourceWord).HasMaxLength(512);
+            entity.Property(e => e.TargetWord).HasMaxLength(512);
+            entity.Property(e => e.Rating).HasDefaultValue(0);
+            entity.ToTable(e => e.HasCheckConstraint("Rating", "Rating > -1 AND Rating < 11").HasName("RatingCheckConstraint"));
+            entity.HasOne(e => e.Dictionary).WithMany(e => e.Words).HasForeignKey(e => e.DictionaryGuid).HasPrincipalKey(e => e.Guid).HasConstraintName("WordToDictionary");
+        });
+
+        modelBuilder.Entity<Dictionary>(entity =>
+        {
+            entity.ToTable("dictionaries");
+            entity.Property<int>("Id");
+            entity.HasKey("Id").HasName("PRIMARY");
+            entity.HasAlternateKey(e => e.Guid).HasName("GuidKey");
+            entity.HasIndex(e => e.UserGuid, "userguid-unique");
+            entity.Property(e => e.Name).HasMaxLength(255);
+            entity.HasOne(e => e.User).WithMany(e => e.Dictionaries).HasForeignKey(e => e.UserGuid).HasPrincipalKey(e => e.Guid).HasConstraintName("DictionaryToUser");
+        });
     }
 }
