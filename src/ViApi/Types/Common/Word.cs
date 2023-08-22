@@ -1,27 +1,46 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
-using Throw;
 
 namespace ViApi.Types.Common;
 
 public class Word
 {
-    public Guid Guid { get; set; }
-    public string SourceWord { get; set; } = string.Empty;
-    public string TargetWord { get; set; } = string.Empty;
-    public int Rating { get; private set; }
-    public Guid DictionaryGuid { get; set; }
+    private Guid _guid;
+    private string _sourceWord = null!;
+    private string _targetWord = null!;
+    private int _rating;
+    private Guid _dictionaryGuid;
+
+    public Guid Guid 
+    {   
+        get => _guid;
+        set => _guid = value.Throw("В конструктор Word попал пустой Guid.").IfDefault().Value;
+    }
+    public string SourceWord
+    {
+        get => _sourceWord;
+        set => _sourceWord = value.Throw("В конструктор Word попало пустое sourceWord.").IfNullOrWhiteSpace(_ => _).Value;
+    }
+    public string TargetWord
+    {
+        get => _targetWord;
+        set => _targetWord = value.Throw("В конструктор Word попало пустое targetWord.").IfNullOrWhiteSpace(_ => _).Value;
+    }
+    public int Rating
+    {
+        get => _rating;
+        set => _rating = value.Throw($"В конструктор Word попало недопустимое значение рейтинга: {value}.").IfGreaterThan(10).IfLessThan(0).Value;
+    }
+    public Guid DictionaryGuid
+    {
+        get => _dictionaryGuid;
+        set => _dictionaryGuid = value.Throw("В конструктор Word попал пустой dictGuid.").IfDefault().Value;
+    }
     [BsonIgnore] public Dictionary? Dictionary { get; set; }
 
 
-    private Word() { }
+    public Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)
     {
-        guid.Throw("В конструктор Word попал пустой Guid.").IfDefault();
-        dictGuid.Throw("В конструктор Word попал пустой dictGuid.").IfDefault();
-        sourceWord.Throw("В конструктор Word попало пустое sourceWord.").IfNullOrWhiteSpace(_ => _);
-        targetWord.Throw("В конструктор Word попало пустое targetWord.").IfNullOrWhiteSpace(_ => _);
-        rating.Throw($"В конструктор Word попало недопустимое значение рейтинга: {rating}.").IfGreaterThan(10).IfLessThan(0);
-
         Guid = guid;
         SourceWord = sourceWord;
         TargetWord = targetWord;

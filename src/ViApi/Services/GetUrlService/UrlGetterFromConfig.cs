@@ -1,6 +1,4 @@
-﻿using Throw;
-
-namespace ViApi.Services.GetUrlService;
+﻿namespace ViApi.Services.GetUrlService;
 
 public class UrlGetterFromConfig : IUrlGetter
 {

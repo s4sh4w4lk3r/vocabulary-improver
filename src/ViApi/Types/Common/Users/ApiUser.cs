@@ -1,25 +1,34 @@
 ﻿using System.Text.RegularExpressions;
-using Throw;
 using ViApi.Types.Common.Users;
 
 namespace ViApi.Types.Users
 {
     public partial class ApiUser : UserBase
     {
-        public string Username { get; set; } = null!;
-        public string Email { get; set; } = null!;
-        public string Password { get; set; } = null!;
+        private string _username = null!;
+        private string _email = null!;
+        private string _password = null!;
+        public string Username
+        {
+            get => _username;
+            set => _username = value.Throw("В конструктор ApiUser передан пустой ник.").IfNullOrWhiteSpace(_ => _).Value;
+        }
+        public string Email
+        {
+            get => _email;
+            set => _email = value.Throw("В конструктор ApiUser передан пустой Email.").IfNullOrWhiteSpace(_ => _)
+                .Throw("В конструктор ApiUser передан Email неверного формата.").IfNotMatches(EmailRegex()).Value;
+        }
+        public string Password
+        {
+            get => _password;
+            set => _password = value.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f)
+                .Throw("В конструктор ApiUser передан слабый пароль.").IfNotMatches(PasswordRegex()).Value;
+        }
 
-        private ApiUser() { }
+        public ApiUser() { }
         public ApiUser(Guid userGuid, string firstname, string username, string email, string password) : base(userGuid, firstname)
         {
-            username.Throw("В конструктор ApiUser передан пустой ник.").IfNullOrWhiteSpace(f => f);
-
-            password.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f)
-                .Throw("В конструктор ApiUser передан слабый пароль.").IfNotMatches(PasswordRegex());
-
-            email.Throw("В конструктор ApiUser передан пустой Email.").IfNullOrWhiteSpace(_ => _)
-                .Throw("В конструктор ApiUser передан Email неверного формата.").IfNotMatches(EmailRegex());
             Username = username;
             Email = email;
             Password = password;

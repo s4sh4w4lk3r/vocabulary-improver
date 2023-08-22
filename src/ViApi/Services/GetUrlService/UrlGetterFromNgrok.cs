@@ -1,5 +1,4 @@
 ﻿using NgrokApi;
-using Throw;
 
 namespace ViApi.Services.GetUrlService
 {

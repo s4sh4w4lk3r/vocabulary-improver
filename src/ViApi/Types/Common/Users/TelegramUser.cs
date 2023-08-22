@@ -1,18 +1,21 @@
-﻿using Throw;
-
-namespace ViApi.Types.Common.Users;
+﻿namespace ViApi.Types.Common.Users;
 
 public class TelegramUser : UserBase
 {
-    public long TelegramId { get; set; }
-    private TelegramUser() { }
+    private long telegramId;
+    public long TelegramId
+    {
+        get => telegramId;
+        set => telegramId = value.Throw("В конструктор TelegramUser передан telegramId, который меньше нуля.").IfNegativeOrZero().Value;
+    }
+    public TelegramUser() { }
     public TelegramUser(Guid userGuid, string firstname, long telegramId) : base(userGuid, firstname)
     {
         TelegramId = telegramId;
     }
     public TelegramUser(Guid userGuid, string firstname, long? telegramId) : base(userGuid, firstname)
     {
-        telegramId.ThrowIfNull(_ => new ArgumentNullException("В конструктор User передан telegramId который null."));
+        telegramId.ThrowIfNull("В конструктор TelegramUser передан telegramId, который null.");
         TelegramId = (long)telegramId;
     }
     public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, TelegramId: {TelegramId}, Firstname: {Firstname}";

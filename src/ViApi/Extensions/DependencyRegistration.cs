@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Telegram.Bot;
-using Throw;
 using ViApi.Services.GetUrlService;
 using ViApi.Services.MySql;
 

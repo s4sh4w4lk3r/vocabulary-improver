@@ -1,26 +1,41 @@
 ﻿using System.Collections;
-using Throw;
 using ViApi.Types.Common.Users;
 
 namespace ViApi.Types.Common;
 
 public class Dictionary : IEnumerable<Word>
 {
-    public Guid Guid { get; set; }
-    public string Name { get; set; } = null!;
-    public Guid UserGuid { get; set; }
-    public UserBase? User { get; set; }
-    public List<Word> Words { get; set; } = new List<Word>();
+    private Guid _guid;
+    private string _name = null!;
+    private Guid _userGuid;
+    private List<Word> _words = null!;
 
-    private Dictionary() { }
-    public Dictionary(Guid guid, string name, Guid userGuid, IEnumerable<Word> words)
+    public Guid Guid
     {
-        guid.Throw("В конструктор Dictionary получен пустой Guid.").IfDefault();
-        userGuid.Throw("В конструктор Dictionary получен пустой userGuid.").IfDefault();
-        name.Throw("В конструктор Dictionary получен пустое имя.").IfNullOrWhiteSpace(_ => _);
-        words.ThrowIfNull("В конструктор Dictionary получена null коллекция.");
+        get => _guid;
+        set => _guid = value.Throw("В конструктор Dictionary получен пустой dictGuid.").IfDefault().Value;
+    }
+    public string Name
+    {
+        get => _name;
+        set => _name = value.Throw("В конструктор Dictionary получен пустое имя.").IfNullOrWhiteSpace(_ => _).Value;
+    }
+    public Guid UserGuid
+    {
+        get => _userGuid;
+        set => _userGuid = value.Throw("В конструктор Dictionary получен пустой userGuid.").IfDefault().Value;
+    }
+    public UserBase? User { get; set; }
+    public List<Word> Words
+    {
+        get => _words;
+        set => _words = value.ThrowIfNull("В конструктор Dictionary получена null коллекция.").Value;
+    }
 
-        Guid = guid;
+    public Dictionary() { }
+    public Dictionary(Guid dictGuid, string name, Guid userGuid, IEnumerable<Word> words)
+    {
+        Guid = dictGuid;
         Name = name;
         UserGuid = userGuid;
         Words = words.ToList();

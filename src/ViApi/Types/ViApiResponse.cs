@@ -1,6 +1,4 @@
-﻿using Throw;
-
-namespace ViApi.Types;
+﻿namespace ViApi.Types;
 
 public class ViApiResponse<T> where T: notnull
 {
