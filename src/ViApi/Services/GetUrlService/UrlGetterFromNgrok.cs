@@ -15,10 +15,9 @@ namespace ViApi.Services.GetUrlService
         {
             return GetFirstTunnelUrlAsync().Result;
         }
-        private async Task<string> GetFirstTunnelUrlAsync(int cancellationTokenIntervalSec = 5)
+        private async Task<string> GetFirstTunnelUrlAsync(CancellationToken cancellationToken = default)
         {
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
-            var tunnel = await Ngrok.Tunnels.List().FirstOrDefaultAsync(cts.Token);
+            var tunnel = await Ngrok.Tunnels.List().FirstOrDefaultAsync(cancellationToken);
             string url = tunnel?.PublicUrl!;
             url.Throw(_ => new InvalidOperationException("Ngrok URL не получен.")).IfNullOrEmpty(u => u);
             return url;

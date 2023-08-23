@@ -13,11 +13,7 @@ public class Program
 
         var app = builder.Build();
 
-        bool ok = await app.Services.EnsureServicesOkAsync(app.Logger);
-        if (ok is false)
-        {
-            return;
-        }
+        await app.Services.EnsureServicesOkAsync(app.Logger);
 
 
         using IServiceScope scope = app.Services.CreateScope();

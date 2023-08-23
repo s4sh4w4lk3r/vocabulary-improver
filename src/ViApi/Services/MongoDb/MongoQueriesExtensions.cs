@@ -8,23 +8,23 @@ namespace ViApi.Services.MongoDb;
 public static class MongoQueriesExtensions
 {
     #region Публичные методы
-    public static async Task<UserSession?> GetUserSessionAsync(this IMongoDatabase db, UserBase user)
+    public static async Task<UserSession?> GetUserSessionAsync(this IMongoDatabase db, UserBase user, CancellationToken cancellationToken = default)
     {
         var userGuid = user.Guid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
         var collection = db.GetCollection<UserSession>("usersessions");
 
-        var userSession = await collection.Find(filter).FirstOrDefaultAsync();
+        var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
         return userSession;
     }
 
-    public static async Task InsertOrUpdateUserSessionAsync(this IMongoDatabase db, UserSession userSession)
+    public static async Task InsertOrUpdateUserSessionAsync(this IMongoDatabase db, UserSession userSession, CancellationToken cancellationToken = default)
     {
         var userGuid = userSession.UserGuid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
         var collection = db.GetCollection<UserSession>("usersessions");
 
-        await collection.ReplaceOneAsync(filter, userSession, new ReplaceOptions { IsUpsert = true });
+        await collection.ReplaceOneAsync(filter, userSession, new ReplaceOptions { IsUpsert = true }, cancellationToken);
     }
     #endregion
 

@@ -24,31 +24,32 @@ namespace ViApi.Extensions
             return serviceProvider.GetRequiredService<IConfiguration>();
         }
 
-        public async static Task<bool> EnsureServicesOkAsync(this IServiceProvider serviceProvider, ILogger logger)
+        public async static Task<bool> EnsureServicesOkAsync(this IServiceProvider serviceProvider, ILogger logger, int intervalToCancel = 10)
         {
             bool mySqlOk = false;
             bool mongoDbOk = false;
             bool botOk = false;
             bool urlOk = false;
+            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(intervalToCancel));
 
             try
             {
 
-                botOk = await EnsureTelegramBotAsync(serviceProvider);
+                botOk = await EnsureTelegramBotAsync(serviceProvider, cts.Token);
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
 
             try
             {
-                mySqlOk = await EnsureMySqlAsync(serviceProvider);
+                mySqlOk = await EnsureMySqlAsync(serviceProvider, cts.Token);
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
 
             try
             {
-                mongoDbOk = await EnsureMongoDbAsync(serviceProvider);
+                mongoDbOk = await EnsureMongoDbAsync(serviceProvider, cts.Token);
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
@@ -68,40 +69,35 @@ namespace ViApi.Extensions
             else
             {
                 logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nTelegramBot: {botOk},\nURL Getter: {urlOk}.", mySqlOk, mongoDbOk, botOk, urlOk);
-                return servicesOk;
+                throw new InvalidOperationException("Проверьте сервисы.");
             }
         }
         #endregion
 
 
         #region Приватные методы.
-        private static async Task<bool> EnsureMySqlAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)
+        private static async Task<bool> EnsureMySqlAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
         {
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
-
             var mySqlConnString = serviceProvider.GetConfiguration().GetRequiredSection("MySql").Value;
             var mySqlOptions = new DbContextOptionsBuilder<MySqlDbContext>().UseMySql(mySqlConnString, ServerVersion.AutoDetect(mySqlConnString)).Options;
             var mySql = new MySqlDbContext(mySqlOptions);
-            return await mySql.Database.CanConnectAsync(cts.Token);
+            return await mySql.Database.CanConnectAsync(cancellationToken);
         }
 
-        private static async Task<bool> EnsureMongoDbAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)
+        private static async Task<bool> EnsureMongoDbAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
         {
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
 
             var mongoDb = serviceProvider.GetMongoDb();
-            var dbNamesCoursor = await mongoDb.Client.ListDatabaseNamesAsync(cts.Token);
-            var dbNamesList = await dbNamesCoursor.ToListAsync(cts.Token);
+            var dbNamesCoursor = await mongoDb.Client.ListDatabaseNamesAsync(cancellationToken);
+            var dbNamesList = await dbNamesCoursor.ToListAsync(cancellationToken);
 
             return dbNamesList.Contains("vocabulary-improver");
         }
 
-        private static async Task<bool> EnsureTelegramBotAsync(IServiceProvider serviceProvider, int cancellationTokenIntervalSec = 5)
+        private static async Task<bool> EnsureTelegramBotAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
         {
-            var cts = new CancellationTokenSource(TimeSpan.FromSeconds(cancellationTokenIntervalSec));
-
             var bot = serviceProvider.GetBotClient();
-            var name = (await bot.GetMyNameAsync(cancellationToken: cts.Token)).Name;
+            var name = (await bot.GetMyNameAsync(cancellationToken: cancellationToken)).Name;
             return string.IsNullOrWhiteSpace(name) is false;
         }
         private static bool EnsureUrlGetted(IServiceProvider serviceProvider, out string url)
