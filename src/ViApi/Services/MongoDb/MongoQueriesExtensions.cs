@@ -17,16 +17,7 @@ public static class MongoQueriesExtensions
         var userSession = await collection.Find(filter).FirstOrDefaultAsync();
         return userSession;
     }
-    public static async Task<UserSession?> GetUserSessionAsync(this IMongoDatabase db, Guid userGuid)
-    {
-        userGuid.Throw("В метод GetUserSessionAsync пришел пустой userGuid.").IfDefault();
 
-        var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
-        var collection = db.GetCollection<UserSession>("usersessions");
-
-        var userSession = await collection.Find(filter).FirstOrDefaultAsync();
-        return userSession;
-    }
     public static async Task InsertOrUpdateUserSessionAsync(this IMongoDatabase db, UserSession userSession)
     {
         var userGuid = userSession.UserGuid;

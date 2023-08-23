@@ -40,6 +40,13 @@ public class Dictionary : IEnumerable<Word>
         UserGuid = userGuid;
         Words = words.ToList();
     }
+    public Dictionary(Guid dictGuid, string name, Guid userGuid)
+    {
+        Guid = dictGuid;
+        Name = name;
+        UserGuid = userGuid;
+        Words = new List<Word>();
+    }
 
     public override string ToString() => $"[Guid {Guid}, Name: {Name}, WordsCount: {Words.Count}, UserGuid: {UserGuid}";
 

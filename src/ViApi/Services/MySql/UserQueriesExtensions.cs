@@ -18,7 +18,7 @@ public static class UserQueriesExtensions
             bool exists = await db.Set<ApiUser>().AnyAsync(u => u.Username == apiUser.Username || u.Email == apiUser.Email);
             if (exists) return false;
         }
-        db.Users.Add(user);
+        await db.Users.AddAsync(user);
         int stringsChanged = await db.SaveChangesAsync();
 
         if (stringsChanged == 1)
@@ -29,5 +29,11 @@ public static class UserQueriesExtensions
         {
             return false;
         }
+    }
+    public static async Task<ApiUser?> GetUserToValidateAsync(this MySqlDbContext db, ApiUser user)
+    {
+        user.ThrowIfNull("В метод GetUserToValidateAsync пришел null user.").IfDefault(g => g.Guid, "В метод GetUserToValidateAsync пришел пустой Guid.");
+        var validUser = await db.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == user.Email && u.Username == user.Username);
+        return validUser;
     }
 }
