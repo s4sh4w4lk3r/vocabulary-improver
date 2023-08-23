@@ -30,10 +30,15 @@ public static class UserQueriesExtensions
             return false;
         }
     }
-    public static async Task<ApiUser?> GetUserToValidateAsync(this MySqlDbContext db, ApiUser user, CancellationToken cancellationToken = default)
+
+    public static async Task<ApiUser?> GetValidUserAsync(this MySqlDbContext db, string username, string email, CancellationToken cancellationToken = default)
     {
-        user.ThrowIfNull("В метод GetUserToValidateAsync пришел null user.").IfDefault(g => g.Guid, "В метод GetUserToValidateAsync пришел пустой Guid.");
-        var validUser = await db.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == user.Email && u.Username == user.Username, cancellationToken);
+        const string INVALID_TEMP_PASSWORD = "Pa55sword!";
+        const string INVALID_TEMP_FIRSTNAME = "Billy";
+ 
+        //Создается временный юзер, чтобы введенные в параметр данные прошли проверку.
+        var tempUser = new ApiUser(Guid.NewGuid(), INVALID_TEMP_FIRSTNAME, username, email, INVALID_TEMP_PASSWORD);
+        var validUser = await db.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == tempUser.Email && u.Username == tempUser.Username, cancellationToken);
         return validUser;
     }
 }

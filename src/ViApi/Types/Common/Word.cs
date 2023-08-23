@@ -48,15 +48,6 @@ public class Word
         DictionaryGuid = dictGuid;
     }
 
-    public void IncreaseRating()
-    {
-        Rating = RatingEdtior.IncreaseRating(Rating);
-    }
-    public void DecreaseRating()
-    {
-        Rating = RatingEdtior.DecreaseRating(Rating);
-    }
-
     public override string ToString() => $"Guid: {Guid}, Source-Target: {SourceWord} - {TargetWord}, {Rating}, DictGuid: {Guid}";
 
 }

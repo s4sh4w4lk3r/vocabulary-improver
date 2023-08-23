@@ -21,7 +21,7 @@ public class Program
         using var mysql = scope.ServiceProvider.GetRequiredService<MySqlDbContext>();
 
         var user = mysql.Users.FirstOrDefault();
-        await mysql.InsertDictionaryAsync(user, "name");
+        await mysql.InsertWordAsync(Guid.NewGuid(), Guid.Parse(""))
+            #error проверить методы
     }
 }
-#warning добавить завтра везде токены отмены чтобы опреации не зависали.
