@@ -67,11 +67,14 @@ public static class DependencyRegistrationExtensions
     }
     private static void RegisterUrl(this WebApplicationBuilder builder)
     {
-        if (builder.Environment.IsDevelopment())
+        string NgrokRequiredStr = builder.Configuration.GetRequiredSection("NgrokRequired").Value!;
+        bool NgrokRequired = bool.Parse(NgrokRequiredStr);
+
+        if (NgrokRequired) 
         {
             builder.RegisterUrlGetterNgrok();
         }
-        if (builder.Environment.IsProduction())
+        else
         {
             builder.RegisterUrlGetterFromConfig();
         }

@@ -24,7 +24,7 @@ namespace ViApi.Services
             return serviceProvider.GetRequiredService<IConfiguration>();
         }
 
-        public async static Task<bool> EnsureServicesOkAsync(this IServiceProvider serviceProvider, ILogger logger, int intervalToCancel = 10)
+        public async static Task EnsureServicesOkAsync(this IServiceProvider serviceProvider, ILogger logger, int intervalToCancel = 10)
         {
             bool mySqlOk = false;
             bool mongoDbOk = false;
@@ -64,7 +64,6 @@ namespace ViApi.Services
             if (servicesOk is true)
             {
                 logger.LogInformation("Все сервисы работают.");
-                return servicesOk;
             }
             else
             {
