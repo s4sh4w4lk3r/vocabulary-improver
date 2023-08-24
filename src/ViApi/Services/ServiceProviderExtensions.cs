@@ -4,7 +4,7 @@ using Telegram.Bot;
 using ViApi.Services.GetUrlService;
 using ViApi.Services.MySql;
 
-namespace ViApi.Extensions
+namespace ViApi.Services
 {
     public static class ServiceProviderExtensions
     {
@@ -105,7 +105,7 @@ namespace ViApi.Extensions
             var urlGetter = serviceProvider.GetRequiredService<IUrlGetter>();
             url = urlGetter.GetUrl();
             return string.IsNullOrWhiteSpace(url) is false;
-            
+
         }
         #endregion
     }

@@ -1,6 +1,6 @@
-﻿namespace ViApi.Types;
+﻿namespace ViApi.Types.API;
 
-public class ViApiResponse<T> where T: notnull
+public class ViApiResponse<T> where T : notnull
 {
     public bool Success { get; set; }
     public T Value { get; set; }

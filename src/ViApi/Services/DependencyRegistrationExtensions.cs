@@ -4,9 +4,9 @@ using Telegram.Bot;
 using ViApi.Services.GetUrlService;
 using ViApi.Services.MySql;
 
-namespace ViApi.Extensions;
+namespace ViApi.Services;
 
-public static class DependencyRegistration
+public static class DependencyRegistrationExtensions
 {
     public static void RegisterDependencies(this WebApplicationBuilder builder, string[] args)
     {
@@ -18,6 +18,7 @@ public static class DependencyRegistration
         builder.RegisterMongoDb();
         builder.RegisterTelegramBot();
         builder.RegisterUrl();
+        builder.Services.AddControllers();
     }
     private static void RegisterMongoDb(this WebApplicationBuilder builder)
     {
@@ -55,15 +56,14 @@ public static class DependencyRegistration
         ngrokToken.Throw("NgrokApiToken не получен.").IfNullOrWhiteSpace(s => s);
 
         IUrlGetter ngrokService = new UrlGetterFromNgrok(ngrokToken);
-        builder.Services.AddSingleton<IUrlGetter>(ngrokService);
+        builder.Services.AddSingleton(ngrokService);
     }
     private static void RegisterUrlGetterFromConfig(this WebApplicationBuilder builder)
     {
         string url = builder.Configuration.GetRequiredSection("PublicURL").Value!;
         url.Throw("PublicURL не получен из конфига.").IfNullOrWhiteSpace(s => s);
         IUrlGetter getter = new UrlGetterFromConfig(url);
-        builder.Services.AddSingleton<IUrlGetter>(getter);
-
+        builder.Services.AddSingleton(getter);
     }
     private static void RegisterUrl(this WebApplicationBuilder builder)
     {

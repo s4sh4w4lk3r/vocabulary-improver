@@ -12,7 +12,7 @@ public static class WordQueriesExtensions
         sourceWord.Throw("В метод InsertDictionaryAsync пришло пустое sourceWord").IfNullOrWhiteSpace(n => n);
         targetWord.Throw("В метод InsertDictionaryAsync пришло пустое targetWord").IfNullOrWhiteSpace(n => n);
 
-        var dictExist = await db.Dictionaries.AnyAsync(d => d.Guid == userGuid && d.UserGuid == userGuid, cancellationToken);
+        var dictExist = await db.Dictionaries.AnyAsync(d => d.Guid == dictGuid && d.UserGuid == userGuid, cancellationToken);
         if (dictExist is false) { return false; }
 
         await db.Words.AddAsync(new Word(Guid.NewGuid(), sourceWord, targetWord, dictGuid), cancellationToken);
@@ -20,11 +20,11 @@ public static class WordQueriesExtensions
         return true;
     }
 
-    public static async Task<bool> RemoveWordAsync(this MySqlDbContext db, Guid userGuid, Guid dictGuid, Guid wordGuid, CancellationToken cancellationToken = default)
+    public static async Task<bool> DeleteWordAsync(this MySqlDbContext db, Guid userGuid, Guid dictGuid, Guid wordGuid, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод RemoveWordAsync пришел пустой userGuid").IfDefault();
-        dictGuid.Throw("В метод RemoveWordAsync пришел пустой dictGuid").IfDefault();
-        wordGuid.Throw("В метод RemoveWordAsync пришел пустой wordGuid").IfDefault();
+        userGuid.Throw("В метод DeleteWordAsync пришел пустой userGuid").IfDefault();
+        dictGuid.Throw("В метод DeleteWordAsync пришел пустой dictGuid").IfDefault();
+        wordGuid.Throw("В метод DeleteWordAsync пришел пустой wordGuid").IfDefault();
 
         var wordToDel = await db.Words.Include(w => w.Dictionary).FirstOrDefaultAsync(w => w.DictionaryGuid == dictGuid && w.Guid == wordGuid && w.Dictionary!.UserGuid == userGuid, cancellationToken);
         if (wordToDel is null) { return false; };
