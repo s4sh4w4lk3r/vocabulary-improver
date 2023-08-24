@@ -1,82 +1,74 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
+using NgrokApi;
+using System;
 using Telegram.Bot;
-using ViApi.Services.GetUrlService;
 using ViApi.Services.MySql;
+using ViApi.Types.Configuration;
 
 namespace ViApi.Services;
 
 public static class DependencyRegistrationExtensions
 {
-    public static void RegisterDependencies(this WebApplicationBuilder builder, string[] args)
+    public static async Task RegisterDependencies(this WebApplicationBuilder builder, string[] args)
     {
         //Должен быть только один аргумент командной строки в виде путя до конфига.
         string configPath = args.FirstOrDefault()!.Throw("Не распознан путь до конфига.").IfNull(s => s);
         builder.Configuration.AddJsonFile(configPath);
-
-        builder.RegisterMySql();
-        builder.RegisterMongoDb();
-        builder.RegisterTelegramBot();
-        builder.RegisterUrl();
         builder.Services.AddControllers();
+
+        builder.RegisterDatabases();
+        await builder.RegisterTelegramBot();
     }
-    private static void RegisterMongoDb(this WebApplicationBuilder builder)
+    
+    private static void RegisterDatabases(this WebApplicationBuilder builder)
     {
-        string mongoDbConnString = builder.Configuration.GetRequiredSection("MongoDb").Value!;
-        string dbNameMongo = builder.Configuration.GetRequiredSection("dbNameMongo").Value!;
-
-        mongoDbConnString.Throw("mongoDbConnString не получен.").IfNullOrWhiteSpace(s => s);
-        dbNameMongo.Throw("DbNameMongo не получен.").IfNullOrWhiteSpace(s => s);
-
-        IMongoDatabase mongoDb = new MongoClient(mongoDbConnString).GetDatabase(dbNameMongo);
-
+        var dbConf = builder.Configuration.GetRequiredSection("DbConfiguration").Get<DbConfiguration>()!;
+        IMongoDatabase mongoDb = new MongoClient(dbConf.MongoDbConnString).GetDatabase(dbConf.MongoDbName);
         builder.Services.AddSingleton(mongoDb);
+        builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(dbConf.MySqlConnString, ServerVersion.AutoDetect(dbConf.MySqlConnString)));
     }
-    private static void RegisterMySql(this WebApplicationBuilder builder)
+
+    private static async Task RegisterTelegramBot(this WebApplicationBuilder builder)
     {
-        string mySqlConnString = builder.Configuration.GetRequiredSection("MySql").Value!;
-
-        mySqlConnString.Throw("MySqlConnString не получен.").IfNullOrWhiteSpace(s => s);
-
-        builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(mySqlConnString, ServerVersion.AutoDetect(mySqlConnString)));
-    }
-    private static void RegisterTelegramBot(this WebApplicationBuilder builder)
-    {
-        string telegramBotToken = builder.Configuration.GetRequiredSection("BotToken").Value!;
-
-        telegramBotToken.Throw("TelegramBotToken не получен.").IfNullOrWhiteSpace(s => s);
-
-        ITelegramBotClient telegramBotClient = new TelegramBotClient(telegramBotToken);
+        var tgConf = await SetWebhookUrl(builder);
+        ITelegramBotClient telegramBotClient = new TelegramBotClient(tgConf.BotToken);
         builder.Services.AddSingleton(telegramBotClient);
+        builder.Services.Configure<BotConfiguration>(builder.Configuration.GetRequiredSection("BotConfiguration"));
     }
-    private static void RegisterUrlGetterNgrok(this WebApplicationBuilder builder)
-    {
-        string ngrokToken = builder.Configuration.GetRequiredSection("ngrokToken").Value!;
 
-        ngrokToken.Throw("NgrokApiToken не получен.").IfNullOrWhiteSpace(s => s);
-
-        IUrlGetter ngrokService = new UrlGetterFromNgrok(ngrokToken);
-        builder.Services.AddSingleton(ngrokService);
-    }
-    private static void RegisterUrlGetterFromConfig(this WebApplicationBuilder builder)
+    private static async Task<BotConfiguration> SetWebhookUrl(this WebApplicationBuilder builder)
     {
-        string url = builder.Configuration.GetRequiredSection("PublicURL").Value!;
-        url.Throw("PublicURL не получен из конфига.").IfNullOrWhiteSpace(s => s);
-        IUrlGetter getter = new UrlGetterFromConfig(url);
-        builder.Services.AddSingleton(getter);
-    }
-    private static void RegisterUrl(this WebApplicationBuilder builder)
-    {
-        string NgrokRequiredStr = builder.Configuration.GetRequiredSection("NgrokRequired").Value!;
-        bool NgrokRequired = bool.Parse(NgrokRequiredStr);
+        var ngrokConf = builder.Configuration.GetRequiredSection("NgrokConfiguration").Get<NgrokConfiguration>()!;
+        var tgConf = builder.Configuration.GetRequiredSection("BotConfiguration").Get<BotConfiguration>()!;
+        string url;
 
-        if (NgrokRequired) 
+        if ((ngrokConf.IsRequired is false) && (string.IsNullOrWhiteSpace(tgConf.WebhookUrl) is false))
         {
-            builder.RegisterUrlGetterNgrok();
+            url = tgConf.WebhookUrl;
         }
-        else
+        else if ((ngrokConf.IsRequired is true) && (string.IsNullOrWhiteSpace(ngrokConf.Token) is false))
         {
-            builder.RegisterUrlGetterFromConfig();
+            url = await GetNgrokUrl(builder);
         }
+        else throw new InvalidOperationException("Не получен Url для вебхука.");
+
+
+        builder.Configuration.GetRequiredSection("BotConfiguration").GetRequiredSection("WebhookUrl").Value = url;
+        tgConf = builder.Configuration.GetRequiredSection("BotConfiguration").Get<BotConfiguration>()!;
+        return tgConf;
+    }
+    
+    private static async Task<string> GetNgrokUrl(this WebApplicationBuilder builder, CancellationToken cancellationToken = default)
+    {
+        var ngrokConf = builder.Configuration.GetRequiredSection("NgrokConfiguration").Get<NgrokConfiguration>()!;
+
+        ngrokConf.Token.ThrowIfNull().IfNullOrWhiteSpace(s => s);
+        var ngrok = new Ngrok(ngrokConf.Token);
+
+        var tunnel = await ngrok.Tunnels.List().FirstOrDefaultAsync(cancellationToken);
+        string url = tunnel?.PublicUrl!;
+        url.Throw(_ => new InvalidOperationException("Ngrok URL не получен от API.")).IfNullOrWhiteSpace(s => s);
+        return url;
     }
 }

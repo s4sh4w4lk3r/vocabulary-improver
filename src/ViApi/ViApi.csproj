@@ -22,4 +22,8 @@
     <Using Include="Throw" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Telegram\" />
+  </ItemGroup>
+
 </Project>

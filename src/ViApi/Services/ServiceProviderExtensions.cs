@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Telegram.Bot;
-using ViApi.Services.GetUrlService;
 using ViApi.Services.MySql;
 
 namespace ViApi.Services
@@ -29,7 +28,6 @@ namespace ViApi.Services
             bool mySqlOk = false;
             bool mongoDbOk = false;
             bool botOk = false;
-            bool urlOk = false;
             var cts = new CancellationTokenSource(TimeSpan.FromSeconds(intervalToCancel));
 
             try
@@ -53,21 +51,15 @@ namespace ViApi.Services
             }
             catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
-            try
-            {
-                urlOk = EnsureUrlGetted(serviceProvider, out string url);
-                logger.LogInformation("Публичный URL: {url}", url);
-            }
-            catch (Exception ex) { logger.LogCritical(ex, string.Empty); }
 
-            bool servicesOk = mySqlOk && mongoDbOk && botOk && urlOk;
+            bool servicesOk = mySqlOk && mongoDbOk && botOk;
             if (servicesOk is true)
             {
                 logger.LogInformation("Все сервисы работают.");
             }
             else
             {
-                logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nTelegramBot: {botOk},\nURL Getter: {urlOk}.", mySqlOk, mongoDbOk, botOk, urlOk);
+                logger.LogCritical("Не все сервисы работают.\nMySql: {mySqlOk},\nMongoDB: {mongoDbOk},\nTelegramBot: {botOk}", mySqlOk, mongoDbOk, botOk);
                 throw new InvalidOperationException("Проверьте сервисы.");
             }
         }
@@ -77,9 +69,8 @@ namespace ViApi.Services
         #region Приватные методы.
         private static async Task<bool> EnsureMySqlAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
         {
-            var mySqlConnString = serviceProvider.GetConfiguration().GetRequiredSection("MySql").Value;
-            var mySqlOptions = new DbContextOptionsBuilder<MySqlDbContext>().UseMySql(mySqlConnString, ServerVersion.AutoDetect(mySqlConnString)).Options;
-            var mySql = new MySqlDbContext(mySqlOptions);
+            using var scoped = serviceProvider.CreateScope();
+            var mySql = scoped.ServiceProvider.GetRequiredService<MySqlDbContext>();
             return await mySql.Database.CanConnectAsync(cancellationToken);
         }
 
@@ -98,13 +89,6 @@ namespace ViApi.Services
             var bot = serviceProvider.GetBotClient();
             var name = (await bot.GetMyNameAsync(cancellationToken: cancellationToken)).Name;
             return string.IsNullOrWhiteSpace(name) is false;
-        }
-        private static bool EnsureUrlGetted(IServiceProvider serviceProvider, out string url)
-        {
-            var urlGetter = serviceProvider.GetRequiredService<IUrlGetter>();
-            url = urlGetter.GetUrl();
-            return string.IsNullOrWhiteSpace(url) is false;
-
         }
         #endregion
     }
