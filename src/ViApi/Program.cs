@@ -1,4 +1,6 @@
-﻿using ViApi.Services;
+﻿using ViApi.Contollers;
+using ViApi.Services;
+using ViApi.Services.Telegram;
 
 namespace ViApi;
 
@@ -11,6 +13,8 @@ public class Program
         var app = builder.Build();
         await app.Services.EnsureServicesOkAsync(app.Logger);
 
-        app.Run();
+        app.MapBotWebhookRoute<BotController>(route: "/bot");
+        app.MapControllers();
+        app.Run(); ;
     }
 }

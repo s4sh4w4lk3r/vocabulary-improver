@@ -3,7 +3,9 @@ using MongoDB.Driver;
 using NgrokApi;
 using System;
 using Telegram.Bot;
+using Telegram.Bot.Polling;
 using ViApi.Services.MySql;
+using ViApi.Services.Telegram;
 using ViApi.Types.Configuration;
 
 namespace ViApi.Services;
@@ -15,7 +17,7 @@ public static class DependencyRegistrationExtensions
         //Должен быть только один аргумент командной строки в виде путя до конфига.
         string configPath = args.FirstOrDefault()!.Throw("Не распознан путь до конфига.").IfNull(s => s);
         builder.Configuration.AddJsonFile(configPath);
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddNewtonsoftJson();
 
         builder.RegisterDatabases();
         await builder.RegisterTelegramBot();
@@ -32,9 +34,18 @@ public static class DependencyRegistrationExtensions
     private static async Task RegisterTelegramBot(this WebApplicationBuilder builder)
     {
         var tgConf = await SetWebhookUrl(builder);
-        ITelegramBotClient telegramBotClient = new TelegramBotClient(tgConf.BotToken);
-        builder.Services.AddSingleton(telegramBotClient);
         builder.Services.Configure<BotConfiguration>(builder.Configuration.GetRequiredSection("BotConfiguration"));
+
+        builder.Services.AddHttpClient("telegram_bot_client")
+                .AddTypedClient<ITelegramBotClient>((httpClient) =>
+                {
+                    BotConfiguration? botConfig = tgConf;
+                    TelegramBotClientOptions options = new(botConfig.BotToken);
+                    return new TelegramBotClient(options, httpClient);
+                });
+
+        builder.Services.AddScoped<UpdateHandlers>();
+        builder.Services.AddHostedService<ConfigureWebhook>();
     }
 
     private static async Task<BotConfiguration> SetWebhookUrl(this WebApplicationBuilder builder)
