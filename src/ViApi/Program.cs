@@ -15,6 +15,6 @@ public class Program
 
         app.MapBotWebhookRoute<BotController>(route: "/bot");
         app.MapControllers();
-        app.Run(); ;
+        app.Run();
     }
 }

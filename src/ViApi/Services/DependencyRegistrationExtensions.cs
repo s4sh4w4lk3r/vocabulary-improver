@@ -37,12 +37,7 @@ public static class DependencyRegistrationExtensions
         builder.Services.Configure<BotConfiguration>(builder.Configuration.GetRequiredSection("BotConfiguration"));
 
         builder.Services.AddHttpClient("telegram_bot_client")
-                .AddTypedClient<ITelegramBotClient>((httpClient) =>
-                {
-                    BotConfiguration? botConfig = tgConf;
-                    TelegramBotClientOptions options = new(botConfig.BotToken);
-                    return new TelegramBotClient(options, httpClient);
-                });
+                .AddTypedClient<ITelegramBotClient>((httpClient) => new TelegramBotClient(tgConf.BotToken, httpClient));
 
         builder.Services.AddScoped<UpdateHandlers>();
         builder.Services.AddHostedService<ConfigureWebhook>();
