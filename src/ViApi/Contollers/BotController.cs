@@ -4,6 +4,8 @@ using ViApi.Services.Telegram;
 
 namespace ViApi.Contollers;
 
+[Route("/bot")]
+[ApiController]
 public class BotController : ControllerBase
 {
     [HttpPost]
