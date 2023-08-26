@@ -2,7 +2,6 @@
 using MongoDB.Driver;
 using NgrokApi;
 using Serilog;
-using Serilog.Events;
 using Telegram.Bot;
 using ViApi.Services.MySql;
 using ViApi.Services.Telegram;
@@ -20,7 +19,6 @@ public static class DependencyRegistrationExtensions
         builder.Configuration.AddJsonFile(configPath);
         builder.Services.AddControllers().AddNewtonsoftJson();
 
-
         builder.RegisterDatabases();
         await builder.RegisterTelegramBot();
     }
@@ -32,7 +30,6 @@ public static class DependencyRegistrationExtensions
         builder.Services.AddSingleton(mongoDb);
         builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(dbConf.MySqlConnString, ServerVersion.AutoDetect(dbConf.MySqlConnString)));
     }
-
     private static async Task RegisterTelegramBot(this WebApplicationBuilder builder)
     {
         var tgConf = await SetWebhookUrl(builder);
@@ -44,7 +41,6 @@ public static class DependencyRegistrationExtensions
         builder.Services.AddScoped<UpdateHandlers>();
         builder.Services.AddHostedService<ConfigureWebhook>();
     }
-
     private static async Task<BotConfiguration> SetWebhookUrl(this WebApplicationBuilder builder)
     {
         var ngrokConf = builder.Configuration.GetRequiredSection("NgrokConfiguration").Get<NgrokConfiguration>()!;
@@ -66,7 +62,6 @@ public static class DependencyRegistrationExtensions
         tgConf = builder.Configuration.GetRequiredSection("BotConfiguration").Get<BotConfiguration>()!;
         return tgConf;
     }
-
     private static async Task<string> GetNgrokUrl(this WebApplicationBuilder builder, CancellationToken cancellationToken = default)
     {
         var ngrokConf = builder.Configuration.GetRequiredSection("NgrokConfiguration").Get<NgrokConfiguration>()!;

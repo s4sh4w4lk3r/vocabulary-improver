@@ -30,12 +30,13 @@ public class UserSession
     public int LastMessageId { get; init; }
 
     private UserSession() { }
-    public UserSession(Guid userGuid, Guid dictGuid, Stack<Word> gameStack, UserState state = UserState.Default)
+    public UserSession(Guid userGuid, Guid dictGuid, Stack<Word> gameStack, int lastMessageId, UserState state = UserState.Default)
     {
         UserGuid = userGuid;
         DictionaryGuid = dictGuid;
         GameStack = gameStack;
         State = state;
+        LastMessageId = lastMessageId;
     }
 
     public override string ToString() => $"[{GetType()}] TGUserGuid: {UserGuid}, State: {State}";
