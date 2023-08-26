@@ -12,5 +12,6 @@ public class Program
         await app.Services.EnsureServicesOkAsync(app.Logger);
         app.MapControllers();
         app.Run();
+
     }
 }

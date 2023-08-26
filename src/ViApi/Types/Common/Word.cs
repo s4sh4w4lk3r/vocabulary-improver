@@ -13,17 +13,17 @@ public class Word
     public Guid Guid 
     {   
         get => _guid;
-        set => _guid = value.Throw("В конструктор Word попал пустой Guid.").IfDefault().Value;
+        init => _guid = value.Throw("В конструктор Word попал пустой Guid.").IfDefault().Value;
     }
     public string SourceWord
     {
         get => _sourceWord;
-        set => _sourceWord = value.Throw("В конструктор Word попало пустое sourceWord.").IfNullOrWhiteSpace(_ => _).Value;
+        init => _sourceWord = value.Throw("В конструктор Word попало пустое sourceWord.").IfNullOrWhiteSpace(_ => _).Value;
     }
     public string TargetWord
     {
         get => _targetWord;
-        set => _targetWord = value.Throw("В конструктор Word попало пустое targetWord.").IfNullOrWhiteSpace(_ => _).Value;
+        init => _targetWord = value.Throw("В конструктор Word попало пустое targetWord.").IfNullOrWhiteSpace(_ => _).Value;
     }
     public int Rating
     {
@@ -33,9 +33,9 @@ public class Word
     public Guid DictionaryGuid
     {
         get => _dictionaryGuid;
-        set => _dictionaryGuid = value.Throw("В конструктор Word попал пустой dictGuid.").IfDefault().Value;
+        init => _dictionaryGuid = value.Throw("В конструктор Word попал пустой dictGuid.").IfDefault().Value;
     }
-    [BsonIgnore] public Dictionary? Dictionary { get; set; }
+    [BsonIgnore] public Dictionary? Dictionary { get; init; }
 
 
     private Word() { }

@@ -6,7 +6,7 @@ public class TelegramUser : UserBase
     public long TelegramId
     {
         get => telegramId;
-        set => telegramId = value.Throw("В конструктор TelegramUser передан telegramId, который меньше нуля.").IfNegativeOrZero().Value;
+        init => telegramId = value.Throw("В конструктор TelegramUser передан telegramId, который меньше нуля.").IfNegativeOrZero().Value;
     }
     private TelegramUser() { }
     public TelegramUser(Guid userGuid, string firstname, long telegramId) : base(userGuid, firstname)

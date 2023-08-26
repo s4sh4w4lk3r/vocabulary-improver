@@ -7,12 +7,12 @@ public abstract class UserBase
     public Guid Guid
     {
         get => _guid;
-        set => _guid = value.Throw("В конструктор UserBase передан пустой GUID.").IfDefault().Value;
+        init => _guid = value.Throw("В конструктор UserBase передан пустой GUID.").IfDefault().Value;
     }
     public string Firstname
     {
         get => _firstname;
-        set => _firstname = value.Throw("В конструктор UserBase передано пустое имя.").IfNullOrWhiteSpace(f => f).Value;
+        init => _firstname = value.Throw("В конструктор UserBase передано пустое имя.").IfNullOrWhiteSpace(f => f).Value;
     }
     public List<Dictionary>? Dictionaries { get; set; }
     protected UserBase() { }

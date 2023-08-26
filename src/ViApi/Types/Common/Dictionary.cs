@@ -13,7 +13,7 @@ public class Dictionary : IEnumerable<Word>
     public Guid Guid
     {
         get => _guid;
-        set => _guid = value.Throw("В конструктор Dictionary получен пустой dictGuid.").IfDefault().Value;
+        init => _guid = value.Throw("В конструктор Dictionary получен пустой dictGuid.").IfDefault().Value;
     }
     public string Name
     {
@@ -23,23 +23,16 @@ public class Dictionary : IEnumerable<Word>
     public Guid UserGuid
     {
         get => _userGuid;
-        set => _userGuid = value.Throw("В конструктор Dictionary получен пустой userGuid.").IfDefault().Value;
+        init => _userGuid = value.Throw("В конструктор Dictionary получен пустой userGuid.").IfDefault().Value;
     }
     public UserBase? User { get; set; }
     public List<Word> Words
     {
         get => _words;
-        set => _words = value.ThrowIfNull("В конструктор Dictionary получена null коллекция.").Value;
+        init => _words = value.ThrowIfNull("В конструктор Dictionary получена null коллекция.").Value;
     }
 
     private Dictionary() { }
-    public Dictionary(Guid dictGuid, string name, Guid userGuid, IEnumerable<Word> words)
-    {
-        Guid = dictGuid;
-        Name = name;
-        UserGuid = userGuid;
-        Words = words.ToList();
-    }
     public Dictionary(Guid dictGuid, string name, Guid userGuid)
     {
         Guid = dictGuid;

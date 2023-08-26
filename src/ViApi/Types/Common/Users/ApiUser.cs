@@ -11,18 +11,18 @@ namespace ViApi.Types.Users
         public string Username
         {
             get => _username;
-            set => _username = value.Throw("В конструктор ApiUser передан пустой ник.").IfNullOrWhiteSpace(_ => _).Value;
+            init => _username = value.Throw("В конструктор ApiUser передан пустой ник.").IfNullOrWhiteSpace(_ => _).Value;
         }
         public string Email
         {
             get => _email;
-            set => _email = value.Throw("В конструктор ApiUser передан пустой Email.").IfNullOrWhiteSpace(_ => _)
+            init => _email = value.Throw("В конструктор ApiUser передан пустой Email.").IfNullOrWhiteSpace(_ => _)
                 .Throw("В конструктор ApiUser передан Email неверного формата.").IfNotMatches(EmailRegex()).Value;
         }
         public string Password
         {
             get => _password;
-            set => _password = value.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f)
+            init => _password = value.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f)
                 .Throw("В конструктор ApiUser передан слабый пароль.").IfNotMatches(PasswordRegex()).Value;
         }
 

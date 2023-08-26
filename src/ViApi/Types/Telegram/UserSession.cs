@@ -14,20 +14,20 @@ public class UserSession
     public Guid UserGuid
     {
         get => _userGuid;
-        set => _userGuid = value.Throw("В конструктор получен пустой userGuid").IfDefault().Value;
+        init => _userGuid = value.Throw("В конструктор получен пустой userGuid").IfDefault().Value;
     }
     public Guid DictionaryGuid
     {
         get => _dictionaryGuid;
-        set => _dictionaryGuid = value.Throw("В конструктор получен пустой dictGuid").IfDefault().Value;
+        init => _dictionaryGuid = value.Throw("В конструктор получен пустой dictGuid").IfDefault().Value;
     }
-
     public Stack<Word> GameStack
     {
         get => _gameStack;
-        set => _gameStack = value.ThrowIfNull("В конструктор получен null gameStack").Value;
+        init => _gameStack = value.ThrowIfNull("В конструктор получен null gameStack").Value;
     }
-    public UserState State { get; set; }
+    public UserState State { get; init; }
+    public int LastMessageId { get; init; }
 
     private UserSession() { }
     public UserSession(Guid userGuid, Guid dictGuid, Stack<Word> gameStack, UserState state = UserState.Default)
