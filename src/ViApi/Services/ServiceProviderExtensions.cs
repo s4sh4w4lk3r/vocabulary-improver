@@ -53,7 +53,7 @@ namespace ViApi.Services
                 excepList.Add(ex);
             }
 
-            throw new AggregateException(excepList);
+            if (excepList.Count > 0) { throw new AggregateException(excepList); }
         }
 
 

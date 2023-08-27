@@ -5,6 +5,7 @@ using Serilog;
 using Telegram.Bot;
 using ViApi.Services.MySql;
 using ViApi.Services.Telegram;
+using ViApi.Services.Telegram.UpdateHandlers;
 using ViApi.Types.Configuration;
 
 namespace ViApi.Services;
@@ -38,7 +39,7 @@ public static class DependencyRegistrationExtensions
         builder.Services.AddHttpClient("telegram_bot_client")
                 .AddTypedClient<ITelegramBotClient>((httpClient) => new TelegramBotClient(tgConf.BotToken, httpClient));
 
-        builder.Services.AddScoped<UpdateHandlers>();
+        builder.Services.AddScoped<UpdateHandler>();
         builder.Services.AddHostedService<ConfigureWebhook>();
     }
     private static async Task<BotConfiguration> SetWebhookUrl(this WebApplicationBuilder builder)
