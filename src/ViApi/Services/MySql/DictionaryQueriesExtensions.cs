@@ -1,18 +1,19 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ViApi.Types.Common;
 using ViApi.Types.Common.Users;
 
 namespace ViApi.Services.MySql;
 
 public static class DictionaryQueriesExtensions
 {
-    public static async Task<bool> InsertDictionaryAsync(this MySqlDbContext db, Guid userGuid, string name, CancellationToken cancellationToken = default)
+    public static async Task<bool> InsertDictionaryAsync(this MySqlDbContext db, Dictionary dictionary, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод InsertDictionaryAsync пришел пустой Guid").IfDefault();
-        name.Throw("В метод InsertDictionaryAsync пришло пустое имя").IfNullOrWhiteSpace(n => n);
-        bool userExists = await db.Users.AnyAsync(u=>u.Guid == userGuid, cancellationToken);
+        dictionary.UserGuid.Throw("В метод InsertDictionaryAsync пришел пустой Guid").IfDefault();
+        dictionary.Name.Throw("В метод InsertDictionaryAsync пришло пустое имя").IfNullOrWhiteSpace(n => n);
+        bool userExists = await db.Users.AnyAsync(u=>u.Guid == dictionary.UserGuid, cancellationToken);
         if (userExists is false) { return false; }
 
-        await db.Dictionaries.AddAsync(new Types.Common.Dictionary(Guid.NewGuid(), name, userGuid), cancellationToken);
+        await db.Dictionaries.AddAsync(dictionary, cancellationToken);
         int stringsChanged = await db.SaveChangesAsync(cancellationToken);
         return true;
     }

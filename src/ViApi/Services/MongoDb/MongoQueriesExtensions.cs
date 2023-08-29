@@ -34,5 +34,12 @@ public static class MongoQueriesExtensions
         var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
         return userSession;
     }
+    public static async Task DeleteUserSessionAsync(this IMongoDatabase db, TelegramSession userSession, CancellationToken cancellationToken = default)
+    {
+        var userGuid = userSession.UserGuid;
+        var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
+        var collection = db.GetCollection<TelegramSession>("usersessions");
 
+        await collection.DeleteOneAsync(filter, cancellationToken);
+    }
 }

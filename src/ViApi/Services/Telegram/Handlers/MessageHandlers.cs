@@ -8,6 +8,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using ViApi.Services.MongoDb;
 using ViApi.Services.MySql;
 using ViApi.Types.Common;
+using ViApi.Types.Enums;
 using ViApi.Types.Telegram;
 
 namespace ViApi.Services.Telegram.UpdateHandlers;
@@ -30,27 +31,27 @@ public class MessageHandlers
         _mongo = mongo;
         _cancellationToken = cancellationToken;
     }
-    public async Task<Message> BotOnMessageReceived()
+    public async Task HandleMessage()
     {
-        var action = _recievedMessage switch
+        var message = _recievedMessage switch
         {
             "/start" => SendOnStartMessageAsync(),
-            "/deleteme" => _botClient.SendTextMessageAsync(_session.TelegramId, "NotImplementedException", cancellationToken: _cancellationToken),
+            "/deleteme" => DeleteUserAsync(),
             "Выбрать словарь" => SendDictionariesListAsync(),
-            "Добавить новый словарь" => _botClient.SendTextMessageAsync(_session.TelegramId, "NotImplementedException", cancellationToken: _cancellationToken),
-            _ => _botClient.SendTextMessageAsync(_session.TelegramId, "Команда не найдена.", cancellationToken: _cancellationToken)
+            "Добавить новый словарь" => AddNewDictinaryAsync(),
+            _ => ChooseActionOnState()
         };
 
-        return await action;
+       await message;
     }
     private async Task<Message> SendOnStartMessageAsync()
     {
-        _session.State = Types.Enums.UserState.Default;
+        _session.State = UserState.Default;
         _session.DictionaryGuid = default;
         var mongoTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
         var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Как приятно начать все с чистого листа.", cancellationToken: _cancellationToken, replyMarkup: KeyboardSet.GetDefaultKeyboard());
         await mongoTask;
-        Log.Information("Сессия {session} обнулена." , _session);
+        Log.Information("Сессия {session} обнулена.", _session);
         return await sendMessageTask;
     }
     private async Task<string> GetFormattedWordListAsync()
@@ -69,7 +70,7 @@ public class MessageHandlers
         var message = new StringBuilder();
 
         int number = 0;
-        foreach (var word in words) 
+        foreach (var word in words)
         {
             number++;
             message.Append($"{number}. {word.SourceWord} - {word.TargetWord}\n");
@@ -81,9 +82,9 @@ public class MessageHandlers
     private async Task<Message> SendDictionariesListAsync()
     {
         var dicts = await _mysql.Dictionaries.Where(d => d.UserGuid == _session.UserGuid).ToListAsync(cancellationToken: _cancellationToken);
-        if (dicts.Count == 0) 
-        {  
-            return await _botClient.SendTextMessageAsync(_session.TelegramId, "Словарей нет.", cancellationToken: _cancellationToken); 
+        if (dicts.Count == 0)
+        {
+            return await _botClient.SendTextMessageAsync(_session.TelegramId, "Словарей нет.", cancellationToken: _cancellationToken);
         }
 
         var buttons = GetDictListAsKeyboardButtons(dicts);
@@ -97,7 +98,7 @@ public class MessageHandlers
         int rows;
         bool IsCountEven = dictCount % 2 == 0;
         var buttonList = new List<IEnumerable<InlineKeyboardButton>>();
-        
+
         if (IsCountEven)
         {
             rows = dictCount / 2;
@@ -111,8 +112,8 @@ public class MessageHandlers
         {
             var buttonPair = new List<InlineKeyboardButton>();
 
-            bool dict1Dequeued = dictqueue.TryDequeue(out Dictionary dict1);
-            bool dict2Dequeued = dictqueue.TryDequeue(out Dictionary dict2);
+            bool dict1Dequeued = dictqueue.TryDequeue(out Dictionary? dict1);
+            bool dict2Dequeued = dictqueue.TryDequeue(out Dictionary? dict2);
 
             if ((dict1Dequeued is true && dict2Dequeued is true) && ((dict1 is not null) && (dict2 is not null)))
             {
@@ -132,5 +133,59 @@ public class MessageHandlers
         }
 
         return new InlineKeyboardMarkup(buttonList);
+    }
+    private async Task<Message> AddNewDictinaryAsync()
+    {
+        if (_session.State is not UserState.AddingDict)
+        {
+            _session.State = UserState.AddingDict;
+            _session.DictionaryGuid = default;
+            var insertTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+            var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите название для нового словаря:", cancellationToken: _cancellationToken);
+            await insertTask;
+            return await sendMessageTask;
+        }
+        if (_session.State is UserState.AddingDict)
+        {
+            string newDictName = _recievedMessage;
+            var newDict = new Dictionary(Guid.NewGuid(), newDictName, _session.UserGuid);
+            bool dictInserted = await _mysql.InsertDictionaryAsync(newDict, _cancellationToken);
+
+            if (dictInserted is true)
+            {
+                _session.State = UserState.Default;
+                var insertTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+                var sendOkTask = _botClient.SendTextMessageAsync(_session.TelegramId, $"Словарь \"{newDictName}\" добавлен", cancellationToken: _cancellationToken);
+                var sendDictListTask = SendDictionariesListAsync();
+                await Task.WhenAll(insertTask, sendOkTask);
+                return await sendDictListTask;
+            }
+            else
+            {
+                return await _botClient.SendTextMessageAsync(_session.TelegramId, $"Словарь почему-то не добавился в базу данных", cancellationToken: _cancellationToken);
+            }
+        }
+        return await _botClient.SendTextMessageAsync(_session.TelegramId, $"Ошибка сессии", cancellationToken: _cancellationToken);
+    }
+    private async Task ChooseActionOnState()
+    {
+        var actionOnState = _session.State switch
+        {
+            UserState.AddingDict => AddNewDictinaryAsync(),
+            _ => _botClient.SendTextMessageAsync(_session.TelegramId, "Команда не найдена.", cancellationToken: _cancellationToken)
+        } ;
+
+        await actionOnState;
+    }
+    private async Task DeleteUserAsync()
+    {
+        var user = await _mysql.Users.FirstOrDefaultAsync(u => u.Guid == _session.UserGuid, _cancellationToken);
+        if (user is not null)
+        {
+            await _mongo.DeleteUserSessionAsync(_session, _cancellationToken);
+            _mysql.Users.Remove(user);
+            await _mysql.SaveChangesAsync();
+            await _botClient.SendTextMessageAsync(_session.TelegramId, "Вся информация про тебя удалена из базы данных. Напиши /start, если захочешь вернуться.", cancellationToken: _cancellationToken, replyMarkup: new  ReplyKeyboardRemove());
+        }
     }
 }

@@ -58,9 +58,7 @@ public class UpdateHandler
 
         var msgHandlers = new MessageHandlers(messageText, _session, _mysql, _mongo, _botClient, cancellationToken);
 
-        Message sentMessage = await msgHandlers.BotOnMessageReceived();
-
-        _logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.MessageId);
+        await msgHandlers.HandleMessage();
 
     }
     private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
