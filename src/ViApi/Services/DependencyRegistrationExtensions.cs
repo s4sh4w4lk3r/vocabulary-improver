@@ -77,7 +77,7 @@ public static class DependencyRegistrationExtensions
     }
     private static void RegisterSerilog(this WebApplicationBuilder builder)
     {
-        Log.Logger = new LoggerConfiguration()
+        Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
             .WriteTo.Console().CreateLogger();
 
         builder.Host.UseSerilog(Log.Logger);

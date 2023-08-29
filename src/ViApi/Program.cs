@@ -14,5 +14,6 @@ public class Program
         await app.Services.EnsureServicesOkAsync();
         app.MapControllers();
         app.Run();
+#warning надо будет запретить иметь более 10 словарей
     }
 }

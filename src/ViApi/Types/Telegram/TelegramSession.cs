@@ -9,20 +9,14 @@ namespace ViApi.Types.Telegram;
 public class TelegramSession
 {
     private Guid _userGuid;
-    private Stack<Word> _gameStack = null!;
-
     public Guid UserGuid
     {
         get => _userGuid;
         init => _userGuid = value.Throw("В конструктор получен пустой userGuid").IfDefault().Value;
     }
     public Guid DictionaryGuid {get; set;}
-    public Stack<Word> GameStack
-    {
-        get => _gameStack;
-        init => _gameStack = value.ThrowIfNull("В конструктор получен null gameStack").Value;
-    }
-    public UserState State { get; init; }
+    public Stack<Word>? GameStack { get; init; }
+    public UserState State { get; set; }
     public int MessageIdToEdit { get; init; }
     public long TelegramId { get; init; }
 
@@ -34,5 +28,5 @@ public class TelegramSession
         TelegramId = user.TelegramId;
     }
 
-    public override string ToString() => $"[{GetType()}] TGUserGuid: {UserGuid}, State: {State}";
+    public override string ToString() => $"UserGuid: {UserGuid}, TelegramId: {TelegramId}, Selected DictGuid: {DictionaryGuid} State: {State}";
 }

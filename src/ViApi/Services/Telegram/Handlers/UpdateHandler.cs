@@ -5,6 +5,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using ViApi.Services.MySql;
+using ViApi.Types.Telegram;
 
 namespace ViApi.Services.Telegram.UpdateHandlers;
 
@@ -15,6 +16,7 @@ public class UpdateHandler
     private readonly ILogger<UpdateHandler> _logger;
     private readonly MySqlDbContext _mysql;
     private readonly IMongoDatabase _mongo;
+    private TelegramSession _session = null!;
 
     public UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, MySqlDbContext mysql, IMongoDatabase mongo)
     {
@@ -36,6 +38,7 @@ public class UpdateHandler
     }
     public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
     {
+        _session = await new UserHandlers(update, _mysql, _mongo, cancellationToken).GetSessionAsync();
         var handler = update switch
         {
             { Message: { } message } => BotOnMessageReceived(message, cancellationToken),
@@ -48,83 +51,17 @@ public class UpdateHandler
 
     private async Task BotOnMessageReceived(Message message, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Получено сообщение типа {MessageType}", message.Type);
         if (message.Text is not { } messageText)
             return;
 
+        _logger.LogInformation("Получено сообщение типа {MessageType} от пользователя {tgid}, содержимое {messagetext}", message.Type, _session.TelegramId, messageText);
 
+        var msgHandlers = new MessageHandlers(messageText, _session, _mysql, _mongo, _botClient, cancellationToken);
 
+        Message sentMessage = await msgHandlers.BotOnMessageReceived();
 
-        var action = messageText.Split(' ')[0] switch
-        {
-            "/inline_keyboard" => SendInlineKeyboard(_botClient, message, cancellationToken),
-            "/keyboard" => SendReplyKeyboard(_botClient, message, cancellationToken),
-            "/remove" => RemoveKeyboard(_botClient, message, cancellationToken),
-            _ => _botClient.SendTextMessageAsync(message.Chat, "Команда не найдена", cancellationToken: cancellationToken)
-        }; 
-        Message sentMessage = await action;
         _logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.MessageId);
 
-
-        static async Task<Message> SendInlineKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
-        {
-            await botClient.SendChatActionAsync(
-                chatId: message.Chat.Id,
-                chatAction: ChatAction.Typing,
-                cancellationToken: cancellationToken);
-
-
-            InlineKeyboardMarkup inlineKeyboard = new(
-                new[]
-                {
-                    // first row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("1.1", "11"),
-                        InlineKeyboardButton.WithCallbackData("1.2", "12"),
-                    },
-                    // second row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("2.1", "21"),
-                        InlineKeyboardButton.WithCallbackData("2.2", "22"),
-                    },
-                });
-
-            return await botClient.SendTextMessageAsync(
-                chatId: message.Chat.Id,
-                text: "Choose",
-                replyMarkup: inlineKeyboard,
-                cancellationToken: cancellationToken);
-        }
-
-        static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
-        {
-            ReplyKeyboardMarkup replyKeyboardMarkup = new(
-                new[]
-                {
-                        new KeyboardButton[] { "1.1", "1.2" },
-                        new KeyboardButton[] { "2.1", "2.2" },
-                })
-            {
-                ResizeKeyboard = true
-            };
-
-            return await botClient.SendTextMessageAsync(
-                chatId: message.Chat.Id,
-                text: "Choose",
-                replyMarkup: replyKeyboardMarkup,
-                cancellationToken: cancellationToken);
-        }
-
-        static async Task<Message> RemoveKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
-        {
-            return await botClient.SendTextMessageAsync(
-                chatId: message.Chat.Id,
-                text: "Removing keyboard",
-                replyMarkup: new ReplyKeyboardRemove(),
-                cancellationToken: cancellationToken);
-        }
     }
     private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
