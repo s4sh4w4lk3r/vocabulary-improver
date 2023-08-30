@@ -17,7 +17,7 @@ public class TelegramSession
     public Guid DictionaryGuid {get; set;}
     public Stack<Word>? GameStack { get; init; }
     public UserState State { get; set; }
-    public int MessageIdToEdit { get; init; }
+    public int MessageIdToEdit { get; set; }
     public long TelegramId { get; init; }
 
     private TelegramSession() { }

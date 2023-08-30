@@ -1,6 +1,4 @@
 ﻿using ViApi.Services;
-using ViApi.Services.MongoDb;
-using ViApi.Types.Telegram;
 
 namespace ViApi;
 

@@ -2,8 +2,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 using ViApi.Services.MySql;
 using ViApi.Types.Telegram;
 
@@ -63,9 +61,16 @@ public class UpdateHandler
     }
     private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Received inline keyboard callback from: {CallbackQueryId}", callbackQuery.Id);
+        if (callbackQuery.Data is not { } callbackQueryMessage)
+            return;
 
-        await _botClient.AnswerCallbackQueryAsync(
+        _logger.LogInformation("Получен колбэкквэри от пользователя {tgid}, содержимое {messagetext}", _session.TelegramId, callbackQuery.Data);
+
+        var msgHandlers = new MessageHandlers(message: callbackQueryMessage, session: _session, callbackQueryId: callbackQuery.Id, _mysql, _mongo, _botClient, cancellationToken);
+
+        await msgHandlers.HandleMessage();
+
+        /*await _botClient.AnswerCallbackQueryAsync(
             callbackQueryId: callbackQuery.Id,
             text: $"Received {callbackQuery.Data}",
             cancellationToken: cancellationToken);
@@ -73,7 +78,7 @@ public class UpdateHandler
         await _botClient.SendTextMessageAsync(
             chatId: callbackQuery.Message!.Chat.Id,
             text: $"Received {callbackQuery.Data}",
-            cancellationToken: cancellationToken);
+            cancellationToken: cancellationToken);*/
     }
     private Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
     {
