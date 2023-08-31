@@ -169,6 +169,8 @@ public class MessageHandlers
         var actionOnState = _session.State switch
         {
             UserState.AddingDict => AddNewDictinaryAsync(),
+            UserState.AddingWord => AddNewWordAsync(),
+            UserState.RenamingDict => RenameDict(),
             _ => _botClient.SendTextMessageAsync(_session.TelegramId, "Команда не найдена", cancellationToken: _cancellationToken)
         };
 
@@ -230,6 +232,7 @@ public class MessageHandlers
                             _session.DictionaryGuid = recievedDictGuid;
                             var inserTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите сочетание слов в формате \"оригинал:перевод\"");
+                            if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
                             await Task.WhenAll(inserTask, sendMessageTask);
                             return true;
                         }
@@ -240,6 +243,7 @@ public class MessageHandlers
                             _session.DictionaryGuid = recievedDictGuid;
                             var inserTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите номер слова для удаления", cancellationToken: _cancellationToken);
+                            if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
                             await Task.WhenAll(inserTask, sendMessageTask);
                             return true;
                         }
@@ -250,6 +254,7 @@ public class MessageHandlers
                             _session.DictionaryGuid = recievedDictGuid;
                             var inserTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите новое имя для словаря");
+                            if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
                             await Task.WhenAll(inserTask, sendMessageTask);
                             return true;
                         }
@@ -260,17 +265,14 @@ public class MessageHandlers
                             var inserTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Словарь удален", cancellationToken: _cancellationToken);
                             var deleteDictTask = _mysql.DeleteDictionaryAsync(_session.UserGuid, recievedDictGuid, _cancellationToken);
-                            if (_callbackQueryId is not null) 
-                            {
-                                await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, text: "Удалено", cancellationToken: _cancellationToken) ; 
-                            }
-                            
+                            if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
+
                             await Task.WhenAll(inserTask, sendMessageTask, deleteDictTask);
                             return true;
                         }
                     case "play":
 
-
+                        if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
                         break;
                 }
             }
@@ -286,5 +288,58 @@ public class MessageHandlers
         var inserTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
         var sendDictsTask = SendDictionariesListAsync(_session.MessageIdToEdit);
         await Task.WhenAll(inserTask, sendDictsTask);
+    }
+    private async Task AddNewWordAsync()
+    {  
+        if (_session.State == UserState.AddingWord && _session.DictionaryGuid != default)
+        {
+            var mas = _recievedMessage.Split(':');
+            if (mas.Length != 2) 
+            { 
+                await _botClient.SendTextMessageAsync(chatId: _session.TelegramId, "Неверный формат", cancellationToken:_cancellationToken) ;
+                return;
+            }
+
+            try
+            {
+                string sourceWord = mas[0];
+                string targetWord = mas[1];
+                if (string.IsNullOrEmpty(sourceWord) || string.IsNullOrEmpty(targetWord))
+                {
+                    await _botClient.SendTextMessageAsync(chatId: _session.TelegramId, "Неверный формат", cancellationToken: _cancellationToken);
+                    return;
+                }
+
+                var insertTask =  _mysql.InsertWordAsync(_session.UserGuid, _session.DictionaryGuid, sourceWord, targetWord, cancellationToken: _cancellationToken);
+                var sendOkMessage = _botClient.SendTextMessageAsync(_session.TelegramId, "Словосочетание добавлено", cancellationToken: _cancellationToken);
+                await Task.WhenAll(insertTask, sendOkMessage);
+                _session.State = UserState.Default;
+                await _mongo.InsertOrUpdateUserSessionAsync(_session, cancellationToken: _cancellationToken);
+            }
+            catch { }
+        }
+    }
+    private async Task RenameDict()
+    {
+        if (_session.State is not UserState.RenamingDict || _session.DictionaryGuid == default) { return; }
+
+        if (string.IsNullOrWhiteSpace(_recievedMessage)) 
+        {
+            _session.State = UserState.Default;
+            var sendMsgTask =  _botClient.SendTextMessageAsync(_session.TelegramId, text: "Словарь не переименовался из-за неверного формата, попробуйте еще", cancellationToken: _cancellationToken);
+            var mongoTask =  _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+            await Task.WhenAll(sendMsgTask, mongoTask);
+            return; 
+        }
+        string newDictName = _recievedMessage;
+        bool renameOk = await _mysql.RenameDictionaryAsync(_session.UserGuid, _session.DictionaryGuid, newDictName, cancellationToken: _cancellationToken);
+
+        if (renameOk)
+        {
+            _session.State = UserState.Default;
+            var sendMsgTask = _botClient.SendTextMessageAsync(_session.TelegramId, text: "Словарь переименован", cancellationToken: _cancellationToken);
+            var mongoTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+            await Task.WhenAll(sendMsgTask, mongoTask);
+        }
     }
 }

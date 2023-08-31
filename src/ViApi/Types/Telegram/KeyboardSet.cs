@@ -40,12 +40,12 @@ public static class KeyboardSet
         var row1 = new List<InlineKeyboardButton>()
         {
             InlineKeyboardButton.WithCallbackData("🆕Добавить слово", $"addword:{dictGuid}"),
-            InlineKeyboardButton.WithCallbackData("❌Удалить слово", $"deleteword:{dictGuid}")
+            InlineKeyboardButton.WithCallbackData("✖️Удалить слово", $"deleteword:{dictGuid}")
         };
         var row2 = new List<InlineKeyboardButton>()
         {
             InlineKeyboardButton.WithCallbackData("✏️Переименовать словарь", $"renamedict:{dictGuid}"),
-            InlineKeyboardButton.WithCallbackData("✖️Удалить словарь", $"deletedict:{dictGuid}")
+            InlineKeyboardButton.WithCallbackData("❌Удалить словарь", $"deletedict:{dictGuid}")
 
         };
         var row3 = new List<InlineKeyboardButton>()

@@ -69,16 +69,6 @@ public class UpdateHandler
         var msgHandlers = new MessageHandlers(message: callbackQueryMessage, session: _session, callbackQueryId: callbackQuery.Id, _mysql, _mongo, _botClient, cancellationToken);
 
         await msgHandlers.HandleMessage();
-
-        /*await _botClient.AnswerCallbackQueryAsync(
-            callbackQueryId: callbackQuery.Id,
-            text: $"Received {callbackQuery.Data}",
-            cancellationToken: cancellationToken);
-
-        await _botClient.SendTextMessageAsync(
-            chatId: callbackQuery.Message!.Chat.Id,
-            text: $"Received {callbackQuery.Data}",
-            cancellationToken: cancellationToken);*/
     }
     private Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
     {
