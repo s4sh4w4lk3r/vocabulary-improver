@@ -20,7 +20,7 @@ public class MessageHandlers
     private readonly CancellationToken _cancellationToken;
     private readonly string _recievedMessage;
     private readonly IMongoDatabase _mongo;
-    private TelegramSession _session;
+    private readonly TelegramSession _session;
     private readonly string? _callbackQueryId;
 
     public MessageHandlers(string message, TelegramSession session, MySqlDbContext mysql, IMongoDatabase mongo, ITelegramBotClient botClient, CancellationToken cancellationToken = default)
@@ -89,37 +89,41 @@ public class MessageHandlers
         return message.ToString();
     }
     //Если нужно отредачить сообщение, то нужно ввести айдишник этого сообщения
-    private async Task<Message> SendDictionariesListAsync(int messageId = default)
+    private async Task SendDictionariesListAsync(int messageId = default)
     {
         var dicts = await _mysql.Dictionaries.Where(d => d.UserGuid == _session.UserGuid).ToListAsync(cancellationToken: _cancellationToken);
         if (dicts.Count == 0)
         {
-            return await _botClient.SendTextMessageAsync(_session.TelegramId, "Словарей нет.", cancellationToken: _cancellationToken);
+            await _botClient.SendTextMessageAsync(_session.TelegramId, "Словарей нет.", cancellationToken: _cancellationToken);
+            return;
         }
 
         var buttons = KeyboardSet.GetDictListAsKeyboardButtons(dicts);
 
         if (messageId != default)
         {
-            Message message = await _botClient.EditMessageTextAsync(chatId: _session.TelegramId, text: "Список ваших словарей:", messageId: messageId, replyMarkup: buttons, cancellationToken: _cancellationToken);
-
-            _session.MessageIdToEdit = message.MessageId;
-            await _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
-
-            return message;
+            try
+            {
+                var msg = await _botClient.EditMessageTextAsync(chatId: _session.TelegramId, text: "Список ваших словарей:", messageId: messageId, replyMarkup: buttons, cancellationToken: _cancellationToken);
+                _session.MessageIdToEdit = msg.MessageId;
+                await _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+                return;
+            }
+            catch { }
+            return;
         }
         else
         {
-            Message message = await _botClient.SendTextMessageAsync(_session.TelegramId, "Список ваших словарей:", replyMarkup: buttons, cancellationToken: _cancellationToken);
+            var msg = await _botClient.SendTextMessageAsync(_session.TelegramId, "Список ваших словарей:", replyMarkup: buttons, cancellationToken: _cancellationToken);
 
-            _session.MessageIdToEdit = message.MessageId;
+            _session.MessageIdToEdit = msg.MessageId;
             await _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
 
-            return message;
+            return;
         }
         
     }
-    private async Task<Message> AddNewDictinaryAsync()
+    private async Task AddNewDictinaryAsync()
     {
         if (_session.State is not UserState.AddingDict)
         {
@@ -127,8 +131,8 @@ public class MessageHandlers
             _session.DictionaryGuid = default;
             var insertTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите название для нового словаря:", cancellationToken: _cancellationToken);
-            await insertTask;
-            return await sendMessageTask;
+            await Task.WhenAll(insertTask, sendMessageTask);
+            return;
         }
         if (_session.State is UserState.AddingDict)
         {
@@ -142,15 +146,17 @@ public class MessageHandlers
                 var insertTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                 var sendOkTask = _botClient.SendTextMessageAsync(_session.TelegramId, $"Словарь \"{newDictName}\" добавлен", cancellationToken: _cancellationToken);
                 var sendDictListTask = SendDictionariesListAsync();
-                await Task.WhenAll(insertTask, sendOkTask);
-                return await sendDictListTask;
+                await Task.WhenAll(insertTask, sendOkTask, sendDictListTask);
+                return;
             }
             else
             {
-                return await _botClient.SendTextMessageAsync(_session.TelegramId, $"Словарь почему-то не добавился в базу данных", cancellationToken: _cancellationToken);
+                await _botClient.SendTextMessageAsync(_session.TelegramId, $"Словарь почему-то не добавился в базу данных", cancellationToken: _cancellationToken);
+                return;
             }
         }
-        return await _botClient.SendTextMessageAsync(_session.TelegramId, $"Ошибка сессии", cancellationToken: _cancellationToken);
+        await _botClient.SendTextMessageAsync(_session.TelegramId, $"Ошибка сессии", cancellationToken: _cancellationToken);
+        return;
     }
     private async Task ChooseActionOnState()
     {
@@ -182,7 +188,7 @@ public class MessageHandlers
     //Метод вернет труе если получен гуид или дейтсвие+гуид
     private async Task<bool> ActionOnGuidAsync()
     {
-        //Просто получение гуида, просто присланный гуид означает выбранный словарь.    Вернет труе если отработал номрмально и работа вызывающего метода должна быть прекращена
+        //Просто получение гуида, просто присланный гуид означает выбранный словарь. Вернет труе если отработал номрмально и работа вызывающего метода должна быть прекращена
         if (Guid.TryParse(_recievedMessage, out Guid recievedGuid) is true)
         {
             recievedGuid.Throw().IfDefault();
@@ -197,7 +203,11 @@ public class MessageHandlers
                 var dictKeyboard = KeyboardSet.GetDictKeyboard(_session.DictionaryGuid);
                 string messageWithWords = await getFormattedWordListTask;
 
-                await _botClient.EditMessageTextAsync(_session.TelegramId, _session.MessageIdToEdit, messageWithWords, replyMarkup: dictKeyboard, cancellationToken: _cancellationToken);
+                var editMessageTask = _botClient.EditMessageTextAsync(_session.TelegramId, _session.MessageIdToEdit, messageWithWords, replyMarkup: dictKeyboard, cancellationToken: _cancellationToken);
+                //Приходится методы EditMessageTextAsync ставить в трай/кетч, так как если юзер нажмет на кнопку два раза быстро, недождавшись ответа, вылезет эксепшон, то что сообщение уже отредактировано текстом из первого запроса,
+                // и оно не будет обновлено снова
+                try { await editMessageTask; } catch { }
+
                 await mongoInsertTask;
                 return true;
             }
@@ -269,7 +279,6 @@ public class MessageHandlers
 
         return false;
     }
-
     private async Task GoBackToDictListAsync()
     {
         _session.State = UserState.Default;
