@@ -170,7 +170,8 @@ public class MessageHandlers
         {
             UserState.AddingDict => AddNewDictinaryAsync(),
             UserState.AddingWord => AddNewWordAsync(),
-            UserState.RenamingDict => RenameDict(),
+            UserState.RenamingDict => RenameDictAsync(),
+            UserState.DeletingWord => DeleteWordAsync(),
             _ => _botClient.SendTextMessageAsync(_session.TelegramId, "Команда не найдена", cancellationToken: _cancellationToken)
         };
 
@@ -319,7 +320,7 @@ public class MessageHandlers
             catch { }
         }
     }
-    private async Task RenameDict()
+    private async Task RenameDictAsync()
     {
         if (_session.State is not UserState.RenamingDict || _session.DictionaryGuid == default) { return; }
 
@@ -340,6 +341,39 @@ public class MessageHandlers
             var sendMsgTask = _botClient.SendTextMessageAsync(_session.TelegramId, text: "Словарь переименован", cancellationToken: _cancellationToken);
             var mongoTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
             await Task.WhenAll(sendMsgTask, mongoTask);
+        }
+    }
+    private async Task DeleteWordAsync()
+    {
+        if (_session.State is not UserState.DeletingWord) { return; }
+        bool parseOk = int.TryParse(_recievedMessage, out int id);
+        if (parseOk is false) 
+        { 
+            await _botClient.SendTextMessageAsync(_session.TelegramId, "Номер слова не распознан, введите заново", cancellationToken: _cancellationToken);
+            return;
+        }
+
+        var words = await _mysql.GetWordsAsync(_session.UserGuid, _session.DictionaryGuid, _cancellationToken);
+        var wordToDelete = words?.ElementAtOrDefault(id-1);
+
+        if (wordToDelete is not null)
+        {
+            if (wordToDelete.Dictionary is null)
+            {
+                await _botClient.SendTextMessageAsync(_session.TelegramId, "Не обнаружен Guid пользователя в методе DeleteWordAsync", cancellationToken: _cancellationToken);
+                return;
+            }
+
+            var delMySqlTask = _mysql.DeleteWordAsync(wordToDelete.Dictionary.UserGuid, wordToDelete.DictionaryGuid, wordToDelete.Guid, _cancellationToken);
+            var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Слово удалено, обновите список слов", cancellationToken: _cancellationToken);
+            _session.State = UserState.DictSelected;
+            var updateStateTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+            await Task.WhenAll(delMySqlTask, sendMessageTask, updateStateTask);
+        }
+        else
+        {
+            await _botClient.SendTextMessageAsync(_session.TelegramId, "Слово с таким номером не найдено, введите заново", cancellationToken: _cancellationToken);
+            return;
         }
     }
 }
