@@ -50,4 +50,6 @@ public class Word
 
     public override string ToString() => $"Guid: {Guid}, Source-Target: {SourceWord} - {TargetWord}, {Rating}, DictGuid: {Guid}";
 
+    public void IncreaseRating() => Rating = RatingEdtior.IncreaseRating(Rating);
+    public void DecreaseRating() => Rating = RatingEdtior.DecreaseRating(Rating);
 }

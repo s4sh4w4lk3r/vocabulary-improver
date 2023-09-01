@@ -15,7 +15,7 @@ public class TelegramSession
         init => _userGuid = value.Throw("В конструктор получен пустой userGuid").IfDefault().Value;
     }
     public Guid DictionaryGuid {get; set;}
-    public Stack<Word>? GameStack { get; init; }
+    public Queue<Word>? GameQueue { get; set; }
     public UserState State { get; set; }
     public int MessageIdToEdit { get; set; }
     public long TelegramId { get; init; }
