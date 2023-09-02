@@ -30,7 +30,7 @@ public static class DependencyRegistrationExtensions
         IMongoDatabase mongoDb = new MongoClient(dbConf.MongoDbConnString).GetDatabase(dbConf.MongoDbName);
         builder.Services.AddSingleton(mongoDb);
         builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(dbConf.MySqlConnString, ServerVersion.AutoDetect(dbConf.MySqlConnString)));
-        builder.Services.AddTransient<IRepository, MySqlMongoRepository>();
+        builder.Services.AddTransient<IRepository, TgRepository>();
     }
     private static async Task RegisterTelegramBot(this WebApplicationBuilder builder)
     {
@@ -79,6 +79,9 @@ public static class DependencyRegistrationExtensions
     private static void RegisterSerilog(this WebApplicationBuilder builder)
     {
         Log.Logger = new LoggerConfiguration().MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", Serilog.Events.LogEventLevel.Warning)
+            .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+            .MinimumLevel.Override("System.Net.Http.HttpClient", Serilog.Events.LogEventLevel.Warning)
             .WriteTo.Console().CreateLogger();
 
         builder.Host.UseSerilog(Log.Logger);

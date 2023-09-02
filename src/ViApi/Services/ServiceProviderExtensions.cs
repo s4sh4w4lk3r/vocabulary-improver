@@ -62,7 +62,7 @@ namespace ViApi.Services
                 using var scoped = serviceProvider.CreateScope();
                 var mySql = scoped.ServiceProvider.GetRequiredService<MySqlDbContext>();
                 return mySql.Database.CanConnect();
-            });
+            }, cancellationToken);
             return mySqlOk;
         }
         private static async Task<bool> EnsureMongoDbAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)

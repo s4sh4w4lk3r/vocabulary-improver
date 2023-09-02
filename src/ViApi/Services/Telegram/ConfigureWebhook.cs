@@ -24,21 +24,20 @@ namespace ViApi.Services.Telegram
             var botClient = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
 
             var webhookAddress = $"{_botConfig.WebhookUrl}{"/bot"}";
-            _logger.LogInformation("Setting webhook: {WebhookAddress}", webhookAddress);
             await botClient.SetWebhookAsync(
                 url: webhookAddress,
                 allowedUpdates: Array.Empty<UpdateType>(),
                 secretToken: _botConfig.WebhookSecretToken,
                 cancellationToken: cancellationToken);
+            _logger.LogInformation("Вебхук установлен: {WebhookAddress}", webhookAddress);
         }
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();
             var botClient = scope.ServiceProvider.GetRequiredService<ITelegramBotClient>();
 
-            // Remove webhook on app shutdown
-            _logger.LogInformation("Removing webhook");
             await botClient.DeleteWebhookAsync(cancellationToken: cancellationToken);
+            _logger.LogInformation("Вебхук удален");
         }
     }
 }
