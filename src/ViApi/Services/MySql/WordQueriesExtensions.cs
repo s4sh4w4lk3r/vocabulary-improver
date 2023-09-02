@@ -19,7 +19,6 @@ public static class WordQueriesExtensions
         await db.SaveChangesAsync(cancellationToken);
         return true;
     }
-
     public static async Task<bool> DeleteWordAsync(this MySqlDbContext db, Guid userGuid, Guid dictGuid, Guid wordGuid, CancellationToken cancellationToken = default)
     {
         userGuid.Throw("В метод DeleteWordAsync пришел пустой userGuid").IfDefault();
@@ -33,7 +32,6 @@ public static class WordQueriesExtensions
         await db.SaveChangesAsync(cancellationToken);
         return true;
     }
-
     public static async Task<List<Word>?> GetWordsAsync(this MySqlDbContext db, Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default)
     {
         userGuid.Throw("В метод GetWordsAsync пришел пустой userGuid").IfDefault();

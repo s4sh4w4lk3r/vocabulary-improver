@@ -30,7 +30,6 @@ public static class UserQueriesExtensions
             return false;
         }
     }
-
     public static async Task<ApiUser?> GetValidUserAsync(this MySqlDbContext db, string username, string email, CancellationToken cancellationToken = default)
     {
         const string INVALID_TEMP_PASSWORD = "Pa55sword!";

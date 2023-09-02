@@ -78,8 +78,7 @@ public partial class MessageHandler
         }
 
         Random rand = new Random();
-        words = words.OrderBy(_ => rand.Next()).ToList();
-        words = words.OrderBy(w => w.Rating).ToList();
+        words = words.OrderBy(_ => rand.Next()).ThenBy(w => w.Rating).ToList();
         _session.GameQueue = new Queue<Word>(words);
         _session.State = UserState.Playing;
         await _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);

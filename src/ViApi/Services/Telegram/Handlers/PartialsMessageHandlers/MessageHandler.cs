@@ -51,6 +51,7 @@ public partial class MessageHandler
 
         await message;
     }
+    
     private async Task<Message> SendOnStartMessageAsync()
     {
         _session.State = UserState.Default;
