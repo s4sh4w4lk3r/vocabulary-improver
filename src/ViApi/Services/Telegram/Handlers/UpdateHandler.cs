@@ -1,8 +1,7 @@
-﻿using MongoDB.Driver;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
-using ViApi.Services.MySql;
+using ViApi.Services.Repository;
 using ViApi.Services.Telegram.Handlers.PartialsMessageHandlers;
 using ViApi.Types.Telegram;
 
@@ -13,17 +12,16 @@ public class UpdateHandler
 {
     private readonly ITelegramBotClient _botClient;
     private readonly ILogger<UpdateHandler> _logger;
-    private readonly MySqlDbContext _mysql;
-    private readonly IMongoDatabase _mongo;
+    private readonly IRepository _repository;
     private TelegramSession _session = null!;
 
-    public UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, MySqlDbContext mysql, IMongoDatabase mongo)
+    public UpdateHandler(ITelegramBotClient botClient, ILogger<UpdateHandler> logger, IRepository repository)
     {
         _botClient = botClient;
         _logger = logger;
-        _mysql = mysql;
-        _mongo = mongo;
+        _repository = repository;
     }
+    
     public Task HandleErrorAsync(Exception exception, CancellationToken cancellationToken)
     {
         var ErrorMessage = exception switch
@@ -37,7 +35,7 @@ public class UpdateHandler
     }
     public async Task HandleUpdateAsync(Update update, CancellationToken cancellationToken)
     {
-        _session = await new UserHandlers(update, _mysql, _mongo, cancellationToken).GetSessionAsync();
+        _session = await _repository.GetOrRegisterSessionAsync(update.GetId(), update.GetFirstname(), cancellationToken);
         var handler = update switch
         {
             { Message: { } message } => BotOnMessageReceived(message, cancellationToken),
@@ -55,7 +53,7 @@ public class UpdateHandler
 
         _logger.LogInformation("Получено сообщение типа {MessageType} от пользователя {tgid}, содержимое {messagetext}", message.Type, _session.TelegramId, messageText);
 
-        var msgHandlers = new MessageHandler(messageText, _session, _mysql, _mongo, _botClient, cancellationToken);
+        var msgHandlers = new MessageHandler(messageText, _session, repository: _repository, _botClient, cancellationToken);
 
         await msgHandlers.HandleMessageAsync();
 
@@ -67,7 +65,7 @@ public class UpdateHandler
 
         _logger.LogInformation("Получен колбэкквэри от пользователя {tgid}, содержимое {messagetext}", _session.TelegramId, callbackQuery.Data);
 
-        var msgHandlers = new MessageHandler(message: callbackQueryMessage, session: _session, callbackQueryId: callbackQuery.Id, _mysql, _mongo, _botClient, cancellationToken);
+        var msgHandlers = new MessageHandler(message: callbackQueryMessage, session: _session, callbackQueryId: callbackQuery.Id, repository: _repository, _botClient, cancellationToken);
 
         await msgHandlers.HandleMessageAsync();
     }

@@ -1,6 +1,4 @@
 ﻿using Telegram.Bot;
-using ViApi.Services.MongoDb;
-using ViApi.Services.MySql;
 using ViApi.Types.Enums;
 
 namespace ViApi.Services.Telegram.Handlers.PartialsMessageHandlers;
@@ -17,7 +15,7 @@ public partial class MessageHandler
             return;
         }
 
-        var words = await _mysql.GetWordsAsync(_session.UserGuid, _session.DictionaryGuid, _cancellationToken);
+        var words = await _repository.GetWordsAsync(_session.UserGuid, _session.DictionaryGuid, _cancellationToken);
         var wordToDelete = words?.ElementAtOrDefault(id - 1);
 
         if (wordToDelete is not null)
@@ -28,10 +26,10 @@ public partial class MessageHandler
                 return;
             }
 
-            var delMySqlTask = _mysql.DeleteWordAsync(wordToDelete.Dictionary.UserGuid, wordToDelete.DictionaryGuid, wordToDelete.Guid, _cancellationToken);
+            var delMySqlTask = _repository.DeleteWordAsync(wordToDelete.Dictionary.UserGuid, wordToDelete.DictionaryGuid, wordToDelete.Guid, _cancellationToken);
             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Слово удалено, обновите список слов", cancellationToken: _cancellationToken);
             _session.State = UserState.DictSelected;
-            var updateStateTask = _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+            var updateStateTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
             await Task.WhenAll(delMySqlTask, sendMessageTask, updateStateTask);
         }
         else
@@ -61,11 +59,11 @@ public partial class MessageHandler
                     return;
                 }
 
-                var insertTask = _mysql.InsertWordAsync(_session.UserGuid, _session.DictionaryGuid, sourceWord, targetWord, cancellationToken: _cancellationToken);
+                var insertTask = _repository.InsertWordAsync(_session.UserGuid, _session.DictionaryGuid, sourceWord, targetWord, cancellationToken: _cancellationToken);
                 var sendOkMessage = _botClient.SendTextMessageAsync(_session.TelegramId, "Словосочетание добавлено", cancellationToken: _cancellationToken);
                 await Task.WhenAll(insertTask, sendOkMessage);
                 _session.State = UserState.Default;
-                await _mongo.InsertOrUpdateUserSessionAsync(_session, cancellationToken: _cancellationToken);
+                await _repository.InsertOrUpdateUserSessionAsync(_session, cancellationToken: _cancellationToken);
             }
             catch { }
         }

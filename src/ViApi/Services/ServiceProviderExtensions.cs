@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using Serilog;
 using Telegram.Bot;
-using ViApi.Services.MySql;
+using ViApi.Services.Repository;
 
 namespace ViApi.Services
 {
@@ -25,8 +24,8 @@ namespace ViApi.Services
                 await ensureTgTask;
                 Log.Information("TelegramBot {OK}.", "OK");
             }
-            catch (Exception ex) 
-            { 
+            catch (Exception ex)
+            {
                 logger.Fatal(ex, string.Empty);
                 excepList.Add(ex);
             }
@@ -55,7 +54,6 @@ namespace ViApi.Services
 
             if (excepList.Count > 0) { throw new AggregateException(excepList); }
         }
-
 
         private static async Task<bool> EnsureMySqlAsync(IServiceProvider serviceProvider, CancellationToken cancellationToken = default)
         {

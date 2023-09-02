@@ -3,7 +3,7 @@ using ViApi.Types.Common;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Users;
 
-namespace ViApi.Services.MySql;
+namespace ViApi.Services.Repository;
 
 public class MySqlDbContext : DbContext
 {

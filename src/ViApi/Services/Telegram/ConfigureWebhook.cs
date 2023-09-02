@@ -31,7 +31,6 @@ namespace ViApi.Services.Telegram
                 secretToken: _botConfig.WebhookSecretToken,
                 cancellationToken: cancellationToken);
         }
-
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             using var scope = _serviceProvider.CreateScope();

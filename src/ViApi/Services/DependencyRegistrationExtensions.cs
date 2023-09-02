@@ -3,7 +3,7 @@ using MongoDB.Driver;
 using NgrokApi;
 using Serilog;
 using Telegram.Bot;
-using ViApi.Services.MySql;
+using ViApi.Services.Repository;
 using ViApi.Services.Telegram;
 using ViApi.Services.Telegram.UpdateHandlers;
 using ViApi.Types.Configuration;
@@ -30,6 +30,7 @@ public static class DependencyRegistrationExtensions
         IMongoDatabase mongoDb = new MongoClient(dbConf.MongoDbConnString).GetDatabase(dbConf.MongoDbName);
         builder.Services.AddSingleton(mongoDb);
         builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(dbConf.MySqlConnString, ServerVersion.AutoDetect(dbConf.MySqlConnString)));
+        builder.Services.AddTransient<IRepository, MySqlMongoRepository>();
     }
     private static async Task RegisterTelegramBot(this WebApplicationBuilder builder)
     {

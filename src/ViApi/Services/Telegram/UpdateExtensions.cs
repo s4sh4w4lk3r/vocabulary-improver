@@ -20,7 +20,6 @@ public static class UpdateExtensions
             throw new ArgumentException("Не получилось вычленить Id из Update.");
         }
     }
-
     public static string GetFirstname(this Update update)
     {
         if (update.Message is not null && (string.IsNullOrWhiteSpace(update.Message.Chat.FirstName) is false))

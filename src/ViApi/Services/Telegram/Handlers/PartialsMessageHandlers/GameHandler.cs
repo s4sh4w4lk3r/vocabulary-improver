@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Telegram.Bot;
-using ViApi.Services.MongoDb;
-using ViApi.Services.MySql;
+﻿using Telegram.Bot;
 using ViApi.Types.Common;
 using ViApi.Types.Enums;
 
@@ -21,7 +18,6 @@ public partial class MessageHandler
         {
             if (_session.GameQueue.TryDequeue(out Word? currentWord) is true && currentWord is not null)
             {
-                currentWord = await _mysql.Words.FirstOrDefaultAsync(w => w.Guid == currentWord.Guid);
                 if (currentWord is null)
                 {
                     await _botClient.SendTextMessageAsync(_session.TelegramId, $"Произошла ошибка получения из базу данных, конец игры", cancellationToken: _cancellationToken);
@@ -31,19 +27,19 @@ public partial class MessageHandler
 
                 if (currentWord.TargetWord == _recievedMessage)
                 {
-                    currentWord.IncreaseRating();
-                    await _botClient.SendTextMessageAsync(_session.TelegramId, "Правильно, молодец", cancellationToken: _cancellationToken);
+                    var updateTask = _repository.UpdateWordRating(_session.UserGuid, _session.DictionaryGuid, currentWord.Guid, Repository.RatingAction.Increase, _cancellationToken);
+                    var messageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Правильно, молодец", cancellationToken: _cancellationToken);
+                    await Task.WhenAll(updateTask, messageTask);
                 }
                 else
                 {
-                    currentWord.DecreaseRating();
-                    await _botClient.SendTextMessageAsync(_session.TelegramId, $"Неправильно, верный ответ: {currentWord.TargetWord}", cancellationToken: _cancellationToken);
+                    var updateTask = _repository.UpdateWordRating(_session.UserGuid, _session.DictionaryGuid, currentWord.Guid, Repository.RatingAction.Decrease, _cancellationToken);
+                    var messageTask = _botClient.SendTextMessageAsync(_session.TelegramId, $"Неправильно, верный ответ: {currentWord.TargetWord}", cancellationToken: _cancellationToken);
+                    await Task.WhenAll(updateTask, messageTask);
                 }
 
-                var saveMysql = _mysql.SaveChangesAsync();
-                var insertMongo = _mongo.InsertOrUpdateUserSessionAsync(_session);
+                await _repository.InsertOrUpdateUserSessionAsync(_session);
 
-                await Task.WhenAll(saveMysql, insertMongo);
                 if (_session.GameQueue.TryPeek(out Word? nextWord) is true && nextWord is not null)
                 {
                     await _botClient.SendTextMessageAsync(_session.TelegramId, $"{nextWord.SourceWord} ---> ?", cancellationToken: _cancellationToken);
@@ -52,7 +48,10 @@ public partial class MessageHandler
             }
             if (_session.GameQueue.Count == 0)
             {
-                await _botClient.SendTextMessageAsync(_session.TelegramId, "Game Over.", cancellationToken: _cancellationToken);
+                _session.State = UserState.DictSelected;
+                var messageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Game Over.", cancellationToken: _cancellationToken);
+                var mongoTask = _repository.InsertOrUpdateUserSessionAsync(_session);
+                await Task.WhenAll(messageTask, mongoTask);
             }
             return;
         }
@@ -60,7 +59,7 @@ public partial class MessageHandler
         {
             _session.State = UserState.DictSelected;
             var messageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Game Over.", cancellationToken: _cancellationToken);
-            var mongoTask = _mongo.InsertOrUpdateUserSessionAsync(_session);
+            var mongoTask = _repository.InsertOrUpdateUserSessionAsync(_session);
             await Task.WhenAll(messageTask, mongoTask);
             return;
         }
@@ -68,12 +67,12 @@ public partial class MessageHandler
     }
     private async Task StartGameAsync()
     {
-        var words = await _mysql.GetWordsAsync(_session.UserGuid, _session.DictionaryGuid, _cancellationToken);
+        var words = await _repository.GetWordsAsync(_session.UserGuid, _session.DictionaryGuid, _cancellationToken);
         if (words is null || words.Count == 0)
         {
             await _botClient.SendTextMessageAsync(_session.TelegramId, "Добавьте слова, чтобы сыграть", cancellationToken: _cancellationToken);
             _session.State = UserState.DictSelected;
-            await _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+            await _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
             return;
         }
 
@@ -81,7 +80,7 @@ public partial class MessageHandler
         words = words.OrderBy(_ => rand.Next()).ThenBy(w => w.Rating).ToList();
         _session.GameQueue = new Queue<Word>(words);
         _session.State = UserState.Playing;
-        await _mongo.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+        await _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
         await _botClient.SendTextMessageAsync(_session.TelegramId, $"{_session.GameQueue.Peek().SourceWord} ---> ?", cancellationToken: _cancellationToken);
     }
 }
