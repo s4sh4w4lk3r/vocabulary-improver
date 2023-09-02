@@ -3,6 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using ViApi.Services.MySql;
+using ViApi.Services.Telegram.Handlers.PartialsMessageHandlers;
 using ViApi.Types.Telegram;
 
 namespace ViApi.Services.Telegram.UpdateHandlers;
@@ -54,9 +55,9 @@ public class UpdateHandler
 
         _logger.LogInformation("Получено сообщение типа {MessageType} от пользователя {tgid}, содержимое {messagetext}", message.Type, _session.TelegramId, messageText);
 
-        var msgHandlers = new MessageHandlers(messageText, _session, _mysql, _mongo, _botClient, cancellationToken);
+        var msgHandlers = new MessageHandler(messageText, _session, _mysql, _mongo, _botClient, cancellationToken);
 
-        await msgHandlers.HandleMessage();
+        await msgHandlers.HandleMessageAsync();
 
     }
     private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
@@ -66,9 +67,9 @@ public class UpdateHandler
 
         _logger.LogInformation("Получен колбэкквэри от пользователя {tgid}, содержимое {messagetext}", _session.TelegramId, callbackQuery.Data);
 
-        var msgHandlers = new MessageHandlers(message: callbackQueryMessage, session: _session, callbackQueryId: callbackQuery.Id, _mysql, _mongo, _botClient, cancellationToken);
+        var msgHandlers = new MessageHandler(message: callbackQueryMessage, session: _session, callbackQueryId: callbackQuery.Id, _mysql, _mongo, _botClient, cancellationToken);
 
-        await msgHandlers.HandleMessage();
+        await msgHandlers.HandleMessageAsync();
     }
     private Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
     {
