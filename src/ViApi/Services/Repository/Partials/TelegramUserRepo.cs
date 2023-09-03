@@ -15,39 +15,22 @@ public partial class TgRepository
         var session = await GetUserSessionAsync(chatId64, cancellationToken);
         if (session is not null)
         {
-            Log.Debug("Получена сессия из MongoDb {session}.", session);
+            Log.Information("Сессия получена из MongoDb: {session}", session);
             return session;
         }
-        Log.Debug("Сессия из MongoDb не получена. Попытка найти пользователя в MySQL.");
 
         var user = await _mysql.Set<TelegramUser>().FirstOrDefaultAsync(u => u.TelegramId == chatId64, cancellationToken);
         if (user is not null)
         {
             session = new TelegramSession(user);
             await InsertOrUpdateUserSessionAsync(session, cancellationToken);
-            Log.Debug("Пользователь найден в MySql и была создана сессия в MongoDb {session}.", session);
+            Log.Information("Юзер получен из MySql, сессия создана: {session}", session);
             return session;
         }
 
-        return await RegisterUserAsync(chatId64, firstname);
-    }
-    public async Task<TelegramSession?> GetUserSessionAsync(Guid userGuid, CancellationToken cancellationToken = default)
-    {
-        userGuid.Throw().IfDefault();
-        var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
-        var collection = _mongo.GetCollection<TelegramSession>("usersessions");
-
-        var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
-        return userSession;
-    }
-    public async Task<TelegramSession?> GetUserSessionAsync(long telegramId, CancellationToken cancellationToken = default)
-    {
-        telegramId.Throw().IfDefault();
-        var filter = new BsonDocument { { "TelegramId", telegramId } };
-        var collection = _mongo.GetCollection<TelegramSession>("usersessions");
-
-        var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
-        return userSession;
+        session = await RegisterUserAsync(chatId64, firstname, cancellationToken);
+        Log.Information("Юзер зарегался и получена сессия: {session}", session);
+        return session;
     }
     public async Task<ApiUser?> GetValidUserAsync(string username, string email, CancellationToken cancellationToken = default)
     {
@@ -103,7 +86,8 @@ public partial class TgRepository
         }
         else return false;
     }
-    public async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
+    
+    private async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
         var userGuid = userSession.UserGuid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
@@ -111,7 +95,6 @@ public partial class TgRepository
 
         await collection.DeleteOneAsync(filter, cancellationToken);
     }
-    
     private async Task<TelegramSession> RegisterUserAsync(long chatId64, string firstname, CancellationToken cancellationToken = default)
     {
         Log.Debug("Пользователь не был найден, регистрируем в бд.");
@@ -128,5 +111,23 @@ public partial class TgRepository
         {
             throw new InvalidOperationException("Не получилось зарегать польльзователя в MySql.");
         }
+    }
+    private async Task<TelegramSession?> GetUserSessionAsync(long telegramId, CancellationToken cancellationToken = default)
+    {
+        telegramId.Throw().IfDefault();
+        var filter = new BsonDocument { { "TelegramId", telegramId } };
+        var collection = _mongo.GetCollection<TelegramSession>("usersessions");
+
+        var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return userSession;
+    }
+    private async Task<TelegramSession?> GetUserSessionAsync(Guid userGuid, CancellationToken cancellationToken = default)
+    {
+        userGuid.Throw().IfDefault();
+        var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
+        var collection = _mongo.GetCollection<TelegramSession>("usersessions");
+
+        var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);
+        return userSession;
     }
 }

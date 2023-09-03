@@ -8,9 +8,6 @@ namespace ViApi.Services.Repository
     public interface IRepository
     {
         Task InsertOrUpdateUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default);
-        Task<TelegramSession?> GetUserSessionAsync(Guid userGuid, CancellationToken cancellationToken = default);
-        Task<TelegramSession?> GetUserSessionAsync(long telegramId, CancellationToken cancellationToken = default);
-        Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default);
 
         Task<bool> InsertDictionaryAsync(Dictionary dictionary, CancellationToken cancellationToken = default);
         Task<bool> DeleteDictionaryAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default);
