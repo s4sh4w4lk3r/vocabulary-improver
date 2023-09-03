@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using ViApi.Types.Common.Users;
 
-namespace ViApi.Types.Users
+namespace ViApi.Types.Common.Users
 {
     public partial class ApiUser : UserBase
     {
@@ -22,8 +21,7 @@ namespace ViApi.Types.Users
         public string Password
         {
             get => _password;
-            init => _password = value.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f)
-                .Throw("В конструктор ApiUser передан слабый пароль.").IfNotMatches(PasswordRegex()).Value;
+            init => _password = value.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f).Value;
         }
 
         private ApiUser() { }
@@ -39,8 +37,5 @@ namespace ViApi.Types.Users
 
         [GeneratedRegex("^\\S+@\\S+\\.\\S+$")]
         private static partial Regex EmailRegex();
-
-        [GeneratedRegex("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")]
-        private static partial Regex PasswordRegex();
     }
 }

@@ -4,7 +4,6 @@ using MongoDB.Driver;
 using Serilog;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Telegram;
-using ViApi.Types.Users;
 
 namespace ViApi.Services.Repository;
 

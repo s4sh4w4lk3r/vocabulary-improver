@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ViApi.Types.Common;
 using ViApi.Types.Common.Users;
-using ViApi.Types.Users;
 
 namespace ViApi.Services.Repository;
 
