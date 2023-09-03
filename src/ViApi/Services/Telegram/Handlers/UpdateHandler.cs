@@ -40,7 +40,7 @@ public class UpdateHandler
         {
             { Message: { } message } => BotOnMessageReceived(message, cancellationToken),
             { CallbackQuery: { } callbackQuery } => BotOnCallbackQueryReceived(callbackQuery, cancellationToken),
-            _ => UnknownUpdateHandlerAsync(update, cancellationToken)
+            _ => UnknownUpdateHandlerAsync(update)
         };
 
         await handler;
@@ -69,7 +69,7 @@ public class UpdateHandler
 
         await msgHandlers.HandleMessageAsync();
     }
-    private Task UnknownUpdateHandlerAsync(Update update, CancellationToken cancellationToken)
+    private Task UnknownUpdateHandlerAsync(Update update)
     {
         _logger.LogInformation("Unknown update type: {UpdateType}", update.Type);
         return Task.CompletedTask;

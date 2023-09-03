@@ -41,7 +41,7 @@ public class Dictionary : IEnumerable<Word>
         Words = new List<Word>();
     }
 
-    public override string ToString() => $"[Guid {Guid}, Name: {Name}, WordsCount: {Words.Count}, UserGuid: {UserGuid}";
+    public override string ToString() => $"Guid {Guid}, Name: {Name}, WordsCount: {Words.Count}, UserGuid: {UserGuid}";
 
     public IEnumerator<Word> GetEnumerator() => Words.GetEnumerator();
 

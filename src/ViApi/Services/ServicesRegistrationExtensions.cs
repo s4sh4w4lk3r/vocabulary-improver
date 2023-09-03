@@ -10,14 +10,15 @@ using ViApi.Types.Configuration;
 
 namespace ViApi.Services;
 
-public static class DependencyRegistrationExtensions
+public static class ServicesRegistrationExtensions
 {
-    public static async Task RegisterDependencies(this WebApplicationBuilder builder, string[] args)
+    public static async Task RegisterServices(this WebApplicationBuilder builder, string[] args)
     {
         builder.RegisterSerilog();
         //Должен быть только один аргумент командной строки в виде путя до конфига.
         string configPath = args.FirstOrDefault()!.Throw("Не распознан путь до конфига.").IfNull(s => s);
         builder.Configuration.AddJsonFile(configPath);
+
         builder.Services.AddControllers().AddNewtonsoftJson();
 
         builder.RegisterDatabases();
