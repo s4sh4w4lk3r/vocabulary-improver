@@ -133,8 +133,9 @@ public partial class MessageHandler
             UserState.RenamingDict => RenameDictAsync(),
             UserState.DeletingWord => DeleteWordAsync(),
             UserState.Playing => PlayAsync(),
+            UserState.AddingWordList => AddWordListAsync(),
             _ => _botClient.SendTextMessageAsync(_session.TelegramId, "Команда не найдена", cancellationToken: _cancellationToken)
-        };
+        }; 
 
         await actionOnState;
     }
@@ -232,6 +233,18 @@ public partial class MessageHandler
                         if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
                         await StartGameAsync();
                         return true;
+
+                    case "addwordlist":
+                        {
+                            _session.State = UserState.AddingWordList;
+                            _session.DictionaryGuid = recievedDictGuid;
+                            var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+                            var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите словосочетания, начиная каждое с новой строки, разделяя двоеточием, например:" +
+                                "\nоригинал1:перевод1\nоригинал2:перевод2");
+                            if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
+                            await Task.WhenAll(inserTask, sendMessageTask);
+                            return true;
+                        }
                 }
             }
         }

@@ -37,9 +37,15 @@ public static class KeyboardSet
     }
     public static InlineKeyboardMarkup GetDictKeyboard(Guid dictGuid)
     {
+        var row0 = new List<InlineKeyboardButton>()
+        {
+            InlineKeyboardButton.WithCallbackData("🆕Добавить слово", $"addword:{dictGuid}")
+        };
+
         var row1 = new List<InlineKeyboardButton>()
         {
-            InlineKeyboardButton.WithCallbackData("🆕Добавить слово", $"addword:{dictGuid}"),
+            
+            InlineKeyboardButton.WithCallbackData("🆕Добавить несколько слов", $"addwordlist:{dictGuid}"),
             InlineKeyboardButton.WithCallbackData("✖️Удалить слово", $"deleteword:{dictGuid}")
         };
         var row2 = new List<InlineKeyboardButton>()
@@ -57,7 +63,7 @@ public static class KeyboardSet
 
         var buttonList = new List<IEnumerable<InlineKeyboardButton>>()
         {
-            row1, row2, row3
+            row0, row1, row2, row3
         };
 
         return new InlineKeyboardMarkup(buttonList);

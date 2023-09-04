@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot;
+using ViApi.Types.Common;
 using ViApi.Types.Enums;
 
 namespace ViApi.Services.Telegram.Handlers.PartialsMessageHandlers;
@@ -42,8 +43,8 @@ public partial class MessageHandler
     {
         if (_session.State == UserState.AddingWord && _session.DictionaryGuid != default)
         {
-            var mas = _recievedMessage.Split(':');
-            if (mas.Length != 2)
+            var wordPair = _recievedMessage.Split(':');
+            if (wordPair.Length != 2)
             {
                 await _botClient.SendTextMessageAsync(chatId: _session.TelegramId, "Неверный формат", cancellationToken: _cancellationToken);
                 return;
@@ -51,8 +52,8 @@ public partial class MessageHandler
 
             try
             {
-                string sourceWord = mas[0];
-                string targetWord = mas[1];
+                string sourceWord = wordPair[0];
+                string targetWord = wordPair[1];
                 if (string.IsNullOrEmpty(sourceWord) || string.IsNullOrEmpty(targetWord))
                 {
                     await _botClient.SendTextMessageAsync(chatId: _session.TelegramId, "Неверный формат", cancellationToken: _cancellationToken);
@@ -66,6 +67,40 @@ public partial class MessageHandler
                 await _repository.InsertOrUpdateUserSessionAsync(_session, cancellationToken: _cancellationToken);
             }
             catch { }
+        }
+    }
+    private async Task AddWordListAsync()
+    {
+        if ((_session.State is not UserState.AddingWordList) || (_session.DictionaryGuid == default)) { return; }
+
+        var lines = _recievedMessage.Split('\n');
+        List<Word> words = new List<Word>(lines.Length);
+
+        try
+        {
+            foreach (var line in lines)
+            {
+                var wordPair = line.Split(':');
+                string sourceWord = wordPair[0];
+                string targetWord = wordPair[1];
+                var word = new Word(Guid.NewGuid(), sourceWord, targetWord, _session.DictionaryGuid);
+                words.Add(word);
+            }
+
+            await _repository.InsertWordListAsync(words, _session.DictionaryGuid, _cancellationToken);
+
+            var messageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Набор слов добавлен", cancellationToken: _cancellationToken);
+            _session.State = UserState.DictSelected;
+            var insertTask = _repository.InsertOrUpdateUserSessionAsync(_session, cancellationToken: _cancellationToken);
+            await Task.WhenAll(messageTask, insertTask);
+        }
+        catch (IndexOutOfRangeException)
+        {
+            await _botClient.SendTextMessageAsync(_session.TelegramId, "Слова не добавлены, возможно в какой-то строке неправильный формат", cancellationToken: _cancellationToken);
+        }
+        catch (Exception)
+        {
+            await _botClient.SendTextMessageAsync(_session.TelegramId, "Слова почему-то недобавлены", cancellationToken: _cancellationToken);
         }
     }
 }

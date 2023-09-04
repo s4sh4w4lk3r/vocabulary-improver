@@ -4,6 +4,6 @@ public enum UserState
 {
     Default = 0, 
     AddingDict = 11, RenamingDict = 12, ChoosingDict = 13, DictSelected = 14,
-    ChoosingWord = 21, AddingWord = 22,  DeletingWord = 23,
+    ChoosingWord = 21, AddingWord = 22,  DeletingWord = 23, AddingWordList = 24,
     Playing = 31
 }

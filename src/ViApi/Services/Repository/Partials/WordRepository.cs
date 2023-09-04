@@ -77,4 +77,16 @@ public partial class TgRepository
         Log.Information("Обработан запрос к MySql на добавление слова, слово {word} добавлено", newWord);
         return true;
     }
+    public async Task InsertWordListAsync(IEnumerable<Word> words, Guid dictGuid, CancellationToken cancellationToken = default)
+    {
+        dictGuid.Throw().IfDefault();
+        foreach (var word in words)
+        {
+            #warning сделать валидацию, чтобы не было пустых и нулловых свойств вместо этого
+            word.DictionaryGuid.Throw().IfNotEquals(dictGuid);
+        }
+
+        await _mysql.Words.AddRangeAsync(words, cancellationToken);
+        await _mysql.SaveChangesAsync();
+    }
 }
