@@ -4,39 +4,12 @@ namespace ViApi.Types.Common;
 
 public class Word
 {
-    private Guid _guid;
-    private string _sourceWord = null!;
-    private string _targetWord = null!;
-    private int _rating;
-    private Guid _dictionaryGuid;
-
-    public Guid Guid 
-    {   
-        get => _guid;
-        init => _guid = value.Throw("В конструктор Word попал пустой Guid.").IfDefault().Value;
-    }
-    public string SourceWord
-    {
-        get => _sourceWord;
-        init => _sourceWord = value.Throw("В конструктор Word попало пустое sourceWord.").IfNullOrWhiteSpace(_ => _).Value;
-    }
-    public string TargetWord
-    {
-        get => _targetWord;
-        init => _targetWord = value.Throw("В конструктор Word попало пустое targetWord.").IfNullOrWhiteSpace(_ => _).Value;
-    }
-    public int Rating
-    {
-        get => _rating;
-        set => _rating = value.Throw($"В конструктор Word попало недопустимое значение рейтинга: {value}.").IfGreaterThan(10).IfLessThan(0).Value;
-    }
-    public Guid DictionaryGuid
-    {
-        get => _dictionaryGuid;
-        init => _dictionaryGuid = value.Throw("В конструктор Word попал пустой dictGuid.").IfDefault().Value;
-    }
-    [BsonIgnore] public Dictionary? Dictionary { get; init; }
-
+    public Guid Guid { get; init; }
+    public string? SourceWord { get; init; }
+    public string? TargetWord { get; init; }
+    public int Rating { get; private set; }
+    public Guid DictionaryGuid { get; init; }
+    [BsonIgnore] public Dictionary? Dictionary { get; init; } 
 
     private Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)

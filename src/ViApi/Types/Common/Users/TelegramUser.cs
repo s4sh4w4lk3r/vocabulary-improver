@@ -2,12 +2,7 @@
 
 public class TelegramUser : UserBase
 {
-    private long telegramId;
-    public long TelegramId
-    {
-        get => telegramId;
-        init => telegramId = value.Throw("В конструктор TelegramUser передан telegramId, который меньше нуля.").IfNegativeOrZero().Value;
-    }
+    public long TelegramId { get; init; }
     private TelegramUser() { }
     public TelegramUser(Guid userGuid, string firstname, long telegramId) : base(userGuid, firstname)
     {

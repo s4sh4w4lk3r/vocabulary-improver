@@ -4,25 +4,9 @@ namespace ViApi.Types.Common.Users
 {
     public partial class ApiUser : UserBase
     {
-        private string _username = null!;
-        private string _email = null!;
-        private string _password = null!;
-        public string Username
-        {
-            get => _username;
-            init => _username = value.Throw("В конструктор ApiUser передан пустой ник.").IfNullOrWhiteSpace(_ => _).Value;
-        }
-        public string Email
-        {
-            get => _email;
-            init => _email = value.Throw("В конструктор ApiUser передан пустой Email.").IfNullOrWhiteSpace(_ => _)
-                .Throw("В конструктор ApiUser передан Email неверного формата.").IfNotMatches(EmailRegex()).Value;
-        }
-        public string Password
-        {
-            get => _password;
-            init => _password = value.Throw("В конструктор ApiUser передан пустой пароль.").IfNullOrWhiteSpace(f => f).Value;
-        }
+        public string? Username { get; init; }
+        public string? Email { get; init; }
+        public string? Password { get; init; }
 
         private ApiUser() { }
         public ApiUser(Guid userGuid, string firstname, string username, string email, string password) : base(userGuid, firstname)

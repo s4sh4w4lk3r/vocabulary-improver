@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using ViApi.Types.Configuration;
 
-namespace ViApi.Services.Telegram
+namespace ViApi.Validation
 {
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class ValidateTelegramBotAttribute : TypeFilterAttribute
