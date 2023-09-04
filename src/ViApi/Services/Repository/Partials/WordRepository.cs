@@ -8,6 +8,10 @@ public partial class TgRepository
 {
     public async Task UpdateWordRating(Guid userGuid, Guid dictGuid, Guid wordGuid, RatingAction action, CancellationToken cancellationToken = default)
     {
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
+        wordGuid.Throw().IfDefault();
+
         var word = await _mysql.Words.FirstOrDefaultAsync(w => w.Guid == wordGuid && w.Dictionary!.Guid == dictGuid && w.Dictionary.UserGuid == userGuid, cancellationToken);
 
         if (word is null) { return; }
@@ -26,8 +30,8 @@ public partial class TgRepository
     }
     public async Task<List<Word>?> GetWordsAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод GetWordsAsync пришел пустой userGuid").IfDefault();
-        dictGuid.Throw("В метод GetWordsAsync пришел пустой dictGuid").IfDefault();
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
 
         var dict = await _mysql.Dictionaries.Include(d => d.Words).FirstOrDefaultAsync(d => d.Guid == dictGuid && d.UserGuid == userGuid, cancellationToken);
 
@@ -38,9 +42,9 @@ public partial class TgRepository
     }
     public async Task<bool> DeleteWordAsync(Guid userGuid, Guid dictGuid, Guid wordGuid, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод DeleteWordAsync пришел пустой userGuid").IfDefault();
-        dictGuid.Throw("В метод DeleteWordAsync пришел пустой dictGuid").IfDefault();
-        wordGuid.Throw("В метод DeleteWordAsync пришел пустой wordGuid").IfDefault();
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
+        wordGuid.Throw().IfDefault();
 
         var wordToDel = await _mysql.Words.Include(w => w.Dictionary).FirstOrDefaultAsync(w => w.DictionaryGuid == dictGuid && w.Guid == wordGuid && w.Dictionary!.UserGuid == userGuid, cancellationToken);
         if (wordToDel is null) 
@@ -56,10 +60,10 @@ public partial class TgRepository
     }
     public async Task<bool> InsertWordAsync(Guid userGuid, Guid dictGuid, string sourceWord, string targetWord, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод InsertWordAsync пришел пустой userGuid").IfDefault();
-        dictGuid.Throw("В метод InsertWordAsync пришел пустой dictGuid").IfDefault();
-        sourceWord.Throw("В метод InsertDictionaryAsync пришло пустое sourceWord").IfNullOrWhiteSpace(n => n);
-        targetWord.Throw("В метод InsertDictionaryAsync пришло пустое targetWord").IfNullOrWhiteSpace(n => n);
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
+        sourceWord.Throw().IfNullOrWhiteSpace(sourceWord => sourceWord);
+        targetWord.Throw().IfNullOrWhiteSpace(targetWord => targetWord);
 
         var dictExist = await _mysql.Dictionaries.AnyAsync(d => d.Guid == dictGuid && d.UserGuid == userGuid, cancellationToken);
         if (dictExist is false) 

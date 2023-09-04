@@ -6,10 +6,10 @@ namespace ViApi.Types.Common;
 public class Dictionary : IEnumerable<Word>
 {
     public Guid Guid { get; init; }
-    public string? Name { get; init; }
+    public string? Name { get; set; }
     public Guid UserGuid { get; init; }
     public UserBase? User { get; init; }
-    public List<Word> Words { get; init; } = null!;
+    public List<Word>? Words { get; init; }
 
     private Dictionary() { }
     public Dictionary(Guid dictGuid, string name, Guid userGuid)
@@ -20,9 +20,9 @@ public class Dictionary : IEnumerable<Word>
         Words = new List<Word>();
     }
 
-    public override string ToString() => $"Guid {Guid}, Name: {Name}, WordsCount: {Words.Count}, UserGuid: {UserGuid}";
+    public override string ToString() => $"Guid {Guid}, Name: {Name}, WordsCount: {Words?.Count}, UserGuid: {UserGuid}";
 
-    public IEnumerator<Word> GetEnumerator() => Words.GetEnumerator();
+    public IEnumerator<Word> GetEnumerator() => Words!.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator() => Words.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() => Words!.GetEnumerator();
 }

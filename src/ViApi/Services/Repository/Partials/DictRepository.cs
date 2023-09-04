@@ -17,12 +17,14 @@ public partial class TgRepository : IRepository
 
     public async Task<bool> CheckDictionaryIsExistAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default)
     {
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
         return (await _mysql.Dictionaries.Where(d => d.Guid == dictGuid && d.UserGuid == userGuid).CountAsync(cancellationToken: cancellationToken)) == 1;
     }
     public async Task<bool> DeleteDictionaryAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод DeleteDictionaryAsync пришел пустой userGuid").IfDefault();
-        dictGuid.Throw("В метод DeleteDictionaryAsync пришел пустой dictGuid").IfDefault();
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
 
         var dictToDel = await _mysql.Dictionaries.Where(d => d.Guid == dictGuid && d.UserGuid == userGuid).FirstOrDefaultAsync(cancellationToken);
         if (dictToDel is null) { return false; }
@@ -33,12 +35,12 @@ public partial class TgRepository : IRepository
     }
     public async Task<List<Dictionary>> GetDicionariesList(Guid userGuid, CancellationToken cancellationToken = default)
     {
+        userGuid.Throw().IfDefault();
         return await _mysql.Dictionaries.Where(d => d.UserGuid == userGuid).ToListAsync(cancellationToken: cancellationToken);
     }
     public async Task<bool> InsertDictionaryAsync(Dictionary dictionary, CancellationToken cancellationToken = default)
     {
-        dictionary.UserGuid.Throw("В метод InsertDictionaryAsync пришел пустой Guid").IfDefault();
-        dictionary.Name.Throw("В метод InsertDictionaryAsync пришло пустое имя").IfNullOrWhiteSpace(n => n);
+#warning добавить валидацию сюда
         bool userExists = await _mysql.Users.AnyAsync(u => u.Guid == dictionary.UserGuid, cancellationToken);
         if (userExists is false) { return false; }
 
@@ -48,9 +50,9 @@ public partial class TgRepository : IRepository
     }
     public async Task<bool> RenameDictionaryAsync(Guid userGuid, Guid dictGuid, string newName, CancellationToken cancellationToken = default)
     {
-        userGuid.Throw("В метод RenameDictionaryAsync пришел пустой userGuid").IfDefault();
-        dictGuid.Throw("В метод RenameDictionaryAsync пришел пустой dictGuid").IfDefault();
-        newName.Throw("В метод RenameDictionaryAsync пришло пустое имя").IfNullOrWhiteSpace(n => n);
+        userGuid.Throw().IfDefault();
+        dictGuid.Throw().IfDefault();
+        newName.Throw().IfNullOrWhiteSpace(n => n);
         var dictToRemove = await _mysql.Dictionaries.Where(d => d.Guid == dictGuid && d.UserGuid == userGuid).FirstOrDefaultAsync(cancellationToken);
         if (dictToRemove is null) { return false; }
 

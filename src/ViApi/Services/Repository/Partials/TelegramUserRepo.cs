@@ -11,6 +11,9 @@ public partial class TgRepository
 {
     public async Task<TelegramSession> GetOrRegisterSessionAsync(long chatId64, string firstname, CancellationToken cancellationToken = default)
     {
+        chatId64.Throw().IfDefault();
+        firstname.Throw().IfNullOrWhiteSpace(_=>_);
+
         var session = await GetUserSessionAsync(chatId64, cancellationToken);
         if (session is not null)
         {
@@ -33,6 +36,9 @@ public partial class TgRepository
     }
     public async Task<ApiUser?> GetValidUserAsync(string username, string email, CancellationToken cancellationToken = default)
     {
+        username.Throw().IfNullOrWhiteSpace(_ => _);
+        email.Throw().IfNullOrWhiteSpace(_ => _);
+#warning добавить regexы
         const string INVALID_TEMP_PASSWORD = "Pa55sword!";
         const string INVALID_TEMP_FIRSTNAME = "Billy";
 
@@ -43,6 +49,7 @@ public partial class TgRepository
     }
     public async Task<bool> InsertUserAsync(UserBase user, CancellationToken cancellationToken = default)
     {
+#warning добавить валидацию сюда
         if (user is TelegramUser telegramUser)
         {
             bool exists = await _mysql.Set<TelegramUser>().AnyAsync(u => u.TelegramId == telegramUser.TelegramId, cancellationToken);
@@ -67,6 +74,7 @@ public partial class TgRepository
     }
     public async Task InsertOrUpdateUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
+#warning добавить валидацию сюда
         var userGuid = userSession.UserGuid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
         var collection = _mongo.GetCollection<TelegramSession>("usersessions");
@@ -75,6 +83,7 @@ public partial class TgRepository
     }
     public async Task<bool> DeleteUserAndSessionAsync(TelegramSession session, CancellationToken cancellationToken = default)
     {
+#warning добавить валидацию сюда
         var user = await _mysql.Users.FirstOrDefaultAsync(u => u.Guid == session.UserGuid, cancellationToken);
         if (user is not null)
         {
@@ -88,6 +97,7 @@ public partial class TgRepository
     
     private async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
+#warning добавить валидацию сюда
         var userGuid = userSession.UserGuid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
         var collection = _mongo.GetCollection<TelegramSession>("usersessions");
@@ -96,6 +106,9 @@ public partial class TgRepository
     }
     private async Task<TelegramSession> RegisterUserAsync(long chatId64, string firstname, CancellationToken cancellationToken = default)
     {
+        chatId64.Throw().IfDefault();
+        firstname.Throw().IfNullOrWhiteSpace(_ => _);
+
         Log.Debug("Пользователь не был найден, регистрируем в бд.");
         var user = new TelegramUser(Guid.NewGuid(), firstname, chatId64);
         var insertToMySqlTask = InsertUserAsync(user, cancellationToken);
@@ -111,10 +124,10 @@ public partial class TgRepository
             throw new InvalidOperationException("Не получилось зарегать польльзователя в MySql.");
         }
     }
-    private async Task<TelegramSession?> GetUserSessionAsync(long telegramId, CancellationToken cancellationToken = default)
+    private async Task<TelegramSession?> GetUserSessionAsync(long chatId64, CancellationToken cancellationToken = default)
     {
-        telegramId.Throw().IfDefault();
-        var filter = new BsonDocument { { "TelegramId", telegramId } };
+        chatId64.Throw().IfDefault();
+        var filter = new BsonDocument { { "TelegramId", chatId64 } };
         var collection = _mongo.GetCollection<TelegramSession>("usersessions");
 
         var userSession = await collection.Find(filter).FirstOrDefaultAsync(cancellationToken);

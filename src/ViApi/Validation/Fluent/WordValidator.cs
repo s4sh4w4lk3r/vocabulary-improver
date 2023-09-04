@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using ViApi.Types.Common;
 
-namespace ViApi.Validation;
+namespace ViApi.Validation.Fluent;
 
 public class WordValidator : AbstractValidator<Word>
 {
