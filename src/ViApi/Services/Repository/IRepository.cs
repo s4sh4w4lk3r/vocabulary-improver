@@ -24,6 +24,7 @@ namespace ViApi.Services.Repository
         Task UpdateWordRating(Guid userGuid, Guid dictGuid, Guid wordGuid, RatingAction action, CancellationToken cancellationToken = default);
         Task<List<Dictionary>> GetDicionariesList(Guid userGuid, CancellationToken cancellationToken = default);
         Task InsertWordListAsync(IEnumerable<Word> words, Guid dictGuid, CancellationToken cancellationToken = default);
+        Task<Word> GetRandomWord(Guid userGuid, Guid dictGuid, Guid excludingWordGuid, CancellationToken cancellationToken = default);
     }
     public enum RatingAction { Decrease, Increase};
 }

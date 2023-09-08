@@ -89,4 +89,9 @@ public partial class TgRepository
         await _mysql.Words.AddRangeAsync(words, cancellationToken);
         await _mysql.SaveChangesAsync();
     }
+    public async Task<Word> GetRandomWord(Guid userGuid, Guid dictGuid, Guid excludingWordGuid, CancellationToken cancellationToken = default)
+    {
+        return await _mysql.Words.Where(w => w.Dictionary!.Guid == dictGuid && w.Dictionary.UserGuid == userGuid && w.Guid != excludingWordGuid)
+            .OrderBy(r => EF.Functions.Random()).Take(1).FirstAsync(cancellationToken: cancellationToken);
+    }
 }

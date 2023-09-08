@@ -132,7 +132,6 @@ public partial class MessageHandler
             UserState.AddingWord => AddNewWordAsync(),
             UserState.RenamingDict => RenameDictAsync(),
             UserState.DeletingWord => DeleteWordAsync(),
-            UserState.Playing => PlayAsync(),
             UserState.AddingWordList => AddWordListAsync(),
             _ => _botClient.SendTextMessageAsync(_session.TelegramId, "Команда не найдена", cancellationToken: _cancellationToken)
         }; 
@@ -181,14 +180,14 @@ public partial class MessageHandler
             string action = mas[0];
             string guidStr = mas[1];
 
-            if (mas.Length == 2 && Guid.TryParse(guidStr, out Guid recievedDictGuid) is true && string.IsNullOrWhiteSpace(action) is false)
+            if (mas.Length == 2 && Guid.TryParse(guidStr, out recievedGuid) is true && string.IsNullOrWhiteSpace(action) is false)
             {
                 switch (action)
                 {
                     case "addword":
                         {
                             _session.State = UserState.AddingWord;
-                            _session.DictionaryGuid = recievedDictGuid;
+                            _session.DictionaryGuid = recievedGuid;
                             var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите сочетание слов в формате \"оригинал:перевод\"");
                             if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
@@ -199,7 +198,7 @@ public partial class MessageHandler
                     case "deleteword":
                         {
                             _session.State = UserState.DeletingWord;
-                            _session.DictionaryGuid = recievedDictGuid;
+                            _session.DictionaryGuid = recievedGuid;
                             var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите номер слова для удаления", cancellationToken: _cancellationToken);
                             if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
@@ -210,7 +209,7 @@ public partial class MessageHandler
                     case "renamedict":
                         {
                             _session.State = UserState.RenamingDict;
-                            _session.DictionaryGuid = recievedDictGuid;
+                            _session.DictionaryGuid = recievedGuid;
                             var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите новое имя для словаря");
                             if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
@@ -223,7 +222,7 @@ public partial class MessageHandler
                             _session.DictionaryGuid = default;
                             var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Словарь удален", cancellationToken: _cancellationToken);
-                            var deleteDictTask = _repository.DeleteDictionaryAsync(_session.UserGuid, recievedDictGuid, _cancellationToken);
+                            var deleteDictTask = _repository.DeleteDictionaryAsync(_session.UserGuid, recievedGuid, _cancellationToken);
                             if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
 
                             await Task.WhenAll(inserTask, sendMessageTask, deleteDictTask);
@@ -231,13 +230,14 @@ public partial class MessageHandler
                         }
                     case "play":
                         if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
-                        await StartGameAsync();
+                        if (_session.DictionaryGuid == default) { return true; }
+                        await PlayAsync(recievedGuid, startNewGame: true);
                         return true;
 
                     case "addwordlist":
                         {
                             _session.State = UserState.AddingWordList;
-                            _session.DictionaryGuid = recievedDictGuid;
+                            _session.DictionaryGuid = recievedGuid;
                             var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                             var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Введите словосочетания, начиная каждое с новой строки, разделяя двоеточием, например:" +
                                 "\nоригинал1:перевод1\nоригинал2:перевод2");
@@ -245,10 +245,15 @@ public partial class MessageHandler
                             await Task.WhenAll(inserTask, sendMessageTask);
                             return true;
                         }
+                    case "answerword":
+                        if (_callbackQueryId is not null) { await _botClient.AnswerCallbackQueryAsync(_callbackQueryId, cancellationToken: _cancellationToken); }
+                        if ((_session.State is not UserState.Playing) || (_session.DictionaryGuid == default)) { return true; }
+                        await PlayAsync(recievedGuid, startNewGame: false);
+                        return true;
                 }
             }
         }
-        catch { }
+        catch (IndexOutOfRangeException) { }
 
         return false;
     }

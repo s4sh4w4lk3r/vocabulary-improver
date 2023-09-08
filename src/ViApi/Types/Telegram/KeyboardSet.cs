@@ -19,7 +19,6 @@ public static class KeyboardSet
 
         return replyKeyboardMarkup;
     }
-
     public static ReplyKeyboardMarkup GetDictKeyboard()
     {
         var buttons = new List<KeyboardButton[]>()
@@ -110,5 +109,29 @@ public static class KeyboardSet
         }
 
         return new InlineKeyboardMarkup(buttonList);
+    }
+    public static InlineKeyboardMarkup GetRandomButtonsAsWord(Word word1, Word word2)
+    {
+        var rand = new Random();
+        int buttonSequence = rand.Next(0, 2);
+
+        if (buttonSequence == 0)
+        {
+            var buttons = new List<InlineKeyboardButton>()
+        {
+            InlineKeyboardButton.WithCallbackData($"{word1.TargetWord}", $"answerword:{word1.Guid}"),
+            InlineKeyboardButton.WithCallbackData($"{word2.TargetWord}", $"answerword:{word2.Guid}")
+        };
+            return new InlineKeyboardMarkup(buttons);
+        }
+        else
+        {
+            var buttons = new List<InlineKeyboardButton>()
+        {
+            InlineKeyboardButton.WithCallbackData($"{word2.TargetWord}", $"answerword:{word2.Guid}"),
+            InlineKeyboardButton.WithCallbackData($"{word1.TargetWord}", $"answerword:{word1.Guid}")
+        };
+            return new InlineKeyboardMarkup(buttons);
+        }
     }
 }
