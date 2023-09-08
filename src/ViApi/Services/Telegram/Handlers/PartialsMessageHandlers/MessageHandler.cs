@@ -1,6 +1,7 @@
 ﻿using Serilog;
 using System.Text;
 using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using ViApi.Services.Repository;
@@ -104,7 +105,7 @@ public partial class MessageHandler
                 await _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
                 return;
             }
-            catch { }
+            catch (ApiRequestException) { }
             return;
         }
         else
@@ -166,7 +167,11 @@ public partial class MessageHandler
                 var editMessageTask = _botClient.EditMessageTextAsync(_session.TelegramId, _session.MessageIdToEdit, messageWithWords, replyMarkup: dictKeyboard, cancellationToken: _cancellationToken);
                 //Приходится методы EditMessageTextAsync ставить в трай/кетч, так как если юзер нажмет на кнопку два раза быстро, недождавшись ответа, вылезет эксепшон, то что сообщение уже отредактировано текстом из первого запроса,
                 // и оно не будет обновлено снова
-                try { await editMessageTask; } catch { }
+                try 
+                { 
+                    await editMessageTask; 
+                } 
+                catch (ApiRequestException) { }
 
                 await mongoInsertTask;
                 return true;
