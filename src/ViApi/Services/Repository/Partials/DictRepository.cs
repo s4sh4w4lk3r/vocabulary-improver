@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using ViApi.Types.Common;
+using ViApi.Validation.Fluent;
 
 namespace ViApi.Services.Repository;
 
@@ -40,7 +42,7 @@ public partial class TgRepository : IRepository
     }
     public async Task<bool> InsertDictionaryAsync(Dictionary dictionary, CancellationToken cancellationToken = default)
     {
-#warning добавить валидацию сюда
+        await new DictionaryValidator().ValidateAndThrowAsync(dictionary, cancellationToken: cancellationToken);
         bool userExists = await _mysql.Users.AnyAsync(u => u.Guid == dictionary.UserGuid, cancellationToken);
         if (userExists is false) { return false; }
 

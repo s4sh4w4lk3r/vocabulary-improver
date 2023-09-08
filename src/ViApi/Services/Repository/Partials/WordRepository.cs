@@ -1,6 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using ViApi.Types.Common;
+using ViApi.Validation.Fluent;
 
 namespace ViApi.Services.Repository;
 
@@ -80,14 +82,15 @@ public partial class TgRepository
     public async Task InsertWordListAsync(IEnumerable<Word> words, Guid dictGuid, CancellationToken cancellationToken = default)
     {
         dictGuid.Throw().IfDefault();
+        var wordValidator = new WordValidator();
         foreach (var word in words)
         {
-            #warning сделать валидацию, чтобы не было пустых и нулловых свойств вместо этого
+            await wordValidator.ValidateAndThrowAsync(word, cancellationToken);
             word.DictionaryGuid.Throw().IfNotEquals(dictGuid);
         }
 
         await _mysql.Words.AddRangeAsync(words, cancellationToken);
-        await _mysql.SaveChangesAsync();
+        await _mysql.SaveChangesAsync(cancellationToken);
     }
     public async Task<Word> GetRandomWord(Guid userGuid, Guid dictGuid, Guid excludingWordGuid, CancellationToken cancellationToken = default)
     {

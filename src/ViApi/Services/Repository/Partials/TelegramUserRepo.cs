@@ -1,9 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using FluentValidation;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Serilog;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Telegram;
+using ViApi.Validation.Fluent;
+using ViApi.Validation.Fluent.UserValidation;
 
 namespace ViApi.Services.Repository;
 
@@ -38,28 +41,30 @@ public partial class TgRepository
     {
         username.Throw().IfNullOrWhiteSpace(_ => _);
         email.Throw().IfNullOrWhiteSpace(_ => _);
-#warning добавить regexы
         const string INVALID_TEMP_PASSWORD = "Pa55sword!";
         const string INVALID_TEMP_FIRSTNAME = "Billy";
 
         //Создается временный юзер, чтобы введенные в параметр данные прошли проверку.
         var tempUser = new ApiUser(Guid.NewGuid(), INVALID_TEMP_FIRSTNAME, username, email, INVALID_TEMP_PASSWORD);
+        await new ApiUserValidator().ValidateAndThrowAsync(tempUser, cancellationToken);
         var validUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == tempUser.Email && u.Username == tempUser.Username, cancellationToken);
         return validUser;
     }
     public async Task<bool> InsertUserAsync(UserBase user, CancellationToken cancellationToken = default)
     {
-#warning добавить валидацию сюда
         if (user is TelegramUser telegramUser)
         {
+            await new TelegramUserValidator().ValidateAndThrowAsync(telegramUser, cancellationToken);
             bool exists = await _mysql.Set<TelegramUser>().AnyAsync(u => u.TelegramId == telegramUser.TelegramId, cancellationToken);
             if (exists) return false;
         }
         if (user is ApiUser apiUser)
         {
+            await new ApiUserValidator().ValidateAndThrowAsync(apiUser, cancellationToken);
             bool exists = await _mysql.Set<ApiUser>().AnyAsync(u => u.Username == apiUser.Username || u.Email == apiUser.Email, cancellationToken);
             if (exists) return false;
         }
+
         await _mysql.Users.AddAsync(user, cancellationToken);
         int stringsChanged = await _mysql.SaveChangesAsync(cancellationToken);
 
@@ -74,7 +79,7 @@ public partial class TgRepository
     }
     public async Task InsertOrUpdateUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
-#warning добавить валидацию сюда
+        await new TelegramSessionValidator().ValidateAndThrowAsync(userSession, cancellationToken);
         var userGuid = userSession.UserGuid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
         var collection = _mongo.GetCollection<TelegramSession>("usersessions");
@@ -83,7 +88,7 @@ public partial class TgRepository
     }
     public async Task<bool> DeleteUserAndSessionAsync(TelegramSession session, CancellationToken cancellationToken = default)
     {
-#warning добавить валидацию сюда
+        await new TelegramSessionValidator().ValidateAndThrowAsync(session, cancellationToken);
         var user = await _mysql.Users.FirstOrDefaultAsync(u => u.Guid == session.UserGuid, cancellationToken);
         if (user is not null)
         {
@@ -97,7 +102,7 @@ public partial class TgRepository
     
     private async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
-#warning добавить валидацию сюда
+        await new TelegramSessionValidator().ValidateAndThrowAsync(userSession, cancellationToken);
         var userGuid = userSession.UserGuid;
         var filter = new BsonDocument { { "UserGuid", new BsonBinaryData(userGuid, GuidRepresentation.Standard) } };
         var collection = _mongo.GetCollection<TelegramSession>("usersessions");

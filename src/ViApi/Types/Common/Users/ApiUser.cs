@@ -1,8 +1,6 @@
-﻿using System.Text.RegularExpressions;
-
-namespace ViApi.Types.Common.Users
+﻿namespace ViApi.Types.Common.Users
 {
-    public partial class ApiUser : UserBase
+    public class ApiUser : UserBase
     {
         public string? Username { get; init; }
         public string? Email { get; init; }
@@ -17,9 +15,5 @@ namespace ViApi.Types.Common.Users
         }
 
         public override string ToString() => $"[{GetType().Name}] Guid: {Guid}, Username: {Username}, Email: {Email}, Firstname: {Firstname}";
-
-
-        [GeneratedRegex("^\\S+@\\S+\\.\\S+$")]
-        private static partial Regex EmailRegex();
     }
 }

@@ -8,12 +8,7 @@ namespace ViApi.Types.Telegram;
 [BsonIgnoreExtraElements]
 public class TelegramSession
 {
-    private Guid _userGuid;
-    public Guid UserGuid
-    {
-        get => _userGuid;
-        init => _userGuid = value.Throw("В конструктор получен пустой userGuid").IfDefault().Value;
-    }
+    public Guid UserGuid { get; set; }
     public Guid DictionaryGuid {get; set;}
     public Queue<Word>? GameQueue { get; set; }
     public UserState State { get; set; }
