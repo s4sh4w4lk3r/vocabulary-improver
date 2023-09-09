@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ViApi.Services.Repository;
 using ViApi.Types.API;
+using ViApi.Validation.Fluent.DtoValidators;
 
 namespace ViApi.Contollers;
 
@@ -9,9 +10,14 @@ namespace ViApi.Contollers;
 public partial class RegistrationController : ControllerBase
 {
     [HttpPost]
-    public async Task<ViApiResponse<ApiUserDto>> Register(ApiUserDto apiUserDto, [FromServices] IRepository repo, CancellationToken cancellationToken)
+    public async Task<IActionResult> Register(ApiUserDto apiUserDto, [FromServices] IRepository repo, CancellationToken cancellationToken)
     {
-#warning добавить фильтр сюды.
+        var validationResult = await new ApiUserDtoValidator().ValidateAsync(apiUserDto, cancellationToken);
+        if (validationResult.IsValid is false)
+        {
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, validationResult.ToString()));
+        }
+
         var hash = BCrypt.Net.BCrypt.EnhancedHashPassword(apiUserDto.Password);
         var apiUser = new Types.Common.Users.ApiUser(Guid.NewGuid(), apiUserDto.Firstname, apiUserDto.Username, apiUserDto.Email, hash);
 
@@ -19,11 +25,11 @@ public partial class RegistrationController : ControllerBase
 
         if (dbInsertOk)
         {
-            return new ViApiResponse<ApiUserDto>(apiUserDto, true, "Регистрация прошла успешно");
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, true, "Регистрация прошла успешно"));
         }
         else
         {
-            return new ViApiResponse<ApiUserDto>(apiUserDto, false, "Регистрация не прошла, с таким email и/или username пользователь уже заргистрирован");
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Регистрация не прошла, с таким email и/или username пользователь уже заргистрирован"));
         }
     }
 

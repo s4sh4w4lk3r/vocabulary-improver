@@ -27,41 +27,47 @@ public class LoginController : ControllerBase
         _cancellationToken = cancellationToken;
     }
 
-    [Route("jwt")] 
+    [Route("jwt")]
     [HttpPost]
-#warning испоользовать iresult
-    public async Task<ViApiResponse<string>> LoginJwt(ApiUserDto apiUserDto)
+    public async Task<IActionResult> LoginJwt(ApiUserDto apiUserDto)
     {
         var vaildUser = await GetValidUser(apiUserDto);
         if (vaildUser == null)
         {
-            return new ViApiResponse<string>("", false, "Пользователь не найден");
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Пользователь не найден"));
         }
 
         if (CheckPassword(apiUserDto, vaildUser) is true)
         {
-            return new ViApiResponse<string>(GetJwtToken(vaildUser), true, "Прохоидте");
+            return Ok(new ViApiResponse<JwtTokenDto>(new JwtTokenDto(GetJwtToken(vaildUser)), true, "Вы залогинились, вот ваш токен"));
         }
         else
         {
-            return new ViApiResponse<string>("", false, "Неправильное имя пользователя или пароль");
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Неправильное имя пользователя или пароль"));
         }
     }
 
     [Route("cookie")]
     [HttpPost]
-    public async Task<string> LoginCookie(ApiUserDto apiUserDto)
+    public async Task<IActionResult> LoginCookie(ApiUserDto apiUserDto)
     {
         var vaildUser = await GetValidUser(apiUserDto);
         if (vaildUser == null)
         {
-            //return new ViApiResponse<ApiUserDto>(apiUserDto, false, "Пользователь не найден");
-            return "user not found";
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Пользователь не найден"));
         }
-        SetCookie(vaildUser);
-        return "ok";
+
+        if (CheckPassword(apiUserDto, vaildUser) is true)
+        {
+            SetCookie(vaildUser);
+            return Ok(new ViApiResponse<string>("Успех!", true, "В ваших куках появилась запись, вы можете пользоваться сервисом. Кука удалится при неактивности в течение получаса"));
+        }
+        else
+        {
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Неправильное имя пользователя или пароль"));
+        }
     }
-    
+
     private static bool CheckPassword(ApiUserDto apiUserDto, ApiUser validUser)
         => BCrypt.Net.BCrypt.EnhancedVerify(apiUserDto.Password, validUser.Password);
     private async Task<ApiUser?> GetValidUser(ApiUserDto apiUserDto)
