@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Serilog;
+using System.Net.Mail;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Telegram;
 using ViApi.Validation.Fluent;
@@ -10,7 +11,7 @@ using ViApi.Validation.Fluent.UserValidation;
 
 namespace ViApi.Services.Repository;
 
-public partial class TgRepository
+public partial class RepositoryClass
 {
     public async Task<TelegramSession> GetOrRegisterSessionAsync(long chatId64, string firstname, CancellationToken cancellationToken = default)
     {
@@ -37,17 +38,18 @@ public partial class TgRepository
         Log.Information("Юзер зарегался и получена сессия: {session}", session);
         return session;
     }
-    public async Task<ApiUser?> GetValidUserAsync(string username, string email, CancellationToken cancellationToken = default)
+    public async Task<ApiUser?> GetValidUserAsync(string username, CancellationToken cancellationToken = default)
     {
         username.Throw().IfNullOrWhiteSpace(_ => _);
-        email.Throw().IfNullOrWhiteSpace(_ => _);
-        const string INVALID_TEMP_PASSWORD = "Pa55sword!";
-        const string INVALID_TEMP_FIRSTNAME = "Billy";
 
-        //Создается временный юзер, чтобы введенные в параметр данные прошли проверку.
-        var tempUser = new ApiUser(Guid.NewGuid(), INVALID_TEMP_FIRSTNAME, username, email, INVALID_TEMP_PASSWORD);
-        await new ApiUserValidator().ValidateAndThrowAsync(tempUser, cancellationToken);
-        var validUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == tempUser.Email && u.Username == tempUser.Username, cancellationToken);
+        var validUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Username == username, cancellationToken);
+        return validUser;
+    }
+    public async Task<ApiUser?> GetValidUserAsync(MailAddress email, CancellationToken cancellationToken = default)
+    {
+        email.ThrowIfNull();
+
+        var validUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == email.Address, cancellationToken);
         return validUser;
     }
     public async Task<bool> InsertUserAsync(UserBase user, CancellationToken cancellationToken = default)

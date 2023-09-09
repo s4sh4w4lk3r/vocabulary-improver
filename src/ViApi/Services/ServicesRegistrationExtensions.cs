@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using NgrokApi;
 using Serilog;
@@ -21,6 +24,7 @@ public static class ServicesRegistrationExtensions
 
         builder.Services.AddControllers().AddNewtonsoftJson();
 
+        builder.RegisterAuth();
         builder.RegisterDatabases();
         await builder.RegisterTelegramBot();
     }
@@ -31,7 +35,7 @@ public static class ServicesRegistrationExtensions
         IMongoDatabase mongoDb = new MongoClient(dbConf.MongoDbConnString).GetDatabase(dbConf.MongoDbName);
         builder.Services.AddSingleton(mongoDb);
         builder.Services.AddDbContext<MySqlDbContext>(options => options.UseMySql(dbConf.MySqlConnString, ServerVersion.AutoDetect(dbConf.MySqlConnString)));
-        builder.Services.AddTransient<IRepository, TgRepository>();
+        builder.Services.AddTransient<IRepository, RepositoryClass>();
     }
     private static async Task RegisterTelegramBot(this WebApplicationBuilder builder)
     {
@@ -73,8 +77,8 @@ public static class ServicesRegistrationExtensions
         var ngrok = new Ngrok(ngrokConf.Token);
 
         var tunnel = await ngrok.Tunnels.List().FirstOrDefaultAsync(cancellationToken);
-        string url = tunnel?.PublicUrl!;
-        url.Throw(_ => new InvalidOperationException("Ngrok URL не получен от API.")).IfNullOrWhiteSpace(s => s);
+        string? url = tunnel?.PublicUrl.ToString();
+        url.ThrowIfNull(_ => new InvalidOperationException("Ngrok URL не получен от API.")).IfNullOrWhiteSpace(s => s);
         return url;
     }
     private static void RegisterSerilog(this WebApplicationBuilder builder)
@@ -86,5 +90,49 @@ public static class ServicesRegistrationExtensions
             .WriteTo.Console().CreateLogger();
 
         builder.Host.UseSerilog(Log.Logger);
+    }
+    private static void RegisterAuth(this WebApplicationBuilder builder)
+    {
+        var jwtConf = builder.Configuration.GetRequiredSection("JwtConfiguration").Get<JwtConfiguration>()!;
+        builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetRequiredSection("JwtConfiguration"));
+
+        builder.Services.AddAuthorization();
+
+        builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultScheme = "JWT_OR_COOKIE";
+            options.DefaultChallengeScheme = "JWT_OR_COOKIE";
+        })
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwtConf.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwtConf.Audience,
+                ValidateLifetime = true,
+                IssuerSigningKey = jwtConf.GetSymmetricSecurityKey(),
+                ValidateIssuerSigningKey = true
+            };
+        })
+        .AddCookie("Cookies", options =>
+        {
+            options.ExpireTimeSpan = TimeSpan.FromDays(1);
+        })
+        .AddPolicyScheme("JWT_OR_COOKIE", "JWT_OR_COOKIE", options =>
+        {
+            options.ForwardDefaultSelector = context =>
+            {
+                if (context.Request.Cookies.ContainsKey(".AspNetCore.Cookies"))
+                {
+                    return CookieAuthenticationDefaults.AuthenticationScheme;
+                }
+                else
+                {
+                    return JwtBearerDefaults.AuthenticationScheme;
+                }
+            };
+        });
     }
 }

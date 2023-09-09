@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Telegram.Bot.Types;
 using ViApi.Services.Telegram.UpdateHandlers;
-using ViApi.Validation;
+using ViApi.Validation.Filters;
 
 namespace ViApi.Contollers;
 

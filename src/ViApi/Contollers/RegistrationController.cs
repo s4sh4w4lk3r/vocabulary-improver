@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
 using ViApi.Services.Repository;
 using ViApi.Types.API;
 
@@ -10,22 +9,13 @@ namespace ViApi.Contollers;
 public partial class RegistrationController : ControllerBase
 {
     [HttpPost]
-    public async Task<ViApiResponse<ApiUserDto>> Register(ApiUserDto apiUserDto, [FromServices] IRepository repo)
+    public async Task<ViApiResponse<ApiUserDto>> Register(ApiUserDto apiUserDto, [FromServices] IRepository repo, CancellationToken cancellationToken)
     {
-        var regexpassword = PasswordRegex();
-        var regexemail = Email();
-        if (regexpassword.IsMatch(apiUserDto.Password) is false)
-        {
-            return new ViApiResponse<ApiUserDto>(apiUserDto, false, "Слабый пароль");
-        }
+#warning добавить фильтр сюды.
+        var hash = BCrypt.Net.BCrypt.EnhancedHashPassword(apiUserDto.Password);
+        var apiUser = new Types.Common.Users.ApiUser(Guid.NewGuid(), apiUserDto.Firstname, apiUserDto.Username, apiUserDto.Email, hash);
 
-        if (regexemail.IsMatch(apiUserDto.Email) is false)
-        {
-            return new ViApiResponse<ApiUserDto>(apiUserDto, false, "Email имеет неверный формат");
-        }
-
-        var apiUser = new Types.Common.Users.ApiUser(Guid.NewGuid(), apiUserDto.Firstname, apiUserDto.Username, apiUserDto.Email, apiUserDto.Password);
-        bool dbInsertOk = await repo.InsertUserAsync(apiUser);
+        bool dbInsertOk = await repo.InsertUserAsync(apiUser, cancellationToken);
 
         if (dbInsertOk)
         {
@@ -37,12 +27,4 @@ public partial class RegistrationController : ControllerBase
         }
     }
 
-    public record class ApiUserDto(string Username, string Email, string Firstname, string Password);
-
-
-    [GeneratedRegex("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")]
-    private static partial Regex PasswordRegex();
-
-    [GeneratedRegex("^\\S+@\\S+\\.\\S+$")]
-    private static partial Regex Email();
 }

@@ -10,6 +10,9 @@ public class Program
         await builder.RegisterServices(args);
         var app = builder.Build();
         await app.Services.EnsureServicesOkAsync();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapControllers();
         app.Run();
     }

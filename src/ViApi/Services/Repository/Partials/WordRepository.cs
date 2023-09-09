@@ -6,7 +6,7 @@ using ViApi.Validation.Fluent;
 
 namespace ViApi.Services.Repository;
 
-public partial class TgRepository
+public partial class RepositoryClass
 {
     public async Task UpdateWordRating(Guid userGuid, Guid dictGuid, Guid wordGuid, RatingAction action, CancellationToken cancellationToken = default)
     {

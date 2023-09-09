@@ -6,12 +6,12 @@ using ViApi.Validation.Fluent;
 
 namespace ViApi.Services.Repository;
 
-public partial class TgRepository : IRepository
+public partial class RepositoryClass : IRepository
 {
     private readonly MySqlDbContext _mysql;
     private readonly IMongoDatabase _mongo;
 
-    public TgRepository(MySqlDbContext mysql, IMongoDatabase mongo)
+    public RepositoryClass(MySqlDbContext mysql, IMongoDatabase mongo)
     {
         _mysql = mysql;
         _mongo = mongo;

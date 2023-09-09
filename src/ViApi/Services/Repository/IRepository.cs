@@ -1,4 +1,5 @@
-﻿using ViApi.Types.Common;
+﻿using System.Net.Mail;
+using ViApi.Types.Common;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Telegram;
 
@@ -14,7 +15,8 @@ namespace ViApi.Services.Repository
         Task<bool> CheckDictionaryIsExistAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default);
 
         Task<bool> InsertUserAsync(UserBase user, CancellationToken cancellationToken = default);
-        Task<ApiUser?> GetValidUserAsync(string username, string email, CancellationToken cancellationToken = default);
+        Task<ApiUser?> GetValidUserAsync(string username, CancellationToken cancellationToken = default);
+        Task<ApiUser?> GetValidUserAsync(MailAddress email, CancellationToken cancellationToken = default);
         Task<bool> DeleteUserAndSessionAsync(TelegramSession session, CancellationToken cancellationToken = default);
         Task<TelegramSession> GetOrRegisterSessionAsync(long chatId64, string firstname, CancellationToken cancellationToken = default);
 
