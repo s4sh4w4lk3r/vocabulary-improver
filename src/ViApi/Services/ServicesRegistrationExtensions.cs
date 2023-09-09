@@ -118,7 +118,9 @@ public static class ServicesRegistrationExtensions
         })
         .AddCookie("Cookies", options =>
         {
-            options.ExpireTimeSpan = TimeSpan.FromDays(1);
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+            options.Cookie.MaxAge = options.ExpireTimeSpan;
+            options.SlidingExpiration = true;
         })
         .AddPolicyScheme("JWT_OR_COOKIE", "JWT_OR_COOKIE", options =>
         {
