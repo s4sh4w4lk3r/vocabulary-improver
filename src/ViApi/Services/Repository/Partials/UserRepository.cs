@@ -101,7 +101,12 @@ public partial class RepositoryClass
         }
         else return false;
     }
-    
+    public async Task<bool> IsUserExists(Guid userGuid, CancellationToken cancellationToken = default)
+    {
+        userGuid.Throw().IfDefault();
+        return await _mysql.Users.AnyAsync(u => u.Guid == userGuid, cancellationToken);
+    }
+
     private async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
         await new TelegramSessionValidator().ValidateAndThrowAsync(userSession, cancellationToken);

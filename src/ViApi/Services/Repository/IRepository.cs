@@ -19,6 +19,7 @@ namespace ViApi.Services.Repository
         Task<ApiUser?> GetValidUserAsync(MailAddress email, CancellationToken cancellationToken = default);
         Task<bool> DeleteUserAndSessionAsync(TelegramSession session, CancellationToken cancellationToken = default);
         Task<TelegramSession> GetOrRegisterSessionAsync(long chatId64, string firstname, CancellationToken cancellationToken = default);
+        Task<bool> IsUserExists(Guid userGuid, CancellationToken cancellationToken = default);
 
         Task<bool> InsertWordAsync(Guid userGuid, Guid dictGuid, string sourceWord, string targetWord, CancellationToken cancellationToken = default);
         Task<bool> DeleteWordAsync(Guid userGuid, Guid dictGuid, Guid wordGuid, CancellationToken cancellationToken = default);

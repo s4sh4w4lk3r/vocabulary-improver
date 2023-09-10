@@ -3,7 +3,6 @@
 namespace ViApi.Contollers
 {
     [Route("/")]
-    [ApiController]
     public class HelloStrangerController : ControllerBase
     {
         public async Task SayHello()
