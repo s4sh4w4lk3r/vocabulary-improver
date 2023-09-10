@@ -77,7 +77,7 @@ public static class ServicesRegistrationExtensions
         var ngrok = new Ngrok(ngrokConf.Token);
 
         var tunnel = await ngrok.Tunnels.List().FirstOrDefaultAsync(cancellationToken);
-        string? url = tunnel?.PublicUrl.ToString();
+        string? url = tunnel?.PublicUrl.OriginalString;
         url.ThrowIfNull(_ => new InvalidOperationException("Ngrok URL не получен от API.")).IfNullOrWhiteSpace(s => s);
         return url;
     }

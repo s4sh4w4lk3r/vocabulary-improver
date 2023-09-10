@@ -8,7 +8,7 @@ namespace ViApi.Services.Repository;
 
 public partial class RepositoryClass
 {
-    public async Task UpdateWordRating(Guid userGuid, Guid dictGuid, Guid wordGuid, RatingAction action, CancellationToken cancellationToken = default)
+    public async Task<int> UpdateWordRating(Guid userGuid, Guid dictGuid, Guid wordGuid, RatingAction action, CancellationToken cancellationToken = default)
     {
         userGuid.Throw().IfDefault();
         dictGuid.Throw().IfDefault();
@@ -16,19 +16,20 @@ public partial class RepositoryClass
 
         var word = await _mysql.Words.FirstOrDefaultAsync(w => w.Guid == wordGuid && w.Dictionary!.Guid == dictGuid && w.Dictionary.UserGuid == userGuid, cancellationToken);
 
-        if (word is null) { return; }
+        if (word is null) { return -1; }
 
         if (action is RatingAction.Increase)
         {
             word.IncreaseRating();
         }
-        if (action is RatingAction.Increase)
+        if (action is RatingAction.Decrease)
         {
             word.DecreaseRating();
         }
 
         await _mysql.SaveChangesAsync(cancellationToken);
         Log.Information("Обработан запрос к MySql на слово {wordGuid}, новый рейтинг: {rating}", wordGuid, word.Rating);
+        return word.Rating;
     }
     public async Task<List<Word>?> GetWordsAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default)
     {

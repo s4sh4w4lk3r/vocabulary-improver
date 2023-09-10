@@ -87,10 +87,12 @@ public partial class MessageHandler
             {
 
                 await _botClient.SendTextMessageAsync(_session.TelegramId, "Вы угадали!", cancellationToken: _cancellationToken);
+                await _repository.UpdateWordRating(_session.UserGuid, _session.DictionaryGuid, wordToGuess.Guid, Repository.RatingAction.Increase, _cancellationToken);
             }
             else
             {
                 await _botClient.SendTextMessageAsync(_session.TelegramId, "Вы не угадали!", cancellationToken: _cancellationToken);
+                await _repository.UpdateWordRating(_session.UserGuid, _session.DictionaryGuid, wordToGuess.Guid, Repository.RatingAction.Decrease, _cancellationToken);
             }
             _session.GameQueue.Dequeue();
             await _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
