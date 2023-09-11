@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
+using Newtonsoft.Json;
 
 namespace ViApi.Types.Common;
 
@@ -9,7 +10,7 @@ public class Word
     public string? TargetWord { get; init; }
     public int Rating { get; private set; }
     public Guid DictionaryGuid { get; init; }
-    [BsonIgnore] public Dictionary? Dictionary { get; init; } 
+    [BsonIgnore] [JsonIgnore] public Dictionary? Dictionary { get; init; } 
 
     private Word() { }
     public Word(Guid guid, string sourceWord, string targetWord, Guid dictGuid, int rating = 0)
