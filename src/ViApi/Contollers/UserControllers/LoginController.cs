@@ -11,7 +11,7 @@ using ViApi.Types.API;
 using ViApi.Types.Common.Users;
 using ViApi.Types.Configuration;
 
-namespace ViApi.Contollers;
+namespace ViApi.Contollers.UserControllers;
 
 [Route("/api/login")]
 [ApiController]
@@ -72,7 +72,7 @@ public class LoginController : ControllerBase
         => BCrypt.Net.BCrypt.EnhancedVerify(apiUserDto.Password, validUser.Password);
     private async Task<ApiUser?> GetValidUser(ApiUserDto apiUserDto)
     {
-        if ((string.IsNullOrWhiteSpace(apiUserDto.Email) is false) && (MailAddress.TryCreate(apiUserDto.Email, out MailAddress? email) is true) && email is not null)
+        if (string.IsNullOrWhiteSpace(apiUserDto.Email) is false && MailAddress.TryCreate(apiUserDto.Email, out MailAddress? email) is true && email is not null)
         {
             var validUser = await _repo.GetValidUserAsync(email, _cancellationToken);
             if (validUser is not null)

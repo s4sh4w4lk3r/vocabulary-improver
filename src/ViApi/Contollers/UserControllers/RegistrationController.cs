@@ -3,7 +3,7 @@ using ViApi.Services.Repository;
 using ViApi.Types.API;
 using ViApi.Validation.Fluent.DtoValidators;
 
-namespace ViApi.Contollers;
+namespace ViApi.Contollers.UserControllers;
 
 [Route("/api/register")]
 [ApiController]

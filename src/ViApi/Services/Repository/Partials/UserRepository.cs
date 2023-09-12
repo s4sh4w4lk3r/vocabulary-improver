@@ -52,6 +52,13 @@ public partial class RepositoryClass
         var validUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Email == email.Address, cancellationToken);
         return validUser;
     }
+    public async Task<ApiUser?> GetValidUserAsync(Guid userGuid, CancellationToken cancellationToken = default)
+    {
+        userGuid.Throw().IfDefault();
+
+        var validUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Guid == userGuid, cancellationToken);
+        return validUser;
+    }
     public async Task<bool> InsertUserAsync(UserBase user, CancellationToken cancellationToken = default)
     {
         if (user is TelegramUser telegramUser)
@@ -105,6 +112,19 @@ public partial class RepositoryClass
     {
         userGuid.Throw().IfDefault();
         return await _mysql.Users.AnyAsync(u => u.Guid == userGuid, cancellationToken);
+    }
+    public async Task UpdateApiUser(ApiUser user, CancellationToken token = default)
+    {
+        user.Guid.Throw().IfDefault();
+        var trackedUser = await _mysql.Set<ApiUser>().FirstOrDefaultAsync(u => u.Guid == user.Guid, cancellationToken: token);
+        if (trackedUser is not null)
+        {
+            trackedUser.Email = user.Email;
+            trackedUser.Firstname = user.Firstname;
+            trackedUser.Password = user.Password;
+            trackedUser.Username = user.Username;
+            await _mysql.SaveChangesAsync(token);
+        }
     }
 
     private async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)

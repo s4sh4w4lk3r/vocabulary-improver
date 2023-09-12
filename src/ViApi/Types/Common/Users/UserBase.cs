@@ -3,7 +3,7 @@
 public abstract class UserBase
 {
     public Guid Guid { get; init; }
-    public string? Firstname { get; init; }
+    public string? Firstname { get; set; }
     public List<Dictionary>? Dictionaries { get; init; }
     protected UserBase() { }
     public UserBase(Guid userGuid, string firstname)

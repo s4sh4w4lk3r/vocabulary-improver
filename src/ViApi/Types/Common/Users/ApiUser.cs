@@ -2,9 +2,9 @@
 {
     public class ApiUser : UserBase
     {
-        public string? Username { get; init; }
-        public string? Email { get; init; }
-        public string? Password { get; init; }
+        public string? Username { get; set; }
+        public string? Email { get; set; }
+        public string? Password { get; set; }
 
         private ApiUser() { }
         public ApiUser(Guid userGuid, string firstname, string username, string email, string password) : base(userGuid, firstname)
