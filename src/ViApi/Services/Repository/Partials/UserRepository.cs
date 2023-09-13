@@ -127,6 +127,19 @@ public partial class RepositoryClass
         }
     }
 
+    public async Task<bool> DeleteApiUserAsync(Guid userGuid, CancellationToken cancellationToken = default)
+    {
+        userGuid.Throw().IfDefault();
+        var userToDel = await _mysql.Set<ApiUser>().Where(u => u.Guid == userGuid).FirstOrDefaultAsync(cancellationToken);
+        if (userToDel is not null)
+        {
+            _mysql.Set<ApiUser>().Remove(userToDel);
+            await _mysql.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+        else return false;
+    }
+
     private async Task DeleteUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default)
     {
         await new TelegramSessionValidator().ValidateAndThrowAsync(userSession, cancellationToken);

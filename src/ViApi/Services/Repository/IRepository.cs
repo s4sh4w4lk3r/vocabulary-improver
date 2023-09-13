@@ -22,6 +22,7 @@ public interface IRepository
     Task<TelegramSession> GetOrRegisterSessionAsync(long chatId64, string firstname, CancellationToken cancellationToken = default);
     Task<bool> IsUserExists(Guid userGuid, CancellationToken cancellationToken = default);
     Task UpdateApiUser(ApiUser user, CancellationToken token = default);
+    Task<bool> DeleteApiUserAsync(Guid userGuid, CancellationToken token = default);
 
     Task<bool> InsertWordAsync(Guid userGuid, Guid dictGuid, string sourceWord, string targetWord, CancellationToken cancellationToken = default);
     Task<bool> DeleteWordAsync(Guid userGuid, Guid dictGuid, Guid wordGuid, CancellationToken cancellationToken = default);

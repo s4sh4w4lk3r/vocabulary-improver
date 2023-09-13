@@ -1,7 +1,4 @@
-﻿using BCrypt.Net;
-using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.AspNetCore.Authentication.OAuth;
+﻿using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -10,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using ViApi.Services.EmailService;
 using ViApi.Services.Repository;
 using ViApi.Types.API;
@@ -49,15 +47,15 @@ public class UpdateUserContoller : ControllerBase
 
         bool emailOk = MailAddress.TryCreate(user.Email, out MailAddress? userEmail);
 
-        if ((emailOk is false) || (userEmail is null) )
+        if ((emailOk is false) || (userEmail is null))
         {
             return BadRequest(new ViApiResponse<string>(user.Email, false, "Email имеет неверный формат"));
         }
 
 
-        var claims = new List<Claim>() 
-        { 
-            new Claim(ClaimTypes.NameIdentifier, userGuid.ToString()), 
+        var claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.NameIdentifier, userGuid.ToString()),
             new Claim(ClaimTypes.Email, userEmail.ToString())
         };
 
@@ -101,6 +99,43 @@ public class UpdateUserContoller : ControllerBase
     {
         Guid userGuid = HttpContext.GetGuidOrDefaultFromRequest();
 
+        if (JwtIsValid(approvailJwtToken, out _) is false)  
+        {
+            return BadRequest(new ViApiResponse<string>(approvailJwtToken, false, "Сигнатура токена не подтверждена или токен не для этой операции"));
+        }
+
+        var validationResult = await new ApiUserDtoValidator().ValidateAsync(apiUserDto, cancellationToken);
+        if (validationResult.IsValid is false)
+        {
+            return BadRequest(new ViApiResponse<ValidationResult>(validationResult, false, "Ошибка валидации полей пользователя"));
+        }
+
+        string hash = BCrypt.Net.BCrypt.EnhancedHashPassword(apiUserDto.Password);
+        var apiUser = new ApiUser(userGuid, apiUserDto.Firstname, apiUserDto.Username, apiUserDto.Email, hash);
+
+        await _repo.UpdateApiUser(apiUser, cancellationToken);
+        return Ok(new ViApiResponse<string>("OK", false, "Данные обновлены"));
+
+    }
+
+    [Route("deleteme")]
+    [HttpGet]
+    [Authorize]
+    [ValidateUser]
+    public async Task<IActionResult> DeleteUser([FromQuery] string approvailJwtToken, CancellationToken cancellationToken)
+    {
+        Guid userGuid = HttpContext.GetGuidOrDefaultFromRequest();
+
+        if (JwtIsValid(approvailJwtToken, out _) is false)
+        {
+            return BadRequest(new ViApiResponse<string>(approvailJwtToken, false, "Сигнатура токена не подтверждена или токен не для этой операции"));
+        }
+
+        await _repo.DeleteApiUserAsync(userGuid, cancellationToken);
+        return Ok(new ViApiResponse<string>("OK", false, "Пользователь и все данные о нем удалены"));
+    }
+    private bool JwtIsValid(string approvailJwtToken, out ClaimsPrincipal? claims)
+    {
         var validationParameters = new TokenValidationParameters()
         {
             ClockSkew = TimeSpan.FromMinutes(5),
@@ -116,25 +151,16 @@ public class UpdateUserContoller : ControllerBase
 
         try
         {
-            var claims = new JwtSecurityTokenHandler().ValidateToken(approvailJwtToken, validationParameters, out SecurityToken validatedToken);
+            claims = new JwtSecurityTokenHandler().ValidateToken(approvailJwtToken, validationParameters, out SecurityToken validatedToken);
 
-            //Проверка токена на наличие имаил, чтобы нельзя было поставить другой токен, выпущенный этим сервером.
-            _ = claims.Claims.First(c => c.Type == ClaimTypes.Email);
-            var validationResult = await new ApiUserDtoValidator().ValidateAsync(apiUserDto, cancellationToken);
-            if (validationResult.IsValid is false)
-            {
-                return BadRequest(new ViApiResponse<ValidationResult>(validationResult, false, "Ошибка валидации полей пользователя"));
-            }
-
-            string hash = BCrypt.Net.BCrypt.EnhancedHashPassword(apiUserDto.Password);
-            var apiUser = new ApiUser(userGuid, apiUserDto.Firstname, apiUserDto.Username, apiUserDto.Email, hash);
-
-            await _repo.UpdateApiUser(apiUser, cancellationToken);
-            return Ok(new ViApiResponse<string>("OK", false, "Данные обновлены"));
+            //Проверка токена на наличие t емаил, чтобы нельзя было поставить другой токен, выпущенный этим сервером.
+            bool containEmail = claims.Claims.Any(c => c.Type == ClaimTypes.Email);
+            return containEmail;
         }
         catch (Exception)
         {
-            return BadRequest(new ViApiResponse<string>(approvailJwtToken, false, "Сигнатура токена не подтверждена или токен не для этой операции"));
+            claims = null;
+            return false;
         }
     }
 }
