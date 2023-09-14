@@ -6,7 +6,10 @@ When learning a foreign language, you need to learn words, however, some express
 Project type ASPNET MVC is an API that can be interacted with using HTTP requests, the Telegram bot client is also included. Instructions for operation are below.
 
 ## Links to instructions
-
+[README API RU](ReadMeFiles\README_API_RU.md)
+[README API EN](ReadMeFiles\README_API_EN.md)
+[README TelegramBot RU](ReadMeFiles\README_TelegramBot_RU.md)
+[README TelegramBot EN](ReadMeFiles\README_TelegramBot_EN.md)
 
 ## Additional information
 .NET 7.0, ASPNET MVC
