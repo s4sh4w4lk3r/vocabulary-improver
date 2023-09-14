@@ -63,7 +63,7 @@ public class UpdateUserContoller : ControllerBase
             issuer: _jwtConf.Issuer,
             audience: _jwtConf.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(48)),
+            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(120)),
             signingCredentials: new SigningCredentials(_jwtConf.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
         var jwtToken = new JwtSecurityTokenHandler().WriteToken(jwt);
 

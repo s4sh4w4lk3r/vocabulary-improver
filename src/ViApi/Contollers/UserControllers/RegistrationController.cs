@@ -29,7 +29,7 @@ public partial class RegistrationController : ControllerBase
         }
         else
         {
-            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Регистрация не прошла, с таким email и/или username пользователь уже заргистрирован"));
+            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, false, "Регистрация не прошла, с таким email и/или username пользователь уже зарегистрирован"));
         }
     }
 

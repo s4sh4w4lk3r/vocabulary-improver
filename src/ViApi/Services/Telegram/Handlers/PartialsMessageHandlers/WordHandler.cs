@@ -1,4 +1,5 @@
 ﻿using Telegram.Bot;
+using Telegram.Bot.Exceptions;
 using ViApi.Types.Common;
 using ViApi.Types.Enums;
 
@@ -66,7 +67,8 @@ public partial class MessageHandler
                 _session.State = UserState.Default;
                 await _repository.InsertOrUpdateUserSessionAsync(_session, cancellationToken: _cancellationToken);
             }
-            catch { }
+            catch (IndexOutOfRangeException) { }
+            catch (ApiRequestException) { }
         }
     }
     private async Task AddWordListAsync()
