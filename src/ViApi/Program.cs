@@ -17,3 +17,4 @@ public class Program
         app.Run();
     }
 }
+#warning добавить в метод для проверки базы данных в репозиторий

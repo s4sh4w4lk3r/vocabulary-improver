@@ -38,7 +38,9 @@ public partial class MessageHandler
         var message = _recievedMessage switch
         {
             "/start" => SendOnStartMessageAsync(),
+            "/restart" => RestartSessionAsync(),
             "/deleteme" => DeleteUserAsync(),
+            "/help" => SendHelpMessageAsync(),
             "Выбрать словарь" => SendDictionariesListAsync(),
             "Добавить новый словарь" => AddNewDictinaryAsync(),
             "backtodictlist" => GoBackToDictListAsync(),
@@ -54,9 +56,9 @@ public partial class MessageHandler
         _session.DictionaryGuid = default;
         _session.GameQueue?.Clear();
         var mongoTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
-        var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Как приятно начать все с чистого листа.", cancellationToken: _cancellationToken, replyMarkup: KeyboardSet.GetDefaultKeyboard());
+        var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Приветствую!", cancellationToken: _cancellationToken, replyMarkup: KeyboardSet.GetDefaultKeyboard());
         await mongoTask;
-        Log.Information("Сессия {session} обнулена.", _session);
+        Log.Information("Новый пользователь, сессия: {session}", _session);
         return await sendMessageTask;
     }
     private async Task<string> GetFormattedWordListAsync()
@@ -269,5 +271,23 @@ public partial class MessageHandler
         var inserTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
         var sendDictsTask = SendDictionariesListAsync(_session.MessageIdToEdit);
         await Task.WhenAll(inserTask, sendDictsTask);
+    }
+    private async Task SendHelpMessageAsync()
+    {
+        string helpMessage = "При изучении иностранного языка вам необходимо заучивать слова, однако некоторые выражения трудно запоминаются. " +
+            "Цель проекта - сделать это проще. Она включает в себя мини-игру, которая выглядит как опросник. Слова также имеют внутренний рейтинг (от 0 до 10 включительно). " +
+            "Слова с более низким рейтингом будут показываться чаще. Инструкция по пользованию по ссылке: https://github.com/s4sh4w4lk3r/vocabulary-improver/blob/ver2.0/ReadMeFiles/README_TelegramBot_RU.md";
+        await _botClient.SendTextMessageAsync(_session.TelegramId, helpMessage, cancellationToken: _cancellationToken);
+    }
+    private async Task RestartSessionAsync()
+    {
+        _session.State = UserState.Default;
+        _session.DictionaryGuid = default;
+        _session.GameQueue?.Clear();
+        var mongoTask = _repository.InsertOrUpdateUserSessionAsync(_session, _cancellationToken);
+        var sendMessageTask = _botClient.SendTextMessageAsync(_session.TelegramId, "Сессия сброшена.", cancellationToken: _cancellationToken, replyMarkup: KeyboardSet.GetDefaultKeyboard());
+        await mongoTask;
+        Log.Information("Сессия {session} обнулена.", _session);
+        await sendMessageTask;
     }
 }

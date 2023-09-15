@@ -8,7 +8,7 @@ Project type ASPNET MVC is an API that can be interacted with using HTTP request
 ## Links to instructions
 [README API RU](ReadMeFiles/README_API_RU.md)  
 [README API EN](ReadMeFiles/README_API_EN.md)  
-[README TelegramBot RU](ReadMeFiles/README_API_EN.mdREADME_TelegramBot_RU.md)  
+[README TelegramBot RU](ReadMeFiles/README_TelegramBot_RU.md)  
 [README TelegramBot EN](ReadMeFiles/README_TelegramBot_EN.md)  
 
 ## Additional information
