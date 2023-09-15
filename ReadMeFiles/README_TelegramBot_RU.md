@@ -4,4 +4,4 @@
 
 Начните работу бота, нажав на единственную кнопку снизу
 
-![image](ReadMeFiles/screenshots/introMessage.jpg)
+<img src="screenshots/introMessage.jpg" alt="drawing" width="300"/>
