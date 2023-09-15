@@ -22,6 +22,7 @@ public partial class RepositoryClass : IRepository
 
         try
         {
+            _mongo.Client.GetDatabase("vocabulary-improver");
             var dbNamesCoursor = await _mongo.Client.ListDatabaseNamesAsync(cancellationToken);
             var dbNamesList = await dbNamesCoursor.ToListAsync(cancellationToken);
 
