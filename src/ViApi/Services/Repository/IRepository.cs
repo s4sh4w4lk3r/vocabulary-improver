@@ -7,6 +7,8 @@ namespace ViApi.Services.Repository;
 
 public interface IRepository
 {
+    Task EnsureDatabasesAsync(CancellationToken cancellationToken = default);
+
     Task InsertOrUpdateUserSessionAsync(TelegramSession userSession, CancellationToken cancellationToken = default);
 
     Task<bool> InsertDictionaryAsync(Dictionary dictionary, CancellationToken cancellationToken = default);

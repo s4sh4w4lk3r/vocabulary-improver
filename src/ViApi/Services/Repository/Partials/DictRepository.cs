@@ -16,7 +16,26 @@ public partial class RepositoryClass : IRepository
         _mysql = mysql;
         _mongo = mongo;
     }
+    public async Task EnsureDatabasesAsync(CancellationToken cancellationToken = default)
+    {
+        var mySqlTask = Task.Run(_mysql.Database.CanConnect, cancellationToken);
 
+        try
+        {
+            var dbNamesCoursor = await _mongo.Client.ListDatabaseNamesAsync(cancellationToken);
+            var dbNamesList = await dbNamesCoursor.ToListAsync(cancellationToken);
+
+            dbNamesList.Contains("vocabulary-improver").Throw().IfFalse();
+        }
+        catch (Exception)
+        {
+
+            throw new InvalidOperationException("Не получилось устновить соединение с бд MongoDb");
+        }
+
+        if ((await mySqlTask) is false) { throw new InvalidOperationException("Не получилось устновить соединение с бд MySQL"); }
+
+    }
     public async Task<bool> CheckDictionaryIsExistAsync(Guid userGuid, Guid dictGuid, CancellationToken cancellationToken = default)
     {
         userGuid.Throw().IfDefault();
