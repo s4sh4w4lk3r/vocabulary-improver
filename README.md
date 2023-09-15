@@ -1,15 +1,13 @@
 # vocabulary-improver
 
 ## Why is this project needed?
-When learning a foreign language, you need to learn words, however, some expressions are difficult to remember. The goal of the project is to make it easier. It includes a mini-game that looks like a questionnaire. Words also have an internal rating (from 0 to 10 inclusive). Words with a lower rating will be shown more often.
+При изучении иностранного языка нам нужно заучивать слова, однако некоторые выражения трудно запоминаются. Цель проекта - сделать это проще. Он включает в себя мини-игру, которая выглядит как опросник. Слова также имеют внутренний рейтинг (от 0 до 10 включительно). Слова с более низким рейтингом будут показываться чаще.
 
-Project type ASPNET MVC is an API that can be interacted with using HTTP requests, the Telegram bot client is also included. Instructions for operation are below.
+Тип проекта ASP NET MVC - это API, с которым можно взаимодействовать с помощью HTTP-запросов, также включен клиент TelegramBot. Инструкции по эксплуатации приведены ниже.
 
 ## Links to instructions
-[README API RU](ReadMeFiles/README_API_RU.md)  
-[README API EN](ReadMeFiles/README_API_EN.md)  
-[README TelegramBot RU](ReadMeFiles/README_TelegramBot_RU.md)  
-[README TelegramBot EN](ReadMeFiles/README_TelegramBot_EN.md)  
+[README API](ReadMeFiles/README_API_RU.md)   
+[README TelegramBot](ReadMeFiles/README_TelegramBot_RU.md)
 
 ## Additional information
-.NET 7.0, ASPNET MVC
+.NET 7.0, ASPNET MVC, MySQL, MongoDb, NgrokApi
