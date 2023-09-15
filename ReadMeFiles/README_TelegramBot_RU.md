@@ -30,10 +30,10 @@
 
 <img src="screenshots/renameDict.jpg" alt="Переименование словаря" width="300"/>
 
-<img src="screenshots/deleteWord.jpg" alt="Удаление слов " width="300"/>
+<img src="screenshots/deleteWord.jpg" alt="Удаление слов" width="300"/>
 
 ## Игра "Угадай-ка"
 
 Принцип игры заключается в том, что она выбирает каждое слово из вашего словаря и предлагает угадать его с помощью двух кнопок с переводом. Обязательное требование для начала игры, иметь в словаре **не менее 4 слов**.
 
-<img src="screenshots/game.jpg" alt="Угадай-ка width="300"/>
+<img src="screenshots/game.jpg" alt="Угадай-ка" width="300"/>
