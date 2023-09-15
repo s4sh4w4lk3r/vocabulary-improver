@@ -12,7 +12,7 @@ public class MySqlDbContext : DbContext
 
     public MySqlDbContext(DbContextOptions<MySqlDbContext> options) : base(options)
     {
-
+        Database.EnsureCreated();
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
