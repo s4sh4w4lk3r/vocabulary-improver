@@ -2,7 +2,6 @@
   "profiles": {
     "http": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\sanchous\\Desktop\\ViApiConfig.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -12,7 +11,6 @@
     },
     "https": {
       "commandName": "Project",
-      "commandLineArgs": "C:\\Users\\sanchous\\Desktop\\ViApiConfig.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
