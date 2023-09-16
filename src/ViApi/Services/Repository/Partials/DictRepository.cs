@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using ViApi.Types.Common;
 using ViApi.Validation.Fluent;
@@ -22,11 +23,7 @@ public partial class RepositoryClass : IRepository
 
         try
         {
-            _mongo.Client.GetDatabase("vocabulary-improver");
-            var dbNamesCoursor = await _mongo.Client.ListDatabaseNamesAsync(cancellationToken);
-            var dbNamesList = await dbNamesCoursor.ToListAsync(cancellationToken);
-
-            dbNamesList.Contains("vocabulary-improver").Throw().IfFalse();
+            await _mongo.RunCommandAsync((Command<BsonDocument>)"{ping:1}", cancellationToken: cancellationToken);
         }
         catch (Exception)
         {
