@@ -1,0 +1,44 @@
+version: '3.1'
+
+volumes:
+  mongo_vol:
+  mysql_vol:
+  mongodb_config:
+
+services:
+
+  viapi:
+    image: viapi
+    build: /src/ViApi
+    ports:
+      - "80:80"
+    container_name: viapi
+    depends_on:
+      - mysql
+      - mongo
+      
+  
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+      - "mysql_vol:/var/lib/mysql"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    container_name: mysql
+
+  mongo:
+    image: mongo
+    restart: always
+    volumes:
+      - "mongo_vol:/data/db"
+      - "mongodb_config:/data/configdb"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+    ports:
+      - "27017:27017"
+    container_name: mongo
