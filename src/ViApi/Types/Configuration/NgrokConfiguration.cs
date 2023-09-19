@@ -2,6 +2,6 @@
 
 public class NgrokConfiguration
 {
-    public bool IsRequired { get ; init; }
-    public string? Token { get; init; } 
+    public bool IsRequired { get; init; }
+    public string? Token { get; init; }
 }
