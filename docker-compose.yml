@@ -3,21 +3,24 @@ version: '3.1'
 volumes:
   mongo_vol:
   mysql_vol:
-  mongodb_config:
+  viapi_vol:
+  nginx_vol:
+  certbot_vol:
 
 services:
 
   viapi:
     image: viapi
     build: /src/ViApi
-    ports:
-      - "80:80"
     container_name: viapi
+    ports:
+      - "5000:80"
+    volumes:
+      - "viapi_vol:/app"
     depends_on:
       - mysql
       - mongo
       
-  
   mysql:
     image: mysql
     command: --default-authentication-plugin=mysql_native_password
@@ -26,8 +29,6 @@ services:
       - "mysql_vol:/var/lib/mysql"
     environment:
       MYSQL_ROOT_PASSWORD: root
-    ports:
-      - "3306:3306"
     container_name: mysql
 
   mongo:
@@ -35,10 +36,31 @@ services:
     restart: always
     volumes:
       - "mongo_vol:/data/db"
-      - "mongodb_config:/data/configdb"
+      - "mongo_vol:/data/configdb"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
-    ports:
-      - "27017:27017"
     container_name: mongo
+
+  nginx:
+    image: nginx
+    volumes:
+      - "nginx_vol:/etc/nginx/conf.d/"
+      - "certbot_vol:/var/www/certbot/"
+      - "certbot_vol:/etc/nginx/ssl/"
+    container_name: nginx
+    depends_on:
+      - viapi
+    ports:
+      - "80:80"
+      - "443:443"
+
+  certbot:
+    image: certbot/certbot:latest
+    depends_on:
+      - nginx
+    volumes:
+      - "certbot_vol:/var/www/certbot/"
+      - "certbot_vol:/etc/letsencrypt/"
+      - "certbot_vol:/var/lib/letsencrypt/"
+      

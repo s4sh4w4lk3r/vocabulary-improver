@@ -25,7 +25,7 @@ public partial class RegistrationController : ControllerBase
 
         if (dbInsertOk)
         {
-            return BadRequest(new ViApiResponse<ApiUserDto>(apiUserDto, true, "Регистрация прошла успешно"));
+            return Ok(new ViApiResponse<ApiUserDto>(apiUserDto, true, "Регистрация прошла успешно"));
         }
         else
         {
