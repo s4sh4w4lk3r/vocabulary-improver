@@ -30,6 +30,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
     container_name: mysql
+    ports:
+      - "3306:3306"
 
   mongo:
     image: mongo
@@ -41,9 +43,12 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
     container_name: mongo
+    ports:
+      - "27017:27017"
 
   nginx:
     image: nginx
+    restart: always
     volumes:
       - "nginx_vol:/etc/nginx/conf.d/"
       - "certbot_vol:/var/www/certbot/"
