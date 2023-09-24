@@ -1,9 +1,8 @@
-﻿using System.Collections;
-using ViApi.Types.Common.Users;
+﻿using ViApi.Types.Common.Users;
 
 namespace ViApi.Types.Common;
 
-public class Dictionary : IEnumerable<Word>
+public class Dictionary
 {
     public Guid Guid { get; init; }
     public string? Name { get; set; }
@@ -21,8 +20,4 @@ public class Dictionary : IEnumerable<Word>
     }
 
     public override string ToString() => $"Guid {Guid}, Name: {Name}, WordsCount: {Words?.Count}, UserGuid: {UserGuid}";
-
-    public IEnumerator<Word> GetEnumerator() => Words!.GetEnumerator();
-
-    IEnumerator IEnumerable.GetEnumerator() => Words!.GetEnumerator();
 }
